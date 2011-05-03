@@ -1,0 +1,12 @@
+OPEN source 0 0 52 100
+Source < attributes TOOLTIP on,TOOLTIP_FORMAT signed,TOOLTIP_MODE details,FREEZE off,MARKS off
+OPEN memory 52 0 48 23
+Memory < attributes FORMAT hex,COMPLEMENT None,WORD 1,ASC on,ADR on,MODE automatic,UPDATERATE 10,SHOW_ADDRESSSPACE 0,ADDRESS 0x80
+OPEN data 52 23 48 17
+Data:1 < attributes SCOPE global,COMPLEMENT None,FORMAT Symb,MODE periodical,SORT NotSort,UPDATERATE 10,NAMEWIDTH 16
+OPEN data 52 40 48 60
+Data:2 < attributes SCOPE local,COMPLEMENT None,FORMAT Symb,MODE periodical,SORT NotSort,UPDATERATE 10,NAMEWIDTH 16
+bckcolor 50331647
+font 'Courier New' 9 BLACK
+AUTOSIZE on
+ACTIVATE "Memory" "Source" "Data:1" "Data:2"
