@@ -11,3 +11,7 @@ http://felectrique.polymtl.ca/images/bms/MasterMini.JPG
 = VTIM =
 
 Under construction...
+
+= Demonstration =
+
+<wiki:video url="http://www.youtube.com/watch?v=B0LCZfnk_24"/>
