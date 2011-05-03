@@ -1,0 +1,13 @@
+#summary A Preview of the BMS
+
+= Slave =
+
+http://felectrique.polymtl.ca/images/bms/SlaveMini.JPG
+
+= Master =
+
+http://felectrique.polymtl.ca/images/bms/MasterMini.JPG
+
+= VTIM =
+
+Under construction...
