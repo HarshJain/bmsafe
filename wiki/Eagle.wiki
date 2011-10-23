@@ -1,0 +1,5 @@
+#summary Just another PCB layout edition software (freeware)
+
+= PCB layout editor (freeware) =
+
+http://www.cadsoftusa.com/
