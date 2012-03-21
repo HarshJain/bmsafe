@@ -143,16 +143,18 @@ void Start_Open_Wire_AD_Conversion_with_Discharge()
 /////////////////////////////////////////////////////////////////////////////// 
 void char_Table_Voltage_2_int_table(unsigned char* char_Voltage_Table)
 {
-	int n;
+	int n = 0; // Modif 29 Janvier 2012
 	int Cell = 0;
 	
-	for(n = 0; n < NB_CHAR_VOLTAGE; n = n + 3)
+	for(; n < NB_CHAR_VOLTAGE; n = n + 3)     // Modif 29 Janvier              
 	{
 		gInt_Voltage_Table[Cell] = ((unsigned int)(char_Voltage_Table[n+1] & 0xF) << 8) + char_Voltage_Table[n];
 		gInt_Voltage_Table[Cell] = (gInt_Voltage_Table[Cell]*3) >> 1;         //From binary ADC value to voltage : V = ADC x 1.5mV
 		gInt_Voltage_Table[Cell+1] = ((unsigned int)char_Voltage_Table[n+2]<<4) | ((char_Voltage_Table[n+1])>>4);
 		gInt_Voltage_Table[Cell+1] = (gInt_Voltage_Table[Cell+1]*3) >> 1;     //From binary ADC value to voltage : V = ADC x 1.5mV
-		Cell = Cell + 2;
+		if(Cell == 8)                       // hack to compensate the fact that the LTC6802-2 is underevaluating the top cell voltage
+	   	gInt_Voltage_Table[Cell+1] += 92; // when uncommented: balancing doesn't work anymore                                      
+		Cell = Cell + 2; 
 	}
 }
 
@@ -168,7 +170,7 @@ void Read_Cell_Voltage()
 	
 	// Loop to put reveiced values in table memory (gNb_char_Voltage because of the PEC byte)
 	for (i = 0; i < NB_CHAR_VOLTAGE; i++)	{
-	  char_Voltage_Table[i] = SPI_receive(0x00);
+	  char_Voltage_Table[i] = SPI_receive(0x00);	    
 	}
 
 	CSBI = 1;
@@ -181,8 +183,8 @@ void Read_Cell_Voltage()
 char Verify_OpenWire()
 {
 	int i;
-	int Voltage_Table_A[NB_CELL + 1];
-	int Voltage_Table_B[NB_CELL + 1];	
+	unsigned int Voltage_Table_A[10] = {0,0,0,0,0,0,0,0,0,0};
+	unsigned int Voltage_Table_B[10] = {0,0,0,0,0,0,0,0,0,0};	
 	
 	Start_Voltage_AD_Conversion();
 	Read_Cell_Voltage();
