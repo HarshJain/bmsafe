@@ -31,7 +31,7 @@ extern unsigned int   gTemp[NB_CELL];
  */
 unsigned char CAN0SendChar(unsigned long id, unsigned char priority, unsigned char length, unsigned char *txdata ){
     
-    unsigned char index;
+    unsigned char index = 0;
     unsigned char txbuffer = {0};
 
     if (!CAN0TFLG)              /* Is Transmit Buffer full?? */
@@ -77,8 +77,8 @@ unsigned char CAN0SendInt(unsigned long id, unsigned char priority, unsigned cha
                            unsigned char length, unsigned int *txdata )
  {
     
-    unsigned char index;
-    unsigned char MSB;
+    unsigned char index = 0;
+    unsigned char MSB = 0;
     unsigned char txbuffer = {0};
 
     if (!CAN0TFLG)              /* Is Transmit Buffer full?? */
@@ -112,8 +112,8 @@ unsigned char CAN0SendInt(unsigned long id, unsigned char priority, unsigned cha
  unsigned char CAN0SendInt2(unsigned long id, unsigned char priority, unsigned char length, unsigned int *txdata)
  {
     
-    unsigned char index;
-    unsigned char MSB;
+    unsigned char index = 0;
+    unsigned char MSB = 0;
     unsigned char txbuffer = {0};
 
     if (!CAN0TFLG)              /* Is Transmit Buffer full?? */
@@ -185,7 +185,7 @@ void CAN0SendTemp(void)
 {
    unsigned char i = 0;
    unsigned char cellRemain = NB_CELL;
-   unsigned char errorFlag;
+   unsigned char errorFlag = 0;
 
    while(cellRemain > 4) {
       cellRemain -= 4;
