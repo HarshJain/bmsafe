@@ -11,7 +11,8 @@
 #define N_CELL_MAX      N_MOD_MAX*N_CELL_SLV_MAX    //Maximum number of total cells
 #define N_CURR_MSR      100                         //Number of current measurements after which the SOC is calculated
 #define RELAY_DELAY     100                         //[ms] Time between the opening or closing of 2 relays
-#define PRECHARGE_DELAY 2000                        //[ms] Time of precharge
+#define PRECHARGE_DELAY 5000                        //[ms] Time of precharge
+#define DISCHARGE_DELAY 15000                       //[ms] Time of discharge
 #define K_HALL1         18                          //Low range hall effet sensor gain
 #define O_HALL1         2048                        //Low range hall effet sensor offset en mV
 #define K_HALL2         210                         //High range hall effet sensor gain

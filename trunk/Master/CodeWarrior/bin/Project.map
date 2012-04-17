@@ -1,5 +1,5 @@
 *** EVALUATION ***
-PROGRAM "C:\Users\Mathieu\Documents\My Dropbox\Projet ELE4000\CodeWarrior\Master\bin\Project.abs"
+PROGRAM "C:\Users\hug\Documents\BMSafe\Master\CodeWarrior\bin\Project.abs"
 
 *********************************************************************************************
 TARGET SECTION
@@ -45,7 +45,7 @@ Entry point: 0xC000 (_Startup)
 _startupData is allocated at 0xC00F and uses 6 Bytes
 extern struct _tagStartup {
   unsigned nofZeroOut     1
-  _Range   pZeroOut       0x2100     3233
+  _Range   pZeroOut       0x2100     3234
   _Copy    *toCopyDownBeg 0xD7B9
 } _startupData;
 
@@ -59,7 +59,7 @@ Section Name                    Size  Type     From       To       Segment
 .rodata1                        3092     R     0xC129     0xCD3C   ROM_C000
 NON_BANKED                      2684     R     0xCD3D     0xD7B8   ROM_C000
 .copy                            295     R     0xD7B9     0xD8DF   ROM_C000
-.text                          16280     R   0xFE8000   0xFEBF97   PAGE_FE
+.text                          16342     R   0xFE8000   0xFEBFD5   PAGE_FE
 .stack                           256   R/W     0x2000     0x20FF   RAM
 .data                            289   R/W     0x2100     0x2220   RAM
 .abs_section_8                     1   N/I        0x8        0x8   .absSeg0
@@ -802,12 +802,12 @@ NON_BANKED                      2684     R     0xCD3D     0xD7B8   ROM_C000
 .abs_section_3f2                   2   N/I      0x3F2      0x3F3   .absSeg737
 .abs_section_ff10                234     R     0xFF10     0xFFF9   .absSeg738
 .abs_section_fffa                  6     R     0xFFFA     0xFFFF   .absSeg739
-.bss                              74   R/W     0x2221     0x226A   RAM
-.common                         2870   R/W     0x226B     0x2DA0   RAM
+.bss                              75   R/W     0x2221     0x226B   RAM
+.common                         2870   R/W     0x226C     0x2DA1   RAM
 
 Summary of section sizes per section type:
-READ_ONLY (R):        5968 (dec:    22888)
-READ_WRITE (R/W):      DA1 (dec:     3489)
+READ_ONLY (R):        59A6 (dec:    22950)
+READ_WRITE (R/W):      DA2 (dec:     3490)
 NO_INIT (N/I):         383 (dec:      899)
 
 *********************************************************************************************
@@ -1230,13 +1230,13 @@ MODULE:                 -- MC9S12XEP100.c.o --
      _PERS                                      24C       1       1       0   .abs_section_24c
      _PPSS                                      24D       1       1       0   .abs_section_24d
      _WOMS                                      24E       1       1       0   .abs_section_24e
-     _PTM                                       250       1       1       0   .abs_section_250
+     _PTM                                       250       1       1       3   .abs_section_250
      _PTIM                                      251       1       1       0   .abs_section_251
-     _DDRM                                      252       1       1       0   .abs_section_252
+     _DDRM                                      252       1       1       1   .abs_section_252
      _RDRM                                      253       1       1       1   .abs_section_253
-     _PERM                                      254       1       1       0   .abs_section_254
-     _PPSM                                      255       1       1       0   .abs_section_255
-     _WOMM                                      256       1       1       1   .abs_section_256
+     _PERM                                      254       1       1       1   .abs_section_254
+     _PPSM                                      255       1       1       1   .abs_section_255
+     _WOMM                                      256       1       1       2   .abs_section_256
      _MODRR                                     257       1       1       1   .abs_section_257
      _PTP                                       258       1       1       0   .abs_section_258
      _PTIP                                      259       1       1       0   .abs_section_259
@@ -1564,11 +1564,11 @@ MODULE:                 -- main.c.o --
 - PROCEDURES:
      deviceInit                              FE8000      84     132       2   .text       
      modeSelection                           FE8084      62      98       2   .text       
-     normalMode                              FE80E6      21      33       2   .text       
-     chargeMode                              FE8107     1B7     439       5   .text       
-     standbyMode                             FE82BE      1F      31       2   .text       
-     errorMode                               FE82DD     12F     303      15   .text       
-     main                                    FE840C     1C0     448       7   .text       
+     normalMode                              FE80E6      2A      42       2   .text       
+     chargeMode                              FE8110     1BC     444       5   .text       
+     standbyMode                             FE82CC      26      38       2   .text       
+     errorMode                               FE82F2     136     310      15   .text       
+     main                                    FE8428     1C0     448       7   .text       
 - VARIABLES:
      STRING.deviceInit..device.i.1             C129      23      35       1   .rodata1    
      STRING.modeSelection..ERROR.2             C14C      24      36       1   .rodata1    
@@ -1605,20 +1605,21 @@ MODULE:                 -- main.c.o --
      gCharger                                  2229       1       1       2   .bss        
      gIgnition                                 222A       1       1       3   .bss        
      gRelaysClosed                             222B       1       1      13   .bss        
-     gCharged                                  222C       1       1       1   .bss        
-     gSOCready                                 222D       1       1       5   .bss        
-     gLastCurrent                              222E       4       4      12   .bss        
-     gFaultMeasure                             2232       2       2       2   .bss        
-     gmaxV                                     2234       2       2       5   .bss        
-     glowestT                                  2236       2       2       4   .bss        
-     gmaxT                                     2238       2       2       4   .bss        
-     gCellVolt                                 226B      C8     200       8   .common     
-     gCellTemp                                 2333      C8     200      10   .common     
-     gCurrentMsr1                              23FB     190     400       5   .common     
-     gCurrentMsr2                              258B     190     400       2   .common     
+     gDischargeRelayOpen                       222C       1       1       1   .bss        
+     gCharged                                  222D       1       1       1   .bss        
+     gSOCready                                 222E       1       1       5   .bss        
+     gLastCurrent                              222F       4       4      12   .bss        
+     gFaultMeasure                             2233       2       2       2   .bss        
+     gmaxV                                     2235       2       2       5   .bss        
+     glowestT                                  2237       2       2       4   .bss        
+     gmaxT                                     2239       2       2       4   .bss        
+     gCellVolt                                 226C      C8     200       8   .common     
+     gCellTemp                                 2334      C8     200      10   .common     
+     gCurrentMsr1                              23FC     190     400       5   .common     
+     gCurrentMsr2                              258C     190     400       2   .common     
 MODULE:                 -- Start12.c.o --
 - PROCEDURES:
-     Init                                    FE85CC      29      41       2   .text       
+     Init                                    FE85E8      29      41       2   .text       
      _Startup                                  C000       F      15       1   .init       
 - VARIABLES:
      _startupData                              C00F       6       6       3   .startData  
@@ -1626,9 +1627,9 @@ MODULE:                 -- Start12.c.o --
      __SEG_END_SSTACK                          2100       0       0       1               
 MODULE:                 -- CTYPE.C.o (ansixb.lib) --
 - PROCEDURES:
-     isdigit                                 FE85F5       E      14       4   .text       
-     isspace                                 FE8603      17      23      12   .text       
-     toupper                                 FE861A      14      20       6   .text       
+     isdigit                                 FE8611       E      14       4   .text       
+     isspace                                 FE861F      17      23      12   .text       
+     toupper                                 FE8636      14      20       6   .text       
 - VARIABLES:
 MODULE:                 -- MATH.C.o (ansixb.lib) --
 - PROCEDURES:
@@ -1636,31 +1637,31 @@ MODULE:                 -- MATH.C.o (ansixb.lib) --
      infinity                                  C051       4       4       2   .rodata     
 MODULE:                 -- PRINTF.C.o (ansixb.lib) --
 - PROCEDURES:
-     Ten                                     FE862E      AC     172       5   .text       
-     vprintf                                 FE86DA     8D8    2264     121   .text       
-     _out                                    FE8FB2       9       9       2   .text       
-     deposit_char                            FE8FBB       A      10       3   .text       
-     sprintf                                 FE8FC5      2D      45      92   .text       
+     Ten                                     FE864A      AC     172       5   .text       
+     vprintf                                 FE86F6     8D8    2264     121   .text       
+     _out                                    FE8FCE       9       9       2   .text       
+     deposit_char                            FE8FD7       A      10       3   .text       
+     sprintf                                 FE8FE1      2D      45      92   .text       
 - VARIABLES:
      pow10                                     C055      28      40       4   .rodata     
      pow16                                     C07D      20      32       4   .rodata     
      pow8                                      C09D      2C      44       4   .rodata     
      fpow10                                    C0C9      30      48       1   .rodata     
      fpow_10                                   C0F9      30      48       1   .rodata     
-     pbuf                                      223A       7       7      15   .bss        
+     pbuf                                      223B       7       7      15   .bss        
 MODULE:                 -- SCANF.C.o (ansixb.lib) --
 - PROCEDURES:
-     _getNum                                 FE8FF2      34      52       2   .text       
-     _copyList                               FE9026      AE     174       2   .text       
-     vsscanf                                 FE90D4     37A     890      46   .text       
-     sscanf                                  FE944E      11      17       2   .text       
+     _getNum                                 FE900E      34      52       2   .text       
+     _copyList                               FE9042      AE     174       2   .text       
+     vsscanf                                 FE90F0     37A     890      46   .text       
+     sscanf                                  FE946A      11      17       2   .text       
 - VARIABLES:
 MODULE:                 -- STDLIB.C.o (ansixb.lib) --
 - PROCEDURES:
-     CheckCharWithBase                       FE945F      3A      58       2   .text       
-     _strtoul                                FE9499     15C     348      10   .text       
-     _strtol                                 FE95F5      D2     210       4   .text       
-     _strtod                                 FE96C7     385     901      26   .text       
+     CheckCharWithBase                       FE947B      3A      58       2   .text       
+     _strtoul                                FE94B5     15C     348      10   .text       
+     _strtol                                 FE9611      D2     210       4   .text       
+     _strtod                                 FE96E3     385     901      26   .text       
 - VARIABLES:
 MODULE:                 -- FADD.C.o (ansixb.lib) --
 - PROCEDURES:
@@ -1723,7 +1724,7 @@ MODULE:                 -- rtshc12.c.o (ansixb.lib) --
      _CASE_SEARCH_8                            D1EE      17      23       3   NON_BANKED  
      _CASE_SEARCH_8_BYTE                       D205      1A      26       1   NON_BANKED  
 - VARIABLES:
-     errno                                     271B       2       2       3   .common     
+     errno                                     271C       2       2       3   .common     
 MODULE:                 -- VREGS.C.o (ansixb.lib) --
 - PROCEDURES:
      L_NEGK                                    D21F       7       7       2   NON_BANKED  
@@ -1733,7 +1734,7 @@ MODULE:                 -- VREGS.C.o (ansixb.lib) --
 - VARIABLES:
 MODULE:                 -- MCUinit.c.o --
 - PROCEDURES:
-     MCU_init                                FE9A4C     2AA     682      27   .text       
+     MCU_init                                FE9A68     2BA     698      27   .text       
      MCU_init_reset                            D23B      12      18       3   NON_BANKED  
      isr_default                               D24D       1       1     100   NON_BANKED  
      isrVatd0compare                           D24E       1       1       1   NON_BANKED  
@@ -1755,30 +1756,30 @@ MODULE:                 -- MCUinit.c.o --
      STRING..f.5                               C3FF       3       3       1   .rodata1    
      STRING.Error.reading.the.en.6             C402      22      34       1   .rodata1    
      currTable.9                               210B       2       2       4   .data       
-     inputBuf.1                                2241      14      20       5   .bss        
-     bufPos.3                                  2255       1       1       7   .bss        
-     point.4                                   2256       1       1       3   .bss        
-     iCurrent.7                                2257       2       2       4   .bss        
-     currConv.8                                2259       4       4      10   .bss        
+     inputBuf.1                                2242      14      20       5   .bss        
+     bufPos.3                                  2256       1       1       7   .bss        
+     point.4                                   2257       1       1       3   .bss        
+     iCurrent.7                                2258       2       2       4   .bss        
+     currConv.8                                225A       4       4      10   .bss        
      _InterruptVectorTable                     FF10      EA     234       0   .abs_section_ff10
      _ResetVectorTable                         FFFA       6       6       0   .abs_section_fffa
 MODULE:                 -- can.c.o --
 - PROCEDURES:
-     CAN0SendInt                             FE9CF6      63      99       2   .text       
-     CAN0SendCommand                         FE9D59      40      64       4   .text       
+     CAN0SendInt                             FE9D22      63      99       2   .text       
+     CAN0SendCommand                         FE9D85      40      64       4   .text       
 - VARIABLES:
-     RXID                                      225D       2       2       8   .bss        
-     errorflag                                 225F       1       1       2   .bss        
-     idleCount                                 271D       A      10       7   .common     
+     RXID                                      225E       2       2       8   .bss        
+     errorflag                                 2260       1       1       2   .bss        
+     idleCount                                 271E       A      10       7   .common     
 MODULE:                 -- common.c.o --
 - PROCEDURES:
-     find_MaxVolt                            FE9D99      2F      47       8   .text       
-     find_MinVolt                            FE9DC8      2D      45       8   .text       
-     find_MaxTemp                            FE9DF5      2F      47       6   .text       
-     find_MinTemp                            FE9E24      2D      45       6   .text       
-     delayMs                                 FE9E51      24      36       8   .text       
-     temperatureCompare                      FE9E75      85     133       2   .text       
-     voltageCompare                          FE9EFA      85     133       2   .text       
+     find_MaxVolt                            FE9DC5      2F      47       8   .text       
+     find_MinVolt                            FE9DF4      2D      45       8   .text       
+     find_MaxTemp                            FE9E21      2F      47       6   .text       
+     find_MinTemp                            FE9E50      2D      45       6   .text       
+     delayMs                                 FE9E7D      24      36      10   .text       
+     temperatureCompare                      FE9EA1      85     133       2   .text       
+     voltageCompare                          FE9F26      85     133       2   .text       
 - VARIABLES:
 MODULE:                 -- parameters.c.o --
 - PROCEDURES:
@@ -1786,41 +1787,43 @@ MODULE:                 -- parameters.c.o --
      gSecurityParams                           210D      1E      30      47   .data       
      gEquiParams                               212B       8       8      20   .data       
      gMesuresParams                            2133       C      12      39   .data       
-     gComParams                                2260       3       3       5   .bss        
+     gComParams                                2261       3       3       5   .bss        
 MODULE:                 -- relays.c.o --
 - PROCEDURES:
-     CloseRelays                             FE9F7F      20      32       6   .text       
-     OpenRelays                              FE9F9F      11      17       6   .text       
-     Precharge                               FE9FB0       B      11       2   .text       
+     CloseRelays                             FE9FAB      20      32       6   .text       
+     OpenRelays                              FE9FCB      11      17       6   .text       
+     Precharge                               FE9FDC       B      11       2   .text       
+     DontDischarge                           FE9FE7       5       5       4   .text       
+     Discharge                               FE9FEC       D      13       4   .text       
 - VARIABLES:
 MODULE:                 -- soc.c.o --
 - PROCEDURES:
-     initTables                              FE9FBB     BE0    3040       8   .text       
-     calcul_avec_tension                     FEAB9B     20F     527      30   .text       
-     calcul_temperature_moyenne              FEADAA      45      69       2   .text       
+     initTables                              FE9FF9     BE0    3040       8   .text       
+     calcul_avec_tension                     FEABD9     20F     527      30   .text       
+     calcul_temperature_moyenne              FEADE8      45      69       2   .text       
 - VARIABLES:
-     TENSION                                   2727      7A     122      65   .common     
-     CAPACITE_60                               27A1      7A     122      66   .common     
-     CAPACITE_40                               281B      7A     122      66   .common     
-     CAPACITE_25                               2895      7A     122     106   .common     
-     CAPACITE_0                                290F      7A     122       3   .common     
-     CAPACITE__10                              2989      7A     122      64   .common     
-     CAPACITE__20                              2A03      7A     122      64   .common     
-     CAPACITE_MAX                              2A7D     322     802     401   .common     
+     TENSION                                   2728      7A     122      65   .common     
+     CAPACITE_60                               27A2      7A     122      66   .common     
+     CAPACITE_40                               281C      7A     122      66   .common     
+     CAPACITE_25                               2896      7A     122     106   .common     
+     CAPACITE_0                                2910      7A     122       3   .common     
+     CAPACITE__10                              298A      7A     122      64   .common     
+     CAPACITE__20                              2A04      7A     122      64   .common     
+     CAPACITE_MAX                              2A7E     322     802     401   .common     
 MODULE:                 -- terminal_code.c.o --
 - PROCEDURES:
-     SCIPutChar                              FEADEF       B      11      22   .text       
-     SCIprintString                          FEADFA      21      33      28   .text       
-     skip_lines                              FEAE1B      1A      26      22   .text       
-     SCITx                                   FEAE35      40      64      64   .text       
-     show_menu                               FEAE75      28      40      16   .text       
-     print_string                            FEAE9D      A3     163       2   .text       
-     get_cells_data                          FEAF40      CA     202       5   .text       
-     SCIprintStatus                          FEB00A     163     355      12   .text       
-     SCIprintErrors                          FEB16D      BB     187       5   .text       
-     SCIupAlevel                             FEB228      19      25       2   .text       
-     SCIshowMenu                             FEB241     931    2353     187   .text       
-     SCIassignation                          FEBB72     3C2     962      79   .text       
+     SCIPutChar                              FEAE2D       B      11      22   .text       
+     SCIprintString                          FEAE38      21      33      28   .text       
+     skip_lines                              FEAE59      1A      26      22   .text       
+     SCITx                                   FEAE73      40      64      64   .text       
+     show_menu                               FEAEB3      28      40      16   .text       
+     print_string                            FEAEDB      A3     163       2   .text       
+     get_cells_data                          FEAF7E      CA     202       5   .text       
+     SCIprintStatus                          FEB048     163     355      12   .text       
+     SCIprintErrors                          FEB1AB      BB     187       5   .text       
+     SCIupAlevel                             FEB266      19      25       2   .text       
+     SCIshowMenu                             FEB27F     931    2353     187   .text       
+     SCIassignation                          FEBBB0     3C2     962      79   .text       
 - VARIABLES:
      STRING..2.1f.oC.1                         C424       9       9       1   .rodata1    
      STRING..1.3f.V.2                          C42D       8       8       1   .rodata1    
@@ -1997,23 +2000,23 @@ MODULE:                 -- terminal_code.c.o --
      status_menu_2                             2217       4       4       2   .data       
      status_menu_3                             221B       2       2       2   .data       
      commande_menu_1                           221D       4       4       1   .data       
-     niveau_1                                  2263       2       2      10   .bss        
-     niveau_2                                  2265       2       2      21   .bss        
-     niveau_3                                  2267       2       2      14   .bss        
-     sci_interrupt_mode                        2269       2       2       8   .bss        
-     num_module                                2D9F       2       2       6   .common     
+     niveau_1                                  2264       2       2      10   .bss        
+     niveau_2                                  2266       2       2      21   .bss        
+     niveau_3                                  2268       2       2      14   .bss        
+     sci_interrupt_mode                        226A       2       2       8   .bss        
+     num_module                                2DA0       2       2       6   .common     
 MODULE:                 -- termio.c.o --
 - PROCEDURES:
-     TERMIO_PutChar                          FEBF34       9       9       2   .text       
-     TERMIO_Init                             FEBF3D       8       8       2   .text       
-     TERMIO_PutString                        FEBF45      21      33      14   .text       
+     TERMIO_PutChar                          FEBF72       9       9       2   .text       
+     TERMIO_Init                             FEBF7B       8       8       2   .text       
+     TERMIO_PutString                        FEBF83      21      33      14   .text       
 - VARIABLES:
 MODULE:                 -- timers.c.o --
 - PROCEDURES:
-     initMicroTimers                         FEBF66       E      14       2   .text       
-     initDelayTimer                          FEBF74       C      12       2   .text       
-     initComTimer                            FEBF80       C      12       2   .text       
-     initADCtimer                            FEBF8C       C      12       2   .text       
+     initMicroTimers                         FEBFA4       E      14       2   .text       
+     initDelayTimer                          FEBFB2       C      12       2   .text       
+     initComTimer                            FEBFBE       C      12       2   .text       
+     initADCtimer                            FEBFCA       C      12       2   .text       
 - VARIABLES:
 
 *********************************************************************************************
@@ -2021,7 +2024,7 @@ MODULE STATISTIC
   Name                                      Data   Code  Const
 ---------------------------------------------------------------------------------------------
   MC9S12XEP100.c.o                           899      0      0
-  main.c.o                                  1236   1484    726
+  main.c.o                                  1237   1512    726
   Start12.c.o                                  0     56      0
   CTYPE.C.o (ansixb.lib)                       0     57      0
   MATH.C.o (ansixb.lib)                        0      0      4
@@ -2036,11 +2039,11 @@ MODULE STATISTIC
   FREGS.C.o (ansixb.lib)                       0    182      0
   rtshc12.c.o (ansixb.lib)                     2    424      0
   VREGS.C.o (ansixb.lib)                       0     28      0
-  MCUinit.c.o                                 30   2088    277
+  MCUinit.c.o                                 30   2104    277
   can.c.o                                     13    163      0
   common.c.o                                   0    486      0
   parameters.c.o                              53      0      0
-  relays.c.o                                   0     60      0
+  relays.c.o                                   0     78      0
   soc.c.o                                   1656   3636      0
   terminal_code.c.o                          236   4421   2329
   termio.c.o                                   0     50      0
@@ -2056,11 +2059,11 @@ SECTION: ".text"
   _copyList vsscanf sscanf CheckCharWithBase _strtoul _strtol _strtod MCU_init 
   CAN0SendInt CAN0SendCommand find_MaxVolt find_MinVolt find_MaxTemp 
   find_MinTemp delayMs temperatureCompare voltageCompare CloseRelays OpenRelays 
-  Precharge initTables calcul_avec_tension calcul_temperature_moyenne 
-  SCIPutChar SCIprintString skip_lines SCITx show_menu print_string 
-  get_cells_data SCIprintStatus SCIprintErrors SCIupAlevel SCIshowMenu 
-  SCIassignation TERMIO_PutChar TERMIO_Init TERMIO_PutString initMicroTimers 
-  initDelayTimer initComTimer initADCtimer 
+  Precharge DontDischarge Discharge initTables calcul_avec_tension 
+  calcul_temperature_moyenne SCIPutChar SCIprintString skip_lines SCITx 
+  show_menu print_string get_cells_data SCIprintStatus SCIprintErrors 
+  SCIupAlevel SCIshowMenu SCIassignation TERMIO_PutChar TERMIO_Init 
+  TERMIO_PutString initMicroTimers initDelayTimer initComTimer initADCtimer 
 SECTION: ".data"
   gInit gCurrentMsr lastSOC gMode gLastMode glowestV T_moyenne currTable.9 
   gSecurityParams gEquiParams gMesuresParams formatTemp formatVolt formatCurr 
@@ -2071,9 +2074,10 @@ SECTION: ".data"
   status_menu_2 status_menu_3 commande_menu_1 
 SECTION: ".bss"
   gErrorBits gSlaveEquiStatus gSlaveComState gActivCharge gActivEqui gCharger 
-  gIgnition gRelaysClosed gCharged gSOCready gLastCurrent gFaultMeasure gmaxV 
-  glowestT gmaxT pbuf inputBuf.1 bufPos.3 point.4 iCurrent.7 currConv.8 RXID 
-  errorflag gComParams niveau_1 niveau_2 niveau_3 sci_interrupt_mode 
+  gIgnition gRelaysClosed gDischargeRelayOpen gCharged gSOCready gLastCurrent 
+  gFaultMeasure gmaxV glowestT gmaxT pbuf inputBuf.1 bufPos.3 point.4 
+  iCurrent.7 currConv.8 RXID errorflag gComParams niveau_1 niveau_2 niveau_3 
+  sci_interrupt_mode 
 SECTION: ".init"
   _Startup 
 SECTION: ".rodata"
@@ -4114,13 +4118,13 @@ OBJECT LIST SORTED BY ADDRESS
      _PERS                                      24C       1       1       0   .abs_section_24c
      _PPSS                                      24D       1       1       0   .abs_section_24d
      _WOMS                                      24E       1       1       0   .abs_section_24e
-     _PTM                                       250       1       1       0   .abs_section_250
+     _PTM                                       250       1       1       3   .abs_section_250
      _PTIM                                      251       1       1       0   .abs_section_251
-     _DDRM                                      252       1       1       0   .abs_section_252
+     _DDRM                                      252       1       1       1   .abs_section_252
      _RDRM                                      253       1       1       1   .abs_section_253
-     _PERM                                      254       1       1       0   .abs_section_254
-     _PPSM                                      255       1       1       0   .abs_section_255
-     _WOMM                                      256       1       1       1   .abs_section_256
+     _PERM                                      254       1       1       1   .abs_section_254
+     _PPSM                                      255       1       1       1   .abs_section_255
+     _WOMM                                      256       1       1       2   .abs_section_256
      _MODRR                                     257       1       1       1   .abs_section_257
      _PTP                                       258       1       1       0   .abs_section_258
      _PTIP                                      259       1       1       0   .abs_section_259
@@ -4420,41 +4424,42 @@ OBJECT LIST SORTED BY ADDRESS
      gCharger                                  2229       1       1       2   .bss        
      gIgnition                                 222A       1       1       3   .bss        
      gRelaysClosed                             222B       1       1      13   .bss        
-     gCharged                                  222C       1       1       1   .bss        
-     gSOCready                                 222D       1       1       5   .bss        
-     gLastCurrent                              222E       4       4      12   .bss        
-     gFaultMeasure                             2232       2       2       2   .bss        
-     gmaxV                                     2234       2       2       5   .bss        
-     glowestT                                  2236       2       2       4   .bss        
-     gmaxT                                     2238       2       2       4   .bss        
-     pbuf                                      223A       7       7      15   .bss        
-     inputBuf.1                                2241      14      20       5   .bss        
-     bufPos.3                                  2255       1       1       7   .bss        
-     point.4                                   2256       1       1       3   .bss        
-     iCurrent.7                                2257       2       2       4   .bss        
-     currConv.8                                2259       4       4      10   .bss        
-     RXID                                      225D       2       2       8   .bss        
-     errorflag                                 225F       1       1       2   .bss        
-     gComParams                                2260       3       3       5   .bss        
-     niveau_1                                  2263       2       2      10   .bss        
-     niveau_2                                  2265       2       2      21   .bss        
-     niveau_3                                  2267       2       2      14   .bss        
-     sci_interrupt_mode                        2269       2       2       8   .bss        
-     gCellVolt                                 226B      C8     200       8   .common     
-     gCellTemp                                 2333      C8     200      10   .common     
-     gCurrentMsr1                              23FB     190     400       5   .common     
-     gCurrentMsr2                              258B     190     400       2   .common     
-     errno                                     271B       2       2       3   .common     
-     idleCount                                 271D       A      10       7   .common     
-     TENSION                                   2727      7A     122      65   .common     
-     CAPACITE_60                               27A1      7A     122      66   .common     
-     CAPACITE_40                               281B      7A     122      66   .common     
-     CAPACITE_25                               2895      7A     122     106   .common     
-     CAPACITE_0                                290F      7A     122       3   .common     
-     CAPACITE__10                              2989      7A     122      64   .common     
-     CAPACITE__20                              2A03      7A     122      64   .common     
-     CAPACITE_MAX                              2A7D     322     802     401   .common     
-     num_module                                2D9F       2       2       6   .common     
+     gDischargeRelayOpen                       222C       1       1       1   .bss        
+     gCharged                                  222D       1       1       1   .bss        
+     gSOCready                                 222E       1       1       5   .bss        
+     gLastCurrent                              222F       4       4      12   .bss        
+     gFaultMeasure                             2233       2       2       2   .bss        
+     gmaxV                                     2235       2       2       5   .bss        
+     glowestT                                  2237       2       2       4   .bss        
+     gmaxT                                     2239       2       2       4   .bss        
+     pbuf                                      223B       7       7      15   .bss        
+     inputBuf.1                                2242      14      20       5   .bss        
+     bufPos.3                                  2256       1       1       7   .bss        
+     point.4                                   2257       1       1       3   .bss        
+     iCurrent.7                                2258       2       2       4   .bss        
+     currConv.8                                225A       4       4      10   .bss        
+     RXID                                      225E       2       2       8   .bss        
+     errorflag                                 2260       1       1       2   .bss        
+     gComParams                                2261       3       3       5   .bss        
+     niveau_1                                  2264       2       2      10   .bss        
+     niveau_2                                  2266       2       2      21   .bss        
+     niveau_3                                  2268       2       2      14   .bss        
+     sci_interrupt_mode                        226A       2       2       8   .bss        
+     gCellVolt                                 226C      C8     200       8   .common     
+     gCellTemp                                 2334      C8     200      10   .common     
+     gCurrentMsr1                              23FC     190     400       5   .common     
+     gCurrentMsr2                              258C     190     400       2   .common     
+     errno                                     271C       2       2       3   .common     
+     idleCount                                 271E       A      10       7   .common     
+     TENSION                                   2728      7A     122      65   .common     
+     CAPACITE_60                               27A2      7A     122      66   .common     
+     CAPACITE_40                               281C      7A     122      66   .common     
+     CAPACITE_25                               2896      7A     122     106   .common     
+     CAPACITE_0                                2910      7A     122       3   .common     
+     CAPACITE__10                              298A      7A     122      64   .common     
+     CAPACITE__20                              2A04      7A     122      64   .common     
+     CAPACITE_MAX                              2A7E     322     802     401   .common     
+     num_module                                2DA0       2       2       6   .common     
      _Startup                                  C000       F      15       1   .init       
      infinity                                  C051       4       4       2   .rodata     
      pow10                                     C055      28      40       4   .rodata     
@@ -4700,63 +4705,65 @@ OBJECT LIST SORTED BY ADDRESS
      _ResetVectorTable                         FFFA       6       6       0   .abs_section_fffa
      deviceInit                              FE8000      84     132       2   .text       
      modeSelection                           FE8084      62      98       2   .text       
-     normalMode                              FE80E6      21      33       2   .text       
-     chargeMode                              FE8107     1B7     439       5   .text       
-     standbyMode                             FE82BE      1F      31       2   .text       
-     errorMode                               FE82DD     12F     303      15   .text       
-     main                                    FE840C     1C0     448       7   .text       
-     Init                                    FE85CC      29      41       2   .text       
-     isdigit                                 FE85F5       E      14       4   .text       
-     isspace                                 FE8603      17      23      12   .text       
-     toupper                                 FE861A      14      20       6   .text       
-     Ten                                     FE862E      AC     172       5   .text       
-     vprintf                                 FE86DA     8D8    2264     121   .text       
-     _out                                    FE8FB2       9       9       2   .text       
-     deposit_char                            FE8FBB       A      10       3   .text       
-     sprintf                                 FE8FC5      2D      45      92   .text       
-     _getNum                                 FE8FF2      34      52       2   .text       
-     _copyList                               FE9026      AE     174       2   .text       
-     vsscanf                                 FE90D4     37A     890      46   .text       
-     sscanf                                  FE944E      11      17       2   .text       
-     CheckCharWithBase                       FE945F      3A      58       2   .text       
-     _strtoul                                FE9499     15C     348      10   .text       
-     _strtol                                 FE95F5      D2     210       4   .text       
-     _strtod                                 FE96C7     385     901      26   .text       
-     MCU_init                                FE9A4C     2AA     682      27   .text       
-     CAN0SendInt                             FE9CF6      63      99       2   .text       
-     CAN0SendCommand                         FE9D59      40      64       4   .text       
-     find_MaxVolt                            FE9D99      2F      47       8   .text       
-     find_MinVolt                            FE9DC8      2D      45       8   .text       
-     find_MaxTemp                            FE9DF5      2F      47       6   .text       
-     find_MinTemp                            FE9E24      2D      45       6   .text       
-     delayMs                                 FE9E51      24      36       8   .text       
-     temperatureCompare                      FE9E75      85     133       2   .text       
-     voltageCompare                          FE9EFA      85     133       2   .text       
-     CloseRelays                             FE9F7F      20      32       6   .text       
-     OpenRelays                              FE9F9F      11      17       6   .text       
-     Precharge                               FE9FB0       B      11       2   .text       
-     initTables                              FE9FBB     BE0    3040       8   .text       
-     calcul_avec_tension                     FEAB9B     20F     527      30   .text       
-     calcul_temperature_moyenne              FEADAA      45      69       2   .text       
-     SCIPutChar                              FEADEF       B      11      22   .text       
-     SCIprintString                          FEADFA      21      33      28   .text       
-     skip_lines                              FEAE1B      1A      26      22   .text       
-     SCITx                                   FEAE35      40      64      64   .text       
-     show_menu                               FEAE75      28      40      16   .text       
-     print_string                            FEAE9D      A3     163       2   .text       
-     get_cells_data                          FEAF40      CA     202       5   .text       
-     SCIprintStatus                          FEB00A     163     355      12   .text       
-     SCIprintErrors                          FEB16D      BB     187       5   .text       
-     SCIupAlevel                             FEB228      19      25       2   .text       
-     SCIshowMenu                             FEB241     931    2353     187   .text       
-     SCIassignation                          FEBB72     3C2     962      79   .text       
-     TERMIO_PutChar                          FEBF34       9       9       2   .text       
-     TERMIO_Init                             FEBF3D       8       8       2   .text       
-     TERMIO_PutString                        FEBF45      21      33      14   .text       
-     initMicroTimers                         FEBF66       E      14       2   .text       
-     initDelayTimer                          FEBF74       C      12       2   .text       
-     initComTimer                            FEBF80       C      12       2   .text       
-     initADCtimer                            FEBF8C       C      12       2   .text       
+     normalMode                              FE80E6      2A      42       2   .text       
+     chargeMode                              FE8110     1BC     444       5   .text       
+     standbyMode                             FE82CC      26      38       2   .text       
+     errorMode                               FE82F2     136     310      15   .text       
+     main                                    FE8428     1C0     448       7   .text       
+     Init                                    FE85E8      29      41       2   .text       
+     isdigit                                 FE8611       E      14       4   .text       
+     isspace                                 FE861F      17      23      12   .text       
+     toupper                                 FE8636      14      20       6   .text       
+     Ten                                     FE864A      AC     172       5   .text       
+     vprintf                                 FE86F6     8D8    2264     121   .text       
+     _out                                    FE8FCE       9       9       2   .text       
+     deposit_char                            FE8FD7       A      10       3   .text       
+     sprintf                                 FE8FE1      2D      45      92   .text       
+     _getNum                                 FE900E      34      52       2   .text       
+     _copyList                               FE9042      AE     174       2   .text       
+     vsscanf                                 FE90F0     37A     890      46   .text       
+     sscanf                                  FE946A      11      17       2   .text       
+     CheckCharWithBase                       FE947B      3A      58       2   .text       
+     _strtoul                                FE94B5     15C     348      10   .text       
+     _strtol                                 FE9611      D2     210       4   .text       
+     _strtod                                 FE96E3     385     901      26   .text       
+     MCU_init                                FE9A68     2BA     698      27   .text       
+     CAN0SendInt                             FE9D22      63      99       2   .text       
+     CAN0SendCommand                         FE9D85      40      64       4   .text       
+     find_MaxVolt                            FE9DC5      2F      47       8   .text       
+     find_MinVolt                            FE9DF4      2D      45       8   .text       
+     find_MaxTemp                            FE9E21      2F      47       6   .text       
+     find_MinTemp                            FE9E50      2D      45       6   .text       
+     delayMs                                 FE9E7D      24      36      10   .text       
+     temperatureCompare                      FE9EA1      85     133       2   .text       
+     voltageCompare                          FE9F26      85     133       2   .text       
+     CloseRelays                             FE9FAB      20      32       6   .text       
+     OpenRelays                              FE9FCB      11      17       6   .text       
+     Precharge                               FE9FDC       B      11       2   .text       
+     DontDischarge                           FE9FE7       5       5       4   .text       
+     Discharge                               FE9FEC       D      13       4   .text       
+     initTables                              FE9FF9     BE0    3040       8   .text       
+     calcul_avec_tension                     FEABD9     20F     527      30   .text       
+     calcul_temperature_moyenne              FEADE8      45      69       2   .text       
+     SCIPutChar                              FEAE2D       B      11      22   .text       
+     SCIprintString                          FEAE38      21      33      28   .text       
+     skip_lines                              FEAE59      1A      26      22   .text       
+     SCITx                                   FEAE73      40      64      64   .text       
+     show_menu                               FEAEB3      28      40      16   .text       
+     print_string                            FEAEDB      A3     163       2   .text       
+     get_cells_data                          FEAF7E      CA     202       5   .text       
+     SCIprintStatus                          FEB048     163     355      12   .text       
+     SCIprintErrors                          FEB1AB      BB     187       5   .text       
+     SCIupAlevel                             FEB266      19      25       2   .text       
+     SCIshowMenu                             FEB27F     931    2353     187   .text       
+     SCIassignation                          FEBBB0     3C2     962      79   .text       
+     TERMIO_PutChar                          FEBF72       9       9       2   .text       
+     TERMIO_Init                             FEBF7B       8       8       2   .text       
+     TERMIO_PutString                        FEBF83      21      33      14   .text       
+     initMicroTimers                         FEBFA4       E      14       2   .text       
+     initDelayTimer                          FEBFB2       C      12       2   .text       
+     initComTimer                            FEBFBE       C      12       2   .text       
+     initADCtimer                            FEBFCA       C      12       2   .text       
 
 *********************************************************************************************
 UNUSED-OBJECTS SECTION
@@ -4822,7 +4829,7 @@ Name of initialized Object : gInit
  01
 ------- ROM-ADDRESS: 0xD7BE ---- RAM-ADDRESS: 0x2101 ---- SIZE       2 ---
 Name of initialized Object : gCurrentMsr
- 23FB
+ 23FC
 ------- ROM-ADDRESS: 0xD7C0 ---- RAM-ADDRESS: 0x2103 ---- SIZE       2 ---
 Name of initialized Object : lastSOC
  03E8
@@ -4843,7 +4850,7 @@ Name of initialized Object : T_moyenne:1
  FA
 ------- ROM-ADDRESS: 0xD7C8 ---- RAM-ADDRESS: 0x210B ---- SIZE       2 ---
 Name of initialized Object : currTable.9
- 23FB
+ 23FC
 ------- ROM-ADDRESS: 0xD7CA ---- RAM-ADDRESS: 0x210D ---- SIZE      30 ---
 Name of initialized Object : gSecurityParams
  FC1803E8FC 1803E8FC18 03E8FC1803
@@ -5064,16 +5071,18 @@ modeSelection             USES gErrorBits STRING.modeSelection..ERROR.2
                                 STRING.modeSelection..CHARG.3 gIgnition lastSOC gMode gLastMode 
                                 STRING.modeSelection..NORMA.4 STRING.modeSelection..STAND.5 TERMIO_PutString 
 normalMode                USES gMode gLastMode gRelaysClosed 
-                                STRING.normalMode..closing..6 TERMIO_PutString CloseRelays 
+                                STRING.normalMode..closing..6 TERMIO_PutString DontDischarge 
+                                gDischargeRelayOpen CloseRelays 
 chargeMode                USES gEquiParams gActivCharge gCharger gRelaysClosed 
                                 gActivEqui gCellVolt gMesuresParams find_MinVolt 
                                 chargeMode find_MaxVolt glowestV gmaxV gCellTemp 
                                 find_MinTemp find_MaxTemp glowestT gmaxT gCharged 
-                                CloseRelays STRING.chargeMode..closing..7 TERMIO_PutString 
+                                DontDischarge CloseRelays STRING.chargeMode..closing..7 
+                                TERMIO_PutString 
 standbyMode               USES gMode gLastMode gRelaysClosed 
-                                STRING.standbyMode..opening.8 TERMIO_PutString OpenRelays 
+                                STRING.standbyMode..opening.8 TERMIO_PutString OpenRelays Discharge 
 errorMode                 USES gRelaysClosed STRING.errorMode..opening.t.9 
-                                errorMode OpenRelays gErrorBits gFaultMeasure 
+                                errorMode OpenRelays Discharge gErrorBits gFaultMeasure 
                                 STRING.errorMode..ground.fa.10 gSlaveComState STRING.errorMode..slave.com.11 
                                 STRING.errorMode..slave.com.12 STRING.errorMode..cell.open.13 gmaxV 
                                 gSecurityParams STRING.errorMode..cell.over.14 glowestV 
@@ -5125,9 +5134,9 @@ MCU_init                  USES _CLKSEL _PLLCTL _VREGHTCL _MPUSEL MCU_init
                                 _CAN1IDAR3 _CAN1IDAR4 _CAN1IDAR5 _CAN1IDAR6 _CAN1IDAR7 
                                 _CAN1IDMR0 _CAN1IDMR1 _CAN1IDMR2 _CAN1IDMR3 _CAN1IDMR4 
                                 _CAN1IDMR5 _CAN1IDMR6 _CAN1IDMR7 _CAN1RIER _CAN1TIER 
-                                _DDRAB _INT_CFDATA2 _INT_CFDATA3 _MPUDESC5 _MPUDESC4 
-                                _INT_CFDATA4 _INT_CFDATA5 _INT_CFDATA6 _INT_CFDATA7 
-                                _INT_CFDATA0 _INT_CFDATA1 
+                                _DDRAB _PPSM _PERM _DDRM _INT_CFDATA2 _INT_CFDATA3 
+                                _MPUDESC5 _MPUDESC4 _INT_CFDATA4 _INT_CFDATA5 
+                                _INT_CFDATA6 _INT_CFDATA7 _INT_CFDATA0 _INT_CFDATA1 
 CAN0SendInt               USES _CAN0TFLG _CAN0TBSEL _CAN0TXIDR0 _CAN0TXDSR0 
                                 _CAN0TXDLR _CAN0TXTBPR 
 CAN0SendCommand           USES errorflag CAN0SendInt 
@@ -5139,6 +5148,8 @@ voltageCompare            USES gCellVolt gMesuresParams find_MinVolt
 CloseRelays               USES _PORTAB delayMs 
 OpenRelays                USES _PORTAB delayMs 
 Precharge                 USES _PORTAB delayMs 
+DontDischarge             USES _PTM 
+Discharge                 USES _PTM delayMs 
 initTables                USES TENSION CAPACITE_60 CAPACITE_40 initTables 
                                 CAPACITE_25 CAPACITE__20 CAPACITE__10 CAPACITE_MAX 
 calcul_avec_tension       USES T_moyenne calcul_avec_tension CAPACITE__20 
@@ -5261,6 +5272,8 @@ DEPENDENCY TREE
  |  |  | 
  |  |  +- TERMIO_PutString     (see above)
  |  |  |  
+ |  |  +- DontDischarge       
+ |  |  |    
  |  |  +- CloseRelays         
  |  |     | 
  |  |     +- delayMs             
@@ -5275,6 +5288,8 @@ DEPENDENCY TREE
  |  |  |  
  |  |  +- find_MaxTemp         (see above)
  |  |  |  
+ |  |  +- DontDischarge        (see above)
+ |  |  |  
  |  |  +- CloseRelays          (see above)
  |  |  |  
  |  |  +- TERMIO_PutString     (see above)
@@ -5284,12 +5299,18 @@ DEPENDENCY TREE
  |  |  +- TERMIO_PutString     (see above)
  |  |  |  
  |  |  +- OpenRelays          
+ |  |  |  | 
+ |  |  |  +- delayMs              (see above)
+ |  |  |     
+ |  |  +- Discharge           
  |  |     | 
  |  |     +- delayMs              (see above)
  |  |        
  |  +- errorMode           
  |     | 
  |     +- OpenRelays           (see above)
+ |     |  
+ |     +- Discharge            (see above)
  |     |  
  |     +- _LNEG               
  |     |    
@@ -5686,5 +5707,5 @@ STATISTIC SECTION
 ExeFile:
 --------
 Number of blocks to be downloaded: 6
-Total size of all blocks to be downloaded: 22888
+Total size of all blocks to be downloaded: 22950
 

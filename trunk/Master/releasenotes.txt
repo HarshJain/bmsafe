@@ -1,0 +1,5 @@
+16 avril 2012: J'ai associé au port M:
+- patte 87: output, contrôle du discharge relay. Compiles, mais pas testé
+
+À faire:
+Lecture de l'interlock. En vue de contrôler le discharge relay en conséquence. Probablement qu'on pourra utiliser la patte pour le ground fault à la place

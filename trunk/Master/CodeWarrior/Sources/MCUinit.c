@@ -7,16 +7,16 @@
 **
 **     Project   : Master
 **     Processor : MC9S12XEP100MAL
-**     Version   : Component 01.003, Driver 01.05, CPU db: 3.00.033
+**     Version   : Component 01.003, Driver 01.05, CPU db: 3.00.035
 **     Datasheet : MC9S12XEP100 Rev. 1.19 12/2008
-**     Date/Time : 2011-04-12, 16:06
+**     Date/Time : 17/04/2012, 12:15 AM
 **     Abstract  :
 **         This module contains device initialization code 
 **         for selected on-chip peripherals.
 **     Contents  :
 **         Function "MCU_init" initializes selected peripherals
 **
-**     Copyright : 1997 - 2010 Freescale Semiconductor, Inc. All Rights Reserved.
+**     Copyright : 1997 - 2011 Freescale Semiconductor, Inc. All Rights Reserved.
 **     
 **     http      : www.freescale.com
 **     mail      : support@freescale.com
@@ -428,8 +428,8 @@ void MCU_init(void)
   /* ### Init_SCI init code */
   /* SCI5CR2: TIE=0,TCIE=0,RIE=0,ILIE=0,TE=0,RE=0,RWU=0,SBK=0 */
   SCI5CR2 = 0U;                        /* Disable the SCI5 module */
-  (void)(SCI5SR1 == 0);                /* Dummy read of the SCI5SR1 registr to clear flags */
-  (void)(SCI5DRL == 0);                /* Dummy read of the SCI5DRL registr to clear flags */
+  (void)(SCI5SR1 == 0U);               /* Dummy read of the SCI5SR1 registr to clear flags */
+  (void)(SCI5DRL == 0U);               /* Dummy read of the SCI5DRL registr to clear flags */
   /* SCI5SR2: AMAP=0,TXPOL=0,RXPOL=0,BRK13=0,TXDIR=0,RAF=0 */
   SCI5SR2 = 0U;                                      
   /* SCI5BD: IREN=0,TNP1=0,TNP0=0,SBR12=0,SBR11=0,SBR10=0,SBR9=0,SBR8=0,SBR7=0,SBR6=0,SBR5=1,SBR4=1,SBR3=0,SBR2=1,SBR1=0,SBR0=0 */
@@ -629,6 +629,15 @@ void MCU_init(void)
   /* ### Init_GPIO init code */
   /* DDRA: DDRA7=1,DDRA6=1,DDRA5=1,DDRA4=1,DDRA3=1,DDRA2=1,DDRA1=1,DDRA0=1 */
   DDRA = 255U;                                      
+  /* ### Init_GPIO init code */
+  /* PPSM: PPSM7=1 */
+  PPSM |= (unsigned char)128U;                      
+  /* WOMM: WOMM7=0 */
+  WOMM &= (unsigned char)~(unsigned char)128U;                     
+  /* PERM: PERM7=1 */
+  PERM |= (unsigned char)128U;                      
+  /* DDRM: DDRM7=1 */
+  DDRM |= (unsigned char)128U;                      
   /* ### */
   /* Initial interrupt priority */
   /*lint -save  -e950 Disable MISRA rule (1.1) checking. */
@@ -1514,7 +1523,7 @@ static const tIsrFunc _ResetVectorTable[] @0xFFFAU = { /* Reset vector table */
 /*
 ** ###################################################################
 **
-**     This file was created by Processor Expert 3.02 [04.44]
+**     This file was created by Processor Expert 3.03 [04.46]
 **     for the Freescale HCS12X series of microcontrollers.
 **
 ** ###################################################################
