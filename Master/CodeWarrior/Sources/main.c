@@ -49,6 +49,7 @@ char gActivEqui = 0;                // 1: when manCharge=1, equilibrate the batt
 char gCharger = 0;                  // 1: a charger has been detected on the CAN bus
 char gIgnition = 0;                 // 1: car ignition is on
 char gRelaysClosed = 0;             // 1: the relays are all closed
+char gDischargeRelayOpen = 0;       // 1: the relay is open
 char gCharged = 0;                  // 1: gCellVolt(max) >= V_BAL
 char gEquilibrated = 0;             // 1: V_BAL-DV < gCellVolt[i] < V_BAL+DV
 char gSOCready = 0;                 // 1: After N_CURR_MSR current measuremenst were made, it's time for the SOC!
@@ -250,6 +251,10 @@ void normalMode(){
             TERMIO_PutString("normalMode: closing the relays\n");
          #endif
        
+         
+         //Opens the discharge relay 
+         DontDischarge();
+         gDischargeRelayOpen = 1;
          //Closing the relays
          CloseRelays(RELAY_DELAY);
          gRelaysClosed = 1;
@@ -330,7 +335,9 @@ void chargeMode(){
        
          if(!gRelaysClosed){
             
-            //Closing the relays
+            // Opens the discharge relay
+            DontDischarge();
+            // Closing the relays
             CloseRelays(RELAY_DELAY);
             gRelaysClosed = 1;
             
@@ -380,6 +387,8 @@ void standbyMode(){
          //Opening the relays
          OpenRelays(RELAY_DELAY);        
          gRelaysClosed = 0;
+         // Close the discharge relay
+         Discharge(DISCHARGE_DELAY);
       }   
    }
    
@@ -407,6 +416,7 @@ void errorMode(){
    
       OpenRelays(RELAY_DELAY);
       gRelaysClosed = 0;
+      Discharge(DISCHARGE_DELAY);
    }
    
 

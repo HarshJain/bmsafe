@@ -66,4 +66,17 @@ void Precharge(unsigned int time) {
    PORTA_PA4 = 0;
    
 }
+
+void DontDischarge(void) {
+
+   PTM_PTM7 = 1;     
    
+}
+
+void Discharge(unsigned int time) {
+
+   PTM_PTM7 = 0;
+   delayMs(time);
+   PTM_PTM7 = 0;     
+   
+}   

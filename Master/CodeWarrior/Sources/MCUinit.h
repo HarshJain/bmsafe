@@ -6,16 +6,16 @@
 **
 **     Project   : Master
 **     Processor : MC9S12XEP100MAL
-**     Version   : Component 01.003, Driver 01.05, CPU db: 3.00.033
+**     Version   : Component 01.003, Driver 01.05, CPU db: 3.00.035
 **     Datasheet : MC9S12XEP100 Rev. 1.19 12/2008
-**     Date/Time : 2011-04-12, 16:06
+**     Date/Time : 17/04/2012, 12:15 AM
 **     Abstract  :
 **         This module contains device initialization code 
 **         for selected on-chip peripherals.
 **     Contents  :
 **         Function "MCU_init" initializes selected peripherals
 **
-**     Copyright : 1997 - 2010 Freescale Semiconductor, Inc. All Rights Reserved.
+**     Copyright : 1997 - 2011 Freescale Semiconductor, Inc. All Rights Reserved.
 **     
 **     http      : www.freescale.com
 **     mail      : support@freescale.com
@@ -312,7 +312,7 @@ __interrupt void iADC_sequence_complete(void);
 /*
 ** ###################################################################
 **
-**     This file was created by Processor Expert 3.02 [04.44]
+**     This file was created by Processor Expert 3.03 [04.46]
 **     for the Freescale HCS12X series of microcontrollers.
 **
 ** ###################################################################
