@@ -4,29 +4,26 @@
 **     It is overwritten during code generation.
 **     USER MODIFICATION ARE PRESERVED ONLY INSIDE EXPLICITLY MARKED SECTIONS.
 **
-**     Project   : SPI_linear
+**     Project   : Slave
 **     Processor : MC9S12XDP512BMPV
-**     Version   : Bean 02.002, Driver 01.03, CPU db: 2.87.222
+**     Version   : Component 02.003, Driver 01.05, CPU db: 2.87.229
 **     Datasheet : MC9S12XDP512RMV2 Rev. 2.18 May 2008
-**     Date/Time : 10/04/2011, 12:26 PM
+**     Date/Time : 2012-05-05, 22:49
 **     Abstract  :
 **         This module contains device initialization code 
 **         for selected on-chip peripherals.
 **     Contents  :
 **         Function "MCU_init" initializes selected peripherals
 **
-**     (c) Copyright UNIS, a.s. 1997-2008
-**     UNIS, a.s.
-**     Jundrovska 33
-**     624 00 Brno
-**     Czech Republic
-**     http      : www.processorexpert.com
-**     mail      : info@processorexpert.com
+**     Copyright : 1997 - 2010 Freescale Semiconductor, Inc. All Rights Reserved.
+**     
+**     http      : www.freescale.com
+**     mail      : support@freescale.com
 ** ###################################################################
 */
 
-#ifndef __SPI_linear_H
-#define __SPI_linear_H 1
+#ifndef __Slave_H
+#define __Slave_H 1
 
 /* Include shared modules, which are used for whole project */
 
@@ -34,10 +31,12 @@
 /* User declarations and definitions */
 /*   Code, declarations and definitions here will be preserved during code generation */
 /* End of user declarations and definitions */
+#pragma CODE_SEG DEFAULT
+
 extern void MCU_init(void);
 /*
 ** ===================================================================
-**     Method      :  MCU_init (bean MC9S12XDP512_112)
+**     Method      :  MCU_init (component MC9S12XDP512_112)
 **
 **     Description :
 **         Device initialization code for selected peripherals.
@@ -46,6 +45,8 @@ extern void MCU_init(void);
 
 
 
+/*lint -save  -e765 Disable MISRA rule (8.10) checking. */
+#pragma CODE_SEG __NEAR_SEG NON_BANKED
 __interrupt void isr_default(void);
 /*
 ** ===================================================================
@@ -57,9 +58,11 @@ __interrupt void isr_default(void);
 **     Returns     : Nothing
 ** ===================================================================
 */
+#pragma CODE_SEG DEFAULT
 
 
 
+#pragma CODE_SEG __NEAR_SEG NON_BANKED
 __interrupt void iPIT1_mesure_temp(void);
 /*
 ** ===================================================================
@@ -71,9 +74,11 @@ __interrupt void iPIT1_mesure_temp(void);
 **     Returns     : Nothing
 ** ===================================================================
 */
+#pragma CODE_SEG DEFAULT
 
 
 
+#pragma CODE_SEG __NEAR_SEG NON_BANKED
 __interrupt void iPIT0_mesure_volt(void);
 /*
 ** ===================================================================
@@ -85,9 +90,27 @@ __interrupt void iPIT0_mesure_volt(void);
 **     Returns     : Nothing
 ** ===================================================================
 */
+#pragma CODE_SEG DEFAULT
 
 
 
+#pragma CODE_SEG __NEAR_SEG NON_BANKED
+__interrupt void isrVportp(void);
+/*
+** ===================================================================
+**     Interrupt handler : isrVportp
+**
+**     Description :
+**         User interrupt service routine. 
+**     Parameters  : None
+**     Returns     : Nothing
+** ===================================================================
+*/
+#pragma CODE_SEG DEFAULT
+
+
+
+#pragma CODE_SEG __NEAR_SEG NON_BANKED
 __interrupt void isrVcan0tx(void);
 /*
 ** ===================================================================
@@ -99,9 +122,11 @@ __interrupt void isrVcan0tx(void);
 **     Returns     : Nothing
 ** ===================================================================
 */
+#pragma CODE_SEG DEFAULT
 
 
 
+#pragma CODE_SEG __NEAR_SEG NON_BANKED
 __interrupt void iCAN0RxISR(void);
 /*
 ** ===================================================================
@@ -113,9 +138,11 @@ __interrupt void iCAN0RxISR(void);
 **     Returns     : Nothing
 ** ===================================================================
 */
+#pragma CODE_SEG DEFAULT
 
 
 
+#pragma CODE_SEG __NEAR_SEG NON_BANKED
 __interrupt void isrVcan0err(void);
 /*
 ** ===================================================================
@@ -127,9 +154,11 @@ __interrupt void isrVcan0err(void);
 **     Returns     : Nothing
 ** ===================================================================
 */
+#pragma CODE_SEG DEFAULT
 
 
 
+#pragma CODE_SEG __NEAR_SEG NON_BANKED
 __interrupt void isrVcan0wkup(void);
 /*
 ** ===================================================================
@@ -141,9 +170,11 @@ __interrupt void isrVcan0wkup(void);
 **     Returns     : Nothing
 ** ===================================================================
 */
+#pragma CODE_SEG DEFAULT
 
 
 
+#pragma CODE_SEG __NEAR_SEG NON_BANKED
 __interrupt void isrVspi1(void);
 /*
 ** ===================================================================
@@ -155,9 +186,11 @@ __interrupt void isrVspi1(void);
 **     Returns     : Nothing
 ** ===================================================================
 */
+#pragma CODE_SEG DEFAULT
 
 
 
+#pragma CODE_SEG __NEAR_SEG NON_BANKED
 __interrupt void isrVporth(void);
 /*
 ** ===================================================================
@@ -169,9 +202,27 @@ __interrupt void isrVporth(void);
 **     Returns     : Nothing
 ** ===================================================================
 */
+#pragma CODE_SEG DEFAULT
 
 
 
+#pragma CODE_SEG __NEAR_SEG NON_BANKED
+__interrupt void isrVportj(void);
+/*
+** ===================================================================
+**     Interrupt handler : isrVportj
+**
+**     Description :
+**         User interrupt service routine. 
+**     Parameters  : None
+**     Returns     : Nothing
+** ===================================================================
+*/
+#pragma CODE_SEG DEFAULT
+
+
+
+#pragma CODE_SEG __NEAR_SEG NON_BANKED
 __interrupt void iADC1_seq_complete(void);
 /*
 ** ===================================================================
@@ -183,9 +234,11 @@ __interrupt void iADC1_seq_complete(void);
 **     Returns     : Nothing
 ** ===================================================================
 */
+#pragma CODE_SEG DEFAULT
 
 
 
+#pragma CODE_SEG __NEAR_SEG NON_BANKED
 __interrupt void iADC0_seq_complete(void);
 /*
 ** ===================================================================
@@ -197,19 +250,21 @@ __interrupt void iADC0_seq_complete(void);
 **     Returns     : Nothing
 ** ===================================================================
 */
+#pragma CODE_SEG DEFAULT
 
 
 
+/*lint -restore Enable MISRA rule (8.10) checking. */
 
 
 
-/* END SPI_linear */
+/* END Slave */
 
 #endif
 /*
 ** ###################################################################
 **
-**     This file was created by UNIS Processor Expert 3.00 [04.12]
+**     This file was created by Processor Expert 3.02 [04.44]
 **     for the Freescale HCS12X series of microcontrollers.
 **
 ** ###################################################################
