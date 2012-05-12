@@ -5,47 +5,57 @@
 **     USER MODIFICATION ARE PRESERVED ONLY INSIDE INTERRUPT SERVICE ROUTINES
 **     OR EXPLICITLY MARKED SECTIONS
 **
-**     Project   : SPI_linear
+**     Project   : Slave
 **     Processor : MC9S12XDP512BMPV
-**     Version   : Bean 02.002, Driver 01.03, CPU db: 2.87.222
+**     Version   : Component 02.003, Driver 01.05, CPU db: 2.87.229
 **     Datasheet : MC9S12XDP512RMV2 Rev. 2.18 May 2008
-**     Date/Time : 10/04/2011, 12:26 PM
+**     Date/Time : 2012-05-05, 22:49
 **     Abstract  :
 **         This module contains device initialization code 
 **         for selected on-chip peripherals.
 **     Contents  :
 **         Function "MCU_init" initializes selected peripherals
 **
-**     (c) Copyright UNIS, a.s. 1997-2008
-**     UNIS, a.s.
-**     Jundrovska 33
-**     624 00 Brno
-**     Czech Republic
-**     http      : www.processorexpert.com
-**     mail      : info@processorexpert.com
+**     Copyright : 1997 - 2010 Freescale Semiconductor, Inc. All Rights Reserved.
+**     
+**     http      : www.freescale.com
+**     mail      : support@freescale.com
 ** ###################################################################
 */
 /* MODULE MCUinit */
 
 #include <MC9S12XDP512.h>              /* I/O map for MC9S12XDP512BMPV */
+#include "MCUinit.h"
 
+/* Standard ANSI C types */
+#ifndef int8_t
+typedef signed char int8_t;
+#endif
+#ifndef int16_t
+typedef signed int   int16_t;
+#endif
+#ifndef int32_t
+typedef signed long int    int32_t;
+#endif
+
+#ifndef uint8_t
+typedef unsigned char       uint8_t;
+#endif
+#ifndef uint16_t
+typedef unsigned int  uint16_t;
+#endif
+#ifndef uint32_t
+typedef unsigned long int   uint32_t;
+#endif
+
+#define CGM_DELAY  1023U
 
 /* User declarations and definitions */
 /*   Code, declarations and definitions here will be preserved during code generation */
 
 #include "CANSlave.h"
-#include "Defines.h"
-#include "Table_Temperature.h"
-
-extern unsigned int  gInt_Voltage_Table[NB_CELL];
-extern unsigned int  gTemp[NB_CELL];
-extern unsigned char gADC0done;
-extern unsigned char gADC1done;
-extern unsigned char gVoltTimeout;
-extern unsigned char gBalanceFlag;
-extern unsigned char gEquiStatusChange;
-extern unsigned int  gBalanceVector;
-extern unsigned int  gBalThres;
+#include "defines.h"
+#include "temp.h"
 
 
 /* End of user declarations and definitions */
@@ -54,37 +64,41 @@ extern void near _Startup(void);
 
 #pragma CODE_SEG __NEAR_SEG NON_BANKED
 
+static void MCU_init_reset(void);
 /*
 ** ===================================================================
-**     Method      :  MCU_init_reset (bean MC9S12XDP512_112)
+**     Method      :  MCU_init_reset (component MC9S12XDP512_112)
 **
 **     Description :
 **         Device initialization code for after reset initialization.
 ** ===================================================================
 */
-void MCU_init_reset(void)
+static void MCU_init_reset(void)
 {
 
   /*  Initialization of memory configuration */
   /* MMCCTL1: EROMON=0,ROMHM=0,ROMON=1 */
-  MMCCTL1 = 1;                                      
+  MMCCTL1 = 1U;                                      
   /* DIRECT: DP15=0,DP14=0,DP13=0,DP12=0,DP11=0,DP10=0,DP9=0,DP8=0 */
-  DIRECT = 0;                                      
+  DIRECT = 0U;                                      
   /* IVBR: IVB_ADDR=255 */
-  IVBR = 255;                                      
+  IVBR = 255U;                                      
   /* ECLKCTL: NECLK=1,NCLKX2=1,EDIV1=0,EDIV0=0 */
-  ECLKCTL = 192;                                      
+  ECLKCTL = 192U;                                      
   /* Jump to the default entry point */
+  /*lint -save  -e950 Disable MISRA rule (1.1) checking. */
   asm jmp _Startup;
+  /*lint -restore Enable MISRA rule (1.1) checking. */
 } /*MCU_init*/
 
 #pragma CODE_SEG DEFAULT
+#pragma MESSAGE DISABLE C12056
 
 
 
 /*
 ** ===================================================================
-**     Method      :  MCU_init (bean MC9S12XDP512_112)
+**     Method      :  MCU_init (component MC9S12XDP512_112)
 **
 **     Description :
 **         Device initialization code for selected peripherals.
@@ -97,309 +111,215 @@ void MCU_init(void)
   /*  PE initialization code after reset */
   /*  System clock initialization */
   /* CLKSEL: PLLSEL=0,PSTP=0,PLLWAI=0,RTIWAI=0,COPWAI=0 */
-  CLKSEL = 0;                          /* Select clock source from XTAL and set bits in CLKSEL reg. */
+  CLKSEL = 0U;                         /* Select clock source from XTAL and set bits in CLKSEL reg. */
   /* PLLCTL: CME=1,PLLON=0,AUTO=1,ACQ=1,FSTWKP=0,PRE=0,PCE=0,SCME=1 */
-  PLLCTL = 177;                        /* Disable the PLL */
+  PLLCTL = 177U;                       /* Disable the PLL */
   /* Initialization of RAM Protection (MMC module) */
-  /* RAMXGU: XGU6=1,XGU5=1,XGU4=1,XGU3=1,XGU2=1,XGU1=1,XGU0=1 */
-  RAMXGU = 255;                                      
-  /* RAMSHL: SHL6=1,SHL5=1,SHL4=1,SHL3=1,SHL2=1,SHL1=1,SHL0=1 */
-  RAMSHL = 255;                                      
-  /* RAMSHU: SHU6=1,SHU5=1,SHU4=1,SHU3=1,SHU2=1,SHU1=1,SHU0=1 */
-  RAMSHU = 255;                                      
-  /* RAMWPC: RWPE=0,AVIE=0,AVIF=0 */
-  RAMWPC = 0;                                      
   /* Int. priority initialization */
   /*                                        No. Address Pri XGATE Name          Description */
-  INT_CFADDR = 16;                                      
-  INT_CFDATA1 = 1;                     /*  0x09  0xFF12   1   no   ivReserved119 unused by PE */
-  INT_CFDATA2 = 1;                     /*  0x0A  0xFF14   1   no   ivReserved118 unused by PE */
-  INT_CFDATA3 = 1;                     /*  0x0B  0xFF16   1   no   ivReserved117 unused by PE */
-  INT_CFDATA4 = 1;                     /*  0x0C  0xFF18   1   no   ivReserved116 unused by PE */
-  INT_CFDATA5 = 1;                     /*  0x0D  0xFF1A   1   no   ivReserved115 unused by PE */
-  INT_CFDATA6 = 1;                     /*  0x0E  0xFF1C   1   no   ivReserved114 unused by PE */
-  INT_CFDATA7 = 1;                     /*  0x0F  0xFF1E   1   no   ivReserved113 unused by PE */
-  INT_CFADDR = 32;                                      
-  INT_CFDATA0 = 1;                     /*  0x10  0xFF20   1   no   ivReserved112 unused by PE */
-  INT_CFDATA1 = 1;                     /*  0x11  0xFF22   1   no   ivReserved111 unused by PE */
-  INT_CFDATA2 = 1;                     /*  0x12  0xFF24   1   no   ivReserved110 unused by PE */
-  INT_CFDATA3 = 1;                     /*  0x13  0xFF26   1   no   ivReserved109 unused by PE */
-  INT_CFDATA4 = 1;                     /*  0x14  0xFF28   1   no   ivReserved108 unused by PE */
-  INT_CFDATA5 = 1;                     /*  0x15  0xFF2A   1   no   ivReserved107 unused by PE */
-  INT_CFDATA6 = 1;                     /*  0x16  0xFF2C   1   no   ivReserved106 unused by PE */
-  INT_CFDATA7 = 1;                     /*  0x17  0xFF2E   1   no   ivReserved105 unused by PE */
-  INT_CFADDR = 48;                                      
-  INT_CFDATA0 = 1;                     /*  0x18  0xFF30   1   no   ivReserved104 unused by PE */
-  INT_CFDATA1 = 1;                     /*  0x19  0xFF32   1   no   ivReserved103 unused by PE */
-  INT_CFDATA2 = 1;                     /*  0x1A  0xFF34   1   no   ivReserved102 unused by PE */
-  INT_CFDATA3 = 1;                     /*  0x1B  0xFF36   1   no   ivReserved101 unused by PE */
-  INT_CFDATA4 = 1;                     /*  0x1C  0xFF38   1   no   ivReserved100 unused by PE */
-  INT_CFDATA5 = 1;                     /*  0x1D  0xFF3A   1   no   ivReserved99  unused by PE */
-  INT_CFDATA6 = 1;                     /*  0x1E  0xFF3C   1   no   ivReserved98  unused by PE */
-  INT_CFDATA7 = 1;                     /*  0x1F  0xFF3E   1   no   ivReserved97  unused by PE */
-  INT_CFADDR = 64;                                      
-  INT_CFDATA0 = 1;                     /*  0x20  0xFF40   1   no   ivReserved96  unused by PE */
-  INT_CFDATA1 = 1;                     /*  0x21  0xFF42   1   no   ivReserved95  unused by PE */
-  INT_CFDATA2 = 1;                     /*  0x22  0xFF44   1   no   ivReserved94  unused by PE */
-  INT_CFDATA3 = 1;                     /*  0x23  0xFF46   1   no   ivReserved93  unused by PE */
-  INT_CFDATA4 = 1;                     /*  0x24  0xFF48   1   no   ivReserved92  unused by PE */
-  INT_CFDATA5 = 1;                     /*  0x25  0xFF4A   1   no   ivReserved91  unused by PE */
-  INT_CFDATA6 = 1;                     /*  0x26  0xFF4C   1   no   ivReserved90  unused by PE */
-  INT_CFDATA7 = 1;                     /*  0x27  0xFF4E   1   no   ivReserved89  unused by PE */
-  INT_CFADDR = 80;                                      
-  INT_CFDATA0 = 1;                     /*  0x28  0xFF50   1   no   ivReserved88  unused by PE */
-  INT_CFDATA1 = 1;                     /*  0x29  0xFF52   1   no   ivReserved87  unused by PE */
-  INT_CFDATA2 = 1;                     /*  0x2A  0xFF54   1   no   ivReserved86  unused by PE */
-  INT_CFDATA3 = 1;                     /*  0x2B  0xFF56   1   no   ivReserved85  unused by PE */
-  INT_CFDATA4 = 1;                     /*  0x2C  0xFF58   1   no   ivReserved84  unused by PE */
-  INT_CFDATA5 = 1;                     /*  0x2D  0xFF5A   1   no   ivReserved83  unused by PE */
-  INT_CFDATA6 = 1;                     /*  0x2E  0xFF5C   1   no   ivReserved82  unused by PE */
-  INT_CFDATA7 = 1;                     /*  0x2F  0xFF5E   1   no   ivReserved81  unused by PE */
-  INT_CFADDR = 96;                                      
-  INT_CFDATA0 = 1;                     /*  0x30  0xFF60   1   -    ivVxsramav    unused by PE */
-  INT_CFDATA1 = 1;                     /*  0x31  0xFF62   1   -    ivVxsei       unused by PE */
-  INT_CFDATA2 = 1;                     /*  0x32  0xFF64   1   no   ivVxst7       unused by PE */
-  INT_CFDATA3 = 1;                     /*  0x33  0xFF66   1   no   ivVxst6       unused by PE */
-  INT_CFDATA4 = 1;                     /*  0x34  0xFF68   1   no   ivVxst5       unused by PE */
-  INT_CFDATA5 = 1;                     /*  0x35  0xFF6A   1   no   ivVxst4       unused by PE */
-  INT_CFDATA6 = 1;                     /*  0x36  0xFF6C   1   no   ivVxst3       unused by PE */
-  INT_CFDATA7 = 1;                     /*  0x37  0xFF6E   1   no   ivVxst2       unused by PE */
-  INT_CFADDR = 112;                                      
-  INT_CFDATA0 = 1;                     /*  0x38  0xFF70   1   no   ivVxst1       unused by PE */
-  INT_CFDATA1 = 1;                     /*  0x39  0xFF72   1   no   ivVxst0       unused by PE */
-  INT_CFDATA2 = 1;                     /*  0x3A  0xFF74   1   no   ivVpit3       unused by PE */
-  INT_CFDATA3 = 1;                     /*  0x3B  0xFF76   1   no   ivVpit2       unused by PE */
-  INT_CFDATA4 = 1;                     /*  0x3C  0xFF78   1   no   ivVpit1       used by PE */
-  INT_CFDATA5 = 1;                     /*  0x3D  0xFF7A   1   no   ivVpit0       used by PE */
-  INT_CFDATA6 = 1;                     /*  0x3E  0xFF7C   1   no   ivVReserved65 unused by PE */
-  INT_CFDATA7 = 1;                     /*  0x3F  0xFF7E   1   no   ivVapi        unused by PE */
-  INT_CFADDR = 128;                                      
-  INT_CFDATA0 = 1;                     /*  0x40  0xFF80   1   no   ivVlvi        unused by PE */
-  INT_CFDATA1 = 1;                     /*  0x41  0xFF82   1   no   ivVReserved62 unused by PE */
-  INT_CFDATA2 = 1;                     /*  0x42  0xFF84   1   no   ivVsci5       unused by PE */
-  INT_CFDATA3 = 1;                     /*  0x43  0xFF86   1   no   ivVsci4       unused by PE */
-  INT_CFDATA4 = 1;                     /*  0x44  0xFF88   1   no   ivVsci3       unused by PE */
-  INT_CFDATA5 = 1;                     /*  0x45  0xFF8A   1   no   ivVsci2       unused by PE */
-  INT_CFDATA6 = 1;                     /*  0x46  0xFF8C   1   no   ivVpwmesdn    unused by PE */
-  INT_CFDATA7 = 1;                     /*  0x47  0xFF8E   1   no   ivVportp      unused by PE */
-  INT_CFADDR = 144;                                      
-  INT_CFDATA0 = 1;                     /*  0x48  0xFF90   1   no   ivVcan4tx     unused by PE */
-  INT_CFDATA1 = 1;                     /*  0x49  0xFF92   1   no   ivVcan4rx     unused by PE */
-  INT_CFDATA2 = 1;                     /*  0x4A  0xFF94   1   no   ivVcan4err    unused by PE */
-  INT_CFDATA3 = 1;                     /*  0x4B  0xFF96   1   no   ivVcan4wkup   unused by PE */
-  INT_CFDATA4 = 1;                     /*  0x4C  0xFF98   1   no   ivVcan3tx     unused by PE */
-  INT_CFDATA5 = 1;                     /*  0x4D  0xFF9A   1   no   ivVcan3rx     unused by PE */
-  INT_CFDATA6 = 1;                     /*  0x4E  0xFF9C   1   no   ivVcan3err    unused by PE */
-  INT_CFDATA7 = 1;                     /*  0x4F  0xFF9E   1   no   ivVcan3wkup   unused by PE */
-  INT_CFADDR = 160;                                      
-  INT_CFDATA0 = 1;                     /*  0x50  0xFFA0   1   no   ivVcan2tx     unused by PE */
-  INT_CFDATA1 = 1;                     /*  0x51  0xFFA2   1   no   ivVcan2rx     unused by PE */
-  INT_CFDATA2 = 1;                     /*  0x52  0xFFA4   1   no   ivVcan2err    unused by PE */
-  INT_CFDATA3 = 1;                     /*  0x53  0xFFA6   1   no   ivVcan2wkup   unused by PE */
-  INT_CFDATA4 = 1;                     /*  0x54  0xFFA8   1   no   ivVcan1tx     unused by PE */
-  INT_CFDATA5 = 1;                     /*  0x55  0xFFAA   1   no   ivVcan1rx     unused by PE */
-  INT_CFDATA6 = 1;                     /*  0x56  0xFFAC   1   no   ivVcan1err    unused by PE */
-  INT_CFDATA7 = 1;                     /*  0x57  0xFFAE   1   no   ivVcan1wkup   unused by PE */
-  INT_CFADDR = 176;                                      
-  INT_CFDATA0 = 1;                     /*  0x58  0xFFB0   1   no   ivVcan0tx     used by PE */
-  INT_CFDATA1 = 1;                     /*  0x59  0xFFB2   1   no   ivVcan0rx     used by PE */
-  INT_CFDATA2 = 1;                     /*  0x5A  0xFFB4   1   no   ivVcan0err    used by PE */
-  INT_CFDATA3 = 1;                     /*  0x5B  0xFFB6   1   no   ivVcan0wkup   used by PE */
-  INT_CFDATA4 = 1;                     /*  0x5C  0xFFB8   1   no   ivVflash      unused by PE */
-  INT_CFDATA5 = 1;                     /*  0x5D  0xFFBA   1   no   ivVeeprom     unused by PE */
-  INT_CFDATA6 = 1;                     /*  0x5E  0xFFBC   1   no   ivVspi2       unused by PE */
-  INT_CFDATA7 = 1;                     /*  0x5F  0xFFBE   1   no   ivVspi1       used by PE */
-  INT_CFADDR = 192;                                      
-  INT_CFDATA0 = 1;                     /*  0x60  0xFFC0   1   no   ivViic0       unused by PE */
-  INT_CFDATA1 = 1;                     /*  0x61  0xFFC2   1   no   ivVReserved30 unused by PE */
-  INT_CFDATA2 = 1;                     /*  0x62  0xFFC4   1   no   ivVcrgscm     unused by PE */
-  INT_CFDATA3 = 1;                     /*  0x63  0xFFC6   1   no   ivVcrgplllck  unused by PE */
-  INT_CFDATA4 = 1;                     /*  0x64  0xFFC8   1   no   ivVtimpabovf  unused by PE */
-  INT_CFDATA5 = 1;                     /*  0x65  0xFFCA   1   no   ivVtimmdcu    unused by PE */
-  INT_CFDATA6 = 1;                     /*  0x66  0xFFCC   1   no   ivVporth      used by PE */
-  INT_CFDATA7 = 1;                     /*  0x67  0xFFCE   1   no   ivVportj      unused by PE */
-  INT_CFADDR = 208;                                      
-  INT_CFDATA0 = 1;                     /*  0x68  0xFFD0   1   no   ivVatd1       used by PE */
-  INT_CFDATA1 = 1;                     /*  0x69  0xFFD2   1   no   ivVatd0       used by PE */
-  INT_CFDATA2 = 1;                     /*  0x6A  0xFFD4   1   no   ivVsci1       unused by PE */
-  INT_CFDATA3 = 1;                     /*  0x6B  0xFFD6   1   no   ivVsci0       unused by PE */
-  INT_CFDATA4 = 1;                     /*  0x6C  0xFFD8   1   no   ivVspi0       unused by PE */
-  INT_CFDATA5 = 1;                     /*  0x6D  0xFFDA   1   no   ivVtimpaie    unused by PE */
-  INT_CFDATA6 = 1;                     /*  0x6E  0xFFDC   1   no   ivVtimpaaovf  unused by PE */
-  INT_CFDATA7 = 1;                     /*  0x6F  0xFFDE   1   no   ivVtimovf     unused by PE */
-  INT_CFADDR = 224;                                      
-  INT_CFDATA0 = 1;                     /*  0x70  0xFFE0   1   no   ivVtimch7     unused by PE */
-  INT_CFDATA1 = 1;                     /*  0x71  0xFFE2   1   no   ivVtimch6     unused by PE */
-  INT_CFDATA2 = 1;                     /*  0x72  0xFFE4   1   no   ivVtimch5     unused by PE */
-  INT_CFDATA3 = 1;                     /*  0x73  0xFFE6   1   no   ivVtimch4     unused by PE */
-  INT_CFDATA4 = 1;                     /*  0x74  0xFFE8   1   no   ivVtimch3     unused by PE */
-  INT_CFDATA5 = 1;                     /*  0x75  0xFFEA   1   no   ivVtimch2     unused by PE */
-  INT_CFDATA6 = 1;                     /*  0x76  0xFFEC   1   no   ivVtimch1     unused by PE */
-  INT_CFDATA7 = 1;                     /*  0x77  0xFFEE   1   no   ivVtimch0     unused by PE */
-  INT_CFADDR = 240;                                      
-  INT_CFDATA0 = 1;                     /*  0x78  0xFFF0   1   no   ivVrti        unused by PE */
-  INT_CFDATA1 = 1;                     /*  0x79  0xFFF2   1   no   ivVirq        unused by PE */
+  INT_CFADDR = 16U;                                      
+  INT_CFDATA1 = 1U;                    /*  0x09  0xFF12   1   no   ivReserved119 unused by PE */
+  INT_CFDATA2 = 1U;                    /*  0x0A  0xFF14   1   no   ivReserved118 unused by PE */
+  INT_CFDATA3 = 1U;                    /*  0x0B  0xFF16   1   no   ivReserved117 unused by PE */
+  INT_CFDATA4 = 1U;                    /*  0x0C  0xFF18   1   no   ivReserved116 unused by PE */
+  INT_CFDATA5 = 1U;                    /*  0x0D  0xFF1A   1   no   ivReserved115 unused by PE */
+  INT_CFDATA6 = 1U;                    /*  0x0E  0xFF1C   1   no   ivReserved114 unused by PE */
+  INT_CFDATA7 = 1U;                    /*  0x0F  0xFF1E   1   no   ivReserved113 unused by PE */
+  INT_CFADDR = 32U;                                      
+  INT_CFDATA0 = 1U;                    /*  0x10  0xFF20   1   no   ivReserved112 unused by PE */
+  INT_CFDATA1 = 1U;                    /*  0x11  0xFF22   1   no   ivReserved111 unused by PE */
+  INT_CFDATA2 = 1U;                    /*  0x12  0xFF24   1   no   ivReserved110 unused by PE */
+  INT_CFDATA3 = 1U;                    /*  0x13  0xFF26   1   no   ivReserved109 unused by PE */
+  INT_CFDATA4 = 1U;                    /*  0x14  0xFF28   1   no   ivReserved108 unused by PE */
+  INT_CFDATA5 = 1U;                    /*  0x15  0xFF2A   1   no   ivReserved107 unused by PE */
+  INT_CFDATA6 = 1U;                    /*  0x16  0xFF2C   1   no   ivReserved106 unused by PE */
+  INT_CFDATA7 = 1U;                    /*  0x17  0xFF2E   1   no   ivReserved105 unused by PE */
+  INT_CFADDR = 48U;                                      
+  INT_CFDATA0 = 1U;                    /*  0x18  0xFF30   1   no   ivReserved104 unused by PE */
+  INT_CFDATA1 = 1U;                    /*  0x19  0xFF32   1   no   ivReserved103 unused by PE */
+  INT_CFDATA2 = 1U;                    /*  0x1A  0xFF34   1   no   ivReserved102 unused by PE */
+  INT_CFDATA3 = 1U;                    /*  0x1B  0xFF36   1   no   ivReserved101 unused by PE */
+  INT_CFDATA4 = 1U;                    /*  0x1C  0xFF38   1   no   ivReserved100 unused by PE */
+  INT_CFDATA5 = 1U;                    /*  0x1D  0xFF3A   1   no   ivReserved99  unused by PE */
+  INT_CFDATA6 = 1U;                    /*  0x1E  0xFF3C   1   no   ivReserved98  unused by PE */
+  INT_CFDATA7 = 1U;                    /*  0x1F  0xFF3E   1   no   ivReserved97  unused by PE */
+  INT_CFADDR = 64U;                                      
+  INT_CFDATA0 = 1U;                    /*  0x20  0xFF40   1   no   ivReserved96  unused by PE */
+  INT_CFDATA1 = 1U;                    /*  0x21  0xFF42   1   no   ivReserved95  unused by PE */
+  INT_CFDATA2 = 1U;                    /*  0x22  0xFF44   1   no   ivReserved94  unused by PE */
+  INT_CFDATA3 = 1U;                    /*  0x23  0xFF46   1   no   ivReserved93  unused by PE */
+  INT_CFDATA4 = 1U;                    /*  0x24  0xFF48   1   no   ivReserved92  unused by PE */
+  INT_CFDATA5 = 1U;                    /*  0x25  0xFF4A   1   no   ivReserved91  unused by PE */
+  INT_CFDATA6 = 1U;                    /*  0x26  0xFF4C   1   no   ivReserved90  unused by PE */
+  INT_CFDATA7 = 1U;                    /*  0x27  0xFF4E   1   no   ivReserved89  unused by PE */
+  INT_CFADDR = 80U;                                      
+  INT_CFDATA0 = 1U;                    /*  0x28  0xFF50   1   no   ivReserved88  unused by PE */
+  INT_CFDATA1 = 1U;                    /*  0x29  0xFF52   1   no   ivReserved87  unused by PE */
+  INT_CFDATA2 = 1U;                    /*  0x2A  0xFF54   1   no   ivReserved86  unused by PE */
+  INT_CFDATA3 = 1U;                    /*  0x2B  0xFF56   1   no   ivReserved85  unused by PE */
+  INT_CFDATA4 = 1U;                    /*  0x2C  0xFF58   1   no   ivReserved84  unused by PE */
+  INT_CFDATA5 = 1U;                    /*  0x2D  0xFF5A   1   no   ivReserved83  unused by PE */
+  INT_CFDATA6 = 1U;                    /*  0x2E  0xFF5C   1   no   ivReserved82  unused by PE */
+  INT_CFDATA7 = 1U;                    /*  0x2F  0xFF5E   1   no   ivReserved81  unused by PE */
+  INT_CFADDR = 96U;                                      
+  INT_CFDATA0 = 1U;                    /*  0x30  0xFF60   1   -    ivVxsramav    unused by PE */
+  INT_CFDATA1 = 1U;                    /*  0x31  0xFF62   1   -    ivVxsei       unused by PE */
+  INT_CFDATA2 = 1U;                    /*  0x32  0xFF64   1   no   ivVxst7       unused by PE */
+  INT_CFDATA3 = 1U;                    /*  0x33  0xFF66   1   no   ivVxst6       unused by PE */
+  INT_CFDATA4 = 1U;                    /*  0x34  0xFF68   1   no   ivVxst5       unused by PE */
+  INT_CFDATA5 = 1U;                    /*  0x35  0xFF6A   1   no   ivVxst4       unused by PE */
+  INT_CFDATA6 = 1U;                    /*  0x36  0xFF6C   1   no   ivVxst3       unused by PE */
+  INT_CFDATA7 = 1U;                    /*  0x37  0xFF6E   1   no   ivVxst2       unused by PE */
+  INT_CFADDR = 112U;                                      
+  INT_CFDATA0 = 1U;                    /*  0x38  0xFF70   1   no   ivVxst1       unused by PE */
+  INT_CFDATA1 = 1U;                    /*  0x39  0xFF72   1   no   ivVxst0       unused by PE */
+  INT_CFDATA2 = 1U;                    /*  0x3A  0xFF74   1   no   ivVpit3       unused by PE */
+  INT_CFDATA3 = 1U;                    /*  0x3B  0xFF76   1   no   ivVpit2       unused by PE */
+  INT_CFDATA4 = 1U;                    /*  0x3C  0xFF78   1   no   ivVpit1       used by PE */
+  INT_CFDATA5 = 1U;                    /*  0x3D  0xFF7A   1   no   ivVpit0       used by PE */
+  INT_CFDATA6 = 1U;                    /*  0x3E  0xFF7C   1   no   ivVReserved65 unused by PE */
+  INT_CFDATA7 = 1U;                    /*  0x3F  0xFF7E   1   no   ivVapi        unused by PE */
+  INT_CFADDR = 128U;                                      
+  INT_CFDATA0 = 1U;                    /*  0x40  0xFF80   1   no   ivVlvi        unused by PE */
+  INT_CFDATA1 = 1U;                    /*  0x41  0xFF82   1   no   ivVReserved62 unused by PE */
+  INT_CFDATA2 = 1U;                    /*  0x42  0xFF84   1   no   ivVsci5       unused by PE */
+  INT_CFDATA3 = 1U;                    /*  0x43  0xFF86   1   no   ivVsci4       unused by PE */
+  INT_CFDATA4 = 1U;                    /*  0x44  0xFF88   1   no   ivVsci3       unused by PE */
+  INT_CFDATA5 = 1U;                    /*  0x45  0xFF8A   1   no   ivVsci2       unused by PE */
+  INT_CFDATA6 = 1U;                    /*  0x46  0xFF8C   1   no   ivVpwmesdn    unused by PE */
+  INT_CFDATA7 = 1U;                    /*  0x47  0xFF8E   1   no   ivVportp      used by PE */
+  INT_CFADDR = 144U;                                      
+  INT_CFDATA0 = 1U;                    /*  0x48  0xFF90   1   no   ivVcan4tx     unused by PE */
+  INT_CFDATA1 = 1U;                    /*  0x49  0xFF92   1   no   ivVcan4rx     unused by PE */
+  INT_CFDATA2 = 1U;                    /*  0x4A  0xFF94   1   no   ivVcan4err    unused by PE */
+  INT_CFDATA3 = 1U;                    /*  0x4B  0xFF96   1   no   ivVcan4wkup   unused by PE */
+  INT_CFDATA4 = 1U;                    /*  0x4C  0xFF98   1   no   ivVcan3tx     unused by PE */
+  INT_CFDATA5 = 1U;                    /*  0x4D  0xFF9A   1   no   ivVcan3rx     unused by PE */
+  INT_CFDATA6 = 1U;                    /*  0x4E  0xFF9C   1   no   ivVcan3err    unused by PE */
+  INT_CFDATA7 = 1U;                    /*  0x4F  0xFF9E   1   no   ivVcan3wkup   unused by PE */
+  INT_CFADDR = 160U;                                      
+  INT_CFDATA0 = 1U;                    /*  0x50  0xFFA0   1   no   ivVcan2tx     unused by PE */
+  INT_CFDATA1 = 1U;                    /*  0x51  0xFFA2   1   no   ivVcan2rx     unused by PE */
+  INT_CFDATA2 = 1U;                    /*  0x52  0xFFA4   1   no   ivVcan2err    unused by PE */
+  INT_CFDATA3 = 1U;                    /*  0x53  0xFFA6   1   no   ivVcan2wkup   unused by PE */
+  INT_CFDATA4 = 1U;                    /*  0x54  0xFFA8   1   no   ivVcan1tx     unused by PE */
+  INT_CFDATA5 = 1U;                    /*  0x55  0xFFAA   1   no   ivVcan1rx     unused by PE */
+  INT_CFDATA6 = 1U;                    /*  0x56  0xFFAC   1   no   ivVcan1err    unused by PE */
+  INT_CFDATA7 = 1U;                    /*  0x57  0xFFAE   1   no   ivVcan1wkup   unused by PE */
+  INT_CFADDR = 176U;                                      
+  INT_CFDATA0 = 1U;                    /*  0x58  0xFFB0   1   no   ivVcan0tx     used by PE */
+  INT_CFDATA1 = 1U;                    /*  0x59  0xFFB2   1   no   ivVcan0rx     used by PE */
+  INT_CFDATA2 = 1U;                    /*  0x5A  0xFFB4   1   no   ivVcan0err    used by PE */
+  INT_CFDATA3 = 1U;                    /*  0x5B  0xFFB6   1   no   ivVcan0wkup   used by PE */
+  INT_CFDATA4 = 1U;                    /*  0x5C  0xFFB8   1   no   ivVflash      unused by PE */
+  INT_CFDATA5 = 1U;                    /*  0x5D  0xFFBA   1   no   ivVeeprom     unused by PE */
+  INT_CFDATA6 = 1U;                    /*  0x5E  0xFFBC   1   no   ivVspi2       unused by PE */
+  INT_CFDATA7 = 1U;                    /*  0x5F  0xFFBE   1   no   ivVspi1       used by PE */
+  INT_CFADDR = 192U;                                      
+  INT_CFDATA0 = 1U;                    /*  0x60  0xFFC0   1   no   ivViic0       unused by PE */
+  INT_CFDATA1 = 1U;                    /*  0x61  0xFFC2   1   no   ivVReserved30 unused by PE */
+  INT_CFDATA2 = 1U;                    /*  0x62  0xFFC4   1   no   ivVcrgscm     unused by PE */
+  INT_CFDATA3 = 1U;                    /*  0x63  0xFFC6   1   no   ivVcrgplllck  unused by PE */
+  INT_CFDATA4 = 1U;                    /*  0x64  0xFFC8   1   no   ivVtimpabovf  unused by PE */
+  INT_CFDATA5 = 1U;                    /*  0x65  0xFFCA   1   no   ivVtimmdcu    unused by PE */
+  INT_CFDATA6 = 1U;                    /*  0x66  0xFFCC   1   no   ivVporth      used by PE */
+  INT_CFDATA7 = 1U;                    /*  0x67  0xFFCE   1   no   ivVportj      used by PE */
+  INT_CFADDR = 208U;                                      
+  INT_CFDATA0 = 1U;                    /*  0x68  0xFFD0   1   no   ivVatd1       used by PE */
+  INT_CFDATA1 = 1U;                    /*  0x69  0xFFD2   1   no   ivVatd0       used by PE */
+  INT_CFDATA2 = 1U;                    /*  0x6A  0xFFD4   1   no   ivVsci1       unused by PE */
+  INT_CFDATA3 = 1U;                    /*  0x6B  0xFFD6   1   no   ivVsci0       unused by PE */
+  INT_CFDATA4 = 1U;                    /*  0x6C  0xFFD8   1   no   ivVspi0       unused by PE */
+  INT_CFDATA5 = 1U;                    /*  0x6D  0xFFDA   1   no   ivVtimpaie    unused by PE */
+  INT_CFDATA6 = 1U;                    /*  0x6E  0xFFDC   1   no   ivVtimpaaovf  unused by PE */
+  INT_CFDATA7 = 1U;                    /*  0x6F  0xFFDE   1   no   ivVtimovf     unused by PE */
+  INT_CFADDR = 224U;                                      
+  INT_CFDATA0 = 1U;                    /*  0x70  0xFFE0   1   no   ivVtimch7     unused by PE */
+  INT_CFDATA1 = 1U;                    /*  0x71  0xFFE2   1   no   ivVtimch6     unused by PE */
+  INT_CFDATA2 = 1U;                    /*  0x72  0xFFE4   1   no   ivVtimch5     unused by PE */
+  INT_CFDATA3 = 1U;                    /*  0x73  0xFFE6   1   no   ivVtimch4     unused by PE */
+  INT_CFDATA4 = 1U;                    /*  0x74  0xFFE8   1   no   ivVtimch3     unused by PE */
+  INT_CFDATA5 = 1U;                    /*  0x75  0xFFEA   1   no   ivVtimch2     unused by PE */
+  INT_CFDATA6 = 1U;                    /*  0x76  0xFFEC   1   no   ivVtimch1     unused by PE */
+  INT_CFDATA7 = 1U;                    /*  0x77  0xFFEE   1   no   ivVtimch0     unused by PE */
+  INT_CFADDR = 240U;                                      
+  INT_CFDATA0 = 1U;                    /*  0x78  0xFFF0   1   no   ivVrti        unused by PE */
+  INT_CFDATA1 = 1U;                    /*  0x79  0xFFF2   1   no   ivVirq        unused by PE */
   /* Common initialization of the CPU registers */
   /* MODRR: MODRR5=1,MODRR1=1,MODRR0=1 */
-  MODRR |= (unsigned char)35;                               
-  /* RDRH: RDRH7=0,RDRH6=0,RDRH5=0,RDRH4=0,RDRH3=0,RDRH2=0,RDRH1=0,RDRH0=0 */
-  RDRH = 0;                                      
-  /* PPSH: PPSH0=0 */
-  PPSH &= (unsigned char)~1;                     
+  MODRR |= (unsigned char)35U;                      
+  /* RDRH: RDRH7=0,RDRH6=0,RDRH5=0,RDRH4=0,RDRH3=0,RDRH2=1,RDRH1=1,RDRH0=1 */
+  RDRH = 7U;                                      
   /* PERH: PERH0=1 */
-  PERH |= (unsigned char)1;                               
-  /* RDRJ: RDRJ7=0,RDRJ6=0,RDRJ1=0,RDRJ0=0 */
-  RDRJ &= (unsigned char)~195;                     
-  /* CRGINT: LOCKIE=0,SCMIE=0 */
-  CRGINT &= (unsigned char)~18;                     
-  /* VREGCTRL: LVIE=0 */
-  VREGCTRL &= (unsigned char)~2;                     
+  PERH |= (unsigned char)1U;                      
   /* COPCTL: WCOP=0,RSBCK=0,WRTMASK=0,CR2=0,CR1=0,CR0=0 */
-  COPCTL = 0;                                      
-  /* RDRIV: RDPK=0,RDPE=0,RDPB=0,RDPA=0 */
-  RDRIV &= (unsigned char)~147;                     
-  /* RDR1AD1: RDR1AD115=0,RDR1AD114=0,RDR1AD113=0,RDR1AD112=0,RDR1AD111=0,RDR1AD110=0,RDR1AD19=0,RDR1AD18=0 */
-  RDR1AD1 = 0;                                      
-  /* RDRM: RDRM7=0,RDRM6=0,RDRM5=0,RDRM4=0,RDRM3=0,RDRM2=0,RDRM1=0,RDRM0=0 */
-  RDRM = 0;                                      
-  /* RDRP: RDRP7=0,RDRP6=0,RDRP5=0,RDRP4=0,RDRP3=0,RDRP2=0,RDRP1=0,RDRP0=0 */
-  RDRP = 0;                                      
-  /* RDRS: RDRS7=0,RDRS6=0,RDRS5=0,RDRS4=0,RDRS3=0,RDRS2=0,RDRS1=0,RDRS0=0 */
-  RDRS = 0;                                      
-  /* RDRT: RDRT7=0,RDRT6=0,RDRT5=0,RDRT4=0,RDRT3=0,RDRT2=0,RDRT1=0,RDRT0=0 */
-  RDRT = 0;                                      
-  /* RDR1AD0: RDR1AD07=0,RDR1AD06=0,RDR1AD05=0,RDR1AD04=0,RDR1AD03=0,RDR1AD02=0,RDR1AD01=0,RDR1AD00=0 */
-  RDR1AD0 = 0;                                      
+  COPCTL = 0U;                                      
   /* IRQCR: IRQEN=0 */
-  IRQCR &= (unsigned char)~64;                     
+  IRQCR &= (unsigned char)~(unsigned char)64U;                     
   /* ### Init_GPIO init code */
-/* Disable interrupts */
-  /* PIEH: PIEH7=0,PIEH6=0,PIEH5=0,PIEH4=0,PIEH3=0,PIEH2=0,PIEH1=0,PIEH0=0 */
-  PIEH = 0;                                      
-/* Clear interrupt flags */
-  /* PIFH: PIFH7=1,PIFH6=1,PIFH5=1,PIFH4=1,PIFH3=1,PIFH2=1,PIFH1=1,PIFH0=1 */
-  PIFH = 255;                                      
   /* PTH: PTH3=1 */
-  PTH |= (unsigned char)8;                               
+  PTH |= (unsigned char)8U;                      
+  /* PERH: PERH7=1,PERH6=1,PERH5=1,PERH4=1 */
+  PERH |= (unsigned char)240U;                      
   /* DDRH: DDRH3=1 */
-  DDRH |= (unsigned char)8;                               
+  DDRH |= (unsigned char)8U;                      
   /* ### Init_SPI init code */
-  /* SPI1CR1: SPIE=0,SPE=0,SPTIE=0,MSTR=0,CPOL=0,CPHA=0,SSOE=0,LSBFE=0 */
-  SPI1CR1 = 0;                         /* Disable the SPI1 module and clearing flags in SPISR register */
-  /* SPI1CR2: MODFEN=0,BIDIROE=0,SPISWAI=0,SPC0=0 */
-  SPI1CR2 = 0;                                      
+  /* SPI1CR2: MODFEN=0,BIDIROE=0,SPISWAI=1,SPC0=0 */
+  SPI1CR2 = 2U;                                      
   /* SPI1BR: SPPR2=0,SPPR1=0,SPPR0=1,SPR2=1,SPR1=0,SPR0=0 */
-  SPI1BR = 20;                                      
+  SPI1BR = 20U;                                      
   /* SPI1CR1: SPIE=0,SPE=1,SPTIE=0,MSTR=1,CPOL=1,CPHA=1,SSOE=0,LSBFE=0 */
-  SPI1CR1 = 92;                                      
+  SPI1CR1 = 92U;                                      
   /* ### Init_PIT init code */
-  /* PITCFLMT: PITE=0 */
-  PITCFLMT &= (unsigned char)~128;                     
   /* PITMTLD0: PMTLD7=1,PMTLD6=1,PMTLD5=1,PMTLD4=1,PMTLD3=1,PMTLD2=1,PMTLD1=1,PMTLD0=1 */
-  PITMTLD0 = 255;                                      
-  /* PITMTLD1: PMTLD7=0,PMTLD6=0,PMTLD5=0,PMTLD4=0,PMTLD3=0,PMTLD2=0,PMTLD1=0,PMTLD0=0 */
-  PITMTLD1 = 0;                                      
+  PITMTLD0 = 255U;                                      
   /* PITLD0: PLD15=0,PLD14=1,PLD13=1,PLD12=1,PLD11=1,PLD10=0,PLD9=0,PLD8=1,PLD7=1,PLD6=1,PLD5=1,PLD4=1,PLD3=0,PLD2=1,PLD1=0,PLD0=0 */
-  PITLD0 = 31220;                                      
+  PITLD0 = 31220U;                            
   /* PITLD1: PLD15=1,PLD14=1,PLD13=1,PLD12=1,PLD11=0,PLD10=1,PLD9=0,PLD8=0,PLD7=0,PLD6=0,PLD5=1,PLD4=0,PLD3=0,PLD2=0,PLD1=1,PLD0=1 */
-  PITLD1 = 62499;                                      
-  /* PITMUX: PMUX3=0,PMUX2=0,PMUX1=0,PMUX0=0 */
-  PITMUX = 0;                                      
-  /* PITCE: PCE3=0,PCE2=0,PCE1=0,PCE0=0 */
-  PITCE = 0;                                      
-  /* PITTF: PTF3=0,PTF2=0,PTF1=1,PTF0=1 */
-  PITTF = 3;                                      
+  PITLD1 = 62499U;                            
   /* PITINTE: PINTE3=0,PINTE2=0,PINTE1=1,PINTE0=1 */
-  PITINTE = 3;                                      
-  /* PITCFLMT: PITE=0,PITSWAI=0,PITFRZ=0,PFLMT1=0,PFLMT0=0 */
-  PITCFLMT = 0;                                      
+  PITINTE = 3U;                                      
   /* ### Init_MSCAN init code */
-  /* CAN0CTL0: INITRQ=1 */
-  CAN0CTL0 |= (unsigned char)1;                               
-  while(!CAN0CTL1_INITAK) {            /* Wait for init acknowledge */
-  }
   /* CAN0CTL1: CANE=1,CLKSRC=1,LOOPB=0,LISTEN=0,BORM=0,WUPM=0,SLPAK=0,INITAK=1 */
-  CAN0CTL1 = 193;                                      
+  CAN0CTL1 = 193U;                                      
   /* CAN0BTR1: SAMP=0,TSEG22=0,TSEG21=1,TSEG20=1,TSEG13=1,TSEG12=0,TSEG11=1,TSEG10=0 */
-  CAN0BTR1 = 58;                                      
+  CAN0BTR1 = 58U;                                      
   /* CAN0BTR0: SJW1=0,SJW0=1,BRP5=0,BRP4=0,BRP3=0,BRP2=0,BRP1=1,BRP0=1 */
-  CAN0BTR0 = 67;                                      
+  CAN0BTR0 = 67U;                                      
   /* CAN0IDAC: IDAM1=0,IDAM0=1,IDHIT2=0,IDHIT1=0,IDHIT0=0 */
-  CAN0IDAC = 16;                                      
+  CAN0IDAC = 16U;                                      
   /* CAN0IDAR0: AC7=1,AC6=0,AC5=1,AC4=0,AC3=0,AC2=0,AC1=0,AC0=0 */
-  CAN0IDAR0 = 160;                                      
-  /* CAN0IDAR1: AC7=0,AC6=0,AC5=0,AC4=0,AC3=0,AC2=0,AC1=0,AC0=0 */
-  CAN0IDAR1 = 0;                                      
-  /* CAN0IDAR2: AC7=0,AC6=0,AC5=0,AC4=0,AC3=0,AC2=0,AC1=0,AC0=0 */
-  CAN0IDAR2 = 0;                                      
-  /* CAN0IDAR3: AC7=0,AC6=0,AC5=0,AC4=0,AC3=0,AC2=0,AC1=0,AC0=0 */
-  CAN0IDAR3 = 0;                                      
-  /* CAN0IDAR4: AC7=0,AC6=0,AC5=0,AC4=0,AC3=0,AC2=0,AC1=0,AC0=0 */
-  CAN0IDAR4 = 0;                                      
-  /* CAN0IDAR5: AC7=0,AC6=0,AC5=0,AC4=0,AC3=0,AC2=0,AC1=0,AC0=0 */
-  CAN0IDAR5 = 0;                                      
-  /* CAN0IDAR6: AC7=0,AC6=0,AC5=0,AC4=0,AC3=0,AC2=0,AC1=0,AC0=0 */
-  CAN0IDAR6 = 0;                                      
-  /* CAN0IDAR7: AC7=0,AC6=0,AC5=0,AC4=0,AC3=0,AC2=0,AC1=0,AC0=0 */
-  CAN0IDAR7 = 0;                                      
+  CAN0IDAR0 = 160U;                                      
   /* CAN0IDMR0: AM7=1,AM6=1,AM5=1,AM4=1,AM3=1,AM2=1,AM1=1,AM0=1 */
-  CAN0IDMR0 = 255;                                      
+  CAN0IDMR0 = 255U;                                      
   /* CAN0IDMR1: AM7=1,AM6=1,AM5=1,AM4=1,AM3=1,AM2=1,AM1=1,AM0=1 */
-  CAN0IDMR1 = 255;                                      
+  CAN0IDMR1 = 255U;                                      
   /* CAN0IDMR2: AM7=1,AM6=1,AM5=1,AM4=1,AM3=1,AM2=1,AM1=1,AM0=1 */
-  CAN0IDMR2 = 255;                                      
+  CAN0IDMR2 = 255U;                                      
   /* CAN0IDMR3: AM7=1,AM6=1,AM5=1,AM4=1,AM3=1,AM2=1,AM1=1,AM0=1 */
-  CAN0IDMR3 = 255;                                      
-  /* CAN0IDMR4: AM7=0,AM6=0,AM5=0,AM4=0,AM3=0,AM2=0,AM1=0,AM0=0 */
-  CAN0IDMR4 = 0;                                      
-  /* CAN0IDMR5: AM7=0,AM6=0,AM5=0,AM4=0,AM3=0,AM2=0,AM1=0,AM0=0 */
-  CAN0IDMR5 = 0;                                      
-  /* CAN0IDMR6: AM7=0,AM6=0,AM5=0,AM4=0,AM3=0,AM2=0,AM1=0,AM0=0 */
-  CAN0IDMR6 = 0;                                      
-  /* CAN0IDMR7: AM7=0,AM6=0,AM5=0,AM4=0,AM3=0,AM2=0,AM1=0,AM0=0 */
-  CAN0IDMR7 = 0;                                      
+  CAN0IDMR3 = 255U;                                      
   /* CAN0CTL0: INITRQ=0 */
-  CAN0CTL0 &= (unsigned char)~1;                     
+  CAN0CTL0 &= (unsigned char)~(unsigned char)1U;                     
   while(CAN0CTL1_INITAK) {             /* Wait for init exit */
   }
   /* CAN0CTL0: RXFRM=0,RXACT=0,CSWAI=0,SYNCH=0,TIME=0,WUPE=0,SLPRQ=0,INITRQ=0 */
-  CAN0CTL0 = 0;                                      
+  CAN0CTL0 = 0U;                                      
   /* CAN0RIER: WUPIE=0,CSCIE=0,RSTATE1=0,RSTATE0=0,TSTATE1=0,TSTATE0=0,OVRIE=0,RXFIE=1 */
-  CAN0RIER = 1;                                      
-  /* CAN0TIER: TXEIE2=0,TXEIE1=0,TXEIE0=0 */
-  CAN0TIER = 0;                                      
+  CAN0RIER = 1U;                                      
   /* ### Init_ADC init code */
-  /* ATD0DIEN: IEN7=0,IEN6=0,IEN5=0,IEN4=0,IEN3=0,IEN2=0,IEN1=0,IEN0=0 */
-  ATD0DIEN = 0;                                      
-  /* ATD0CTL0: WRAP2=1,WRAP1=1,WRAP0=1 */
-  ATD0CTL0 = 7;                                      
-  /* ATD0CTL1: ETRIGSEL=0,ETRIGCH2=1,ETRIGCH1=1,ETRIGCH0=1 */
-  ATD0CTL1 = 7;                                      
+  /* Initialization of the ADC0 module */
   /* ATD0CTL3: S8C=1,S4C=0,S2C=0,S1C=0,FIFO=0,FRZ1=0,FRZ0=0 */
-  ATD0CTL3 = 64;                                      
-  /* ATD0CTL4: SRES8=0,SMP1=0,SMP0=0,PRS4=0,PRS3=0,PRS2=1,PRS1=0,PRS0=1 */
-  ATD0CTL4 = 5;                                      
-  /* ATD0TEST1: SC=0 */
-  ATD0TEST1 = 0;                                      
+  ATD0CTL3 = 64U;                                      
   /* ATD0CTL2: ADPU=1,AFFC=0,AWAI=0,ETRIGLE=0,ETRIGP=0,ETRIGE=0,ASCIE=1,ASCIF=0 */
-  ATD0CTL2 = 130;                                      
+  ATD0CTL2 = 130U;                                      
   /* ATD0CTL5: DJM=1,DSGN=0,SCAN=0,MULT=1,CC=0,CB=0,CA=0 */
-  ATD0CTL5 = 144;                                      
+  ATD0CTL5 = 144U;                                      
   /* ### Init_ADC init code */
-  /* ATD1DIEN1: IEN7=0,IEN6=0,IEN5=0,IEN4=0,IEN3=0,IEN2=0,IEN1=0,IEN0=0 */
-  ATD1DIEN1 = 0;                                      
-  /* ATD1CTL0: WRAP3=1,WRAP2=1,WRAP1=1,WRAP0=1 */
-  ATD1CTL0 = 15;                                      
-  /* ATD1CTL1: ETRIGSEL=0,ETRIGCH3=1,ETRIGCH2=1,ETRIGCH1=1,ETRIGCH0=1 */
-  ATD1CTL1 = 15;                                      
+  /* Initialization of the ADC1 module */
   /* ATD1CTL3: S8C=0,S4C=0,S2C=1,S1C=0,FIFO=0,FRZ1=0,FRZ0=0 */
-  ATD1CTL3 = 16;                                      
-  /* ATD1CTL4: SRES8=0,SMP1=0,SMP0=0,PRS4=0,PRS3=0,PRS2=1,PRS1=0,PRS0=1 */
-  ATD1CTL4 = 5;                                      
-  /* ATD1TEST1: SC=0 */
-  ATD1TEST1 = 0;                                      
+  ATD1CTL3 = 16U;                                      
   /* ATD1CTL2: ADPU=1,AFFC=0,AWAI=0,ETRIGLE=0,ETRIGP=0,ETRIGE=0,ASCIE=1,ASCIF=0 */
-  ATD1CTL2 = 130;                                      
+  ATD1CTL2 = 130U;                                      
   /*
      The following delay loop generates a delay of approx. 20us, which is needed for
      the module to recover from power down state.
@@ -415,20 +335,49 @@ void MCU_init(void)
     label0:
     dbne d, label0                     /* (3 c: 375 ns) repeat 51x */
     puld                               /* (3 c: 375 ns) restore D */
-  }
+  };
   /* ATD1CTL5: DJM=1,DSGN=0,SCAN=0,MULT=1,CD=0,CC=0,CB=0,CA=0 */
-  ATD1CTL5 = 144;                                      
+  ATD1CTL5 = 144U;                                      
+  /* ### Init_GPIO init code */
+  /* ### Init_GPIO init code */
+  /* PUCR: PUPAE=1 */
+  PUCR |= (unsigned char)1U;                      
+  /* ### Init_GPIO init code */
+  /* PUCR: PUPBE=1 */
+  PUCR |= (unsigned char)2U;                      
+  /* ### Init_GPIO init code */
+  /* ### Init_GPIO init code */
+  /* PERM: PERM7=1,PERM6=1,PERM5=1,PERM4=1,PERM3=1,PERM2=1,PERM1=1,PERM0=1 */
+  PERM = 255U;                                      
+  /* ### Init_GPIO init code */
+  /* PERP: PERP7=1,PERP6=1,PERP5=1,PERP4=1,PERP3=1,PERP2=1,PERP1=1,PERP0=1 */
+  PERP = 255U;                                      
+  /* ### Init_GPIO init code */
+  /* ### Init_GPIO init code */
+  /* PERT: PERT7=1,PERT6=1,PERT5=1,PERT4=1,PERT3=1,PERT2=1,PERT1=1,PERT0=1 */
+  PERT = 255U;                                      
+  /* ### Init_GPIO init code */
+  /* ### Init_GPIO init code */
+  /* ATD1DIEN1: IEN7=1,IEN6=1,IEN5=1,IEN4=1,IEN3=1,IEN2=1 */
+  ATD1DIEN1 |= (unsigned char)252U;                      
+  /* PER1AD1: PER1AD115=1,PER1AD114=1,PER1AD113=1,PER1AD112=1,PER1AD111=1,PER1AD110=1 */
+  PER1AD1 |= (unsigned char)252U;                      
   /* ### */
   /* Initial interrupt priority */
+  /*lint -save  -e950 Disable MISRA rule (1.1) checking. */
   asm {
     PSHA
     LDAA #0
     TFR A,CCRH
     PULA
     CLI                                /* Enable interrupts */
-  }
+  };
+  /*lint -restore Enable MISRA rule (1.1) checking. */
 } /*MCU_init*/
 
+#pragma MESSAGE DEFAULT C12056
+
+/*lint -save  -e765 Disable MISRA rule (8.10) checking. */
 #pragma CODE_SEG __NEAR_SEG NON_BANKED
 /*
 ** ===================================================================
@@ -442,8 +391,6 @@ void MCU_init(void)
 */
 __interrupt void isr_default(void)
 {
-  /* Write your interrupt code here ... */
-
 }
 /* end of isr_default */
 #pragma CODE_SEG DEFAULT
@@ -462,8 +409,7 @@ __interrupt void isr_default(void)
 */
 __interrupt void iPIT1_mesure_temp(void)
 {
-
-   PITTF_PTF1 = 1;   //raz du flag
+   PITTF_PTF1 = 1;   //reset the interrupt bit
    ATD0CTL5_CA = 0;  //start ADC0 conversion (from AN0 to AN7)
    ATD1CTL5_CA = 0;  //start ADC1 conversion (from AN8 to AN9)
 }
@@ -484,12 +430,31 @@ __interrupt void iPIT1_mesure_temp(void)
 */
 __interrupt void iPIT0_mesure_volt(void)
 {
-	
    gVoltTimeout = 1;
-	PITTF_PTF0 = 1; //raz du flag
-
+   gElapsedTime++;
+   PITTF_PTF0 = 1; //reset the interrupt bit
 }
 /* end of iPIT0_mesure_volt */
+#pragma CODE_SEG DEFAULT
+
+
+#pragma CODE_SEG __NEAR_SEG NON_BANKED
+/*
+** ===================================================================
+**     Interrupt handler : isrVportp
+**
+**     Description :
+**         User interrupt service routine. 
+**     Parameters  : None
+**     Returns     : Nothing
+** ===================================================================
+*/
+__interrupt void isrVportp(void)
+{
+  /* Write your interrupt code here ... */
+
+}
+/* end of isrVportp */
 #pragma CODE_SEG DEFAULT
 
 
@@ -526,26 +491,41 @@ __interrupt void isrVcan0tx(void)
 */
 __interrupt void iCAN0RxISR(void)
 {
-   unsigned char length, index;
-   unsigned char rxdata[8];
+   uint16 rxId; 
+   uint8 length, slaveId, msgId, i;
+   uint8 rxData[8];
+   uint16 balVector, balThres;
+   
+   
+   rxId = ((uint16) CAN0RXIDR0) << 3 | ((uint16) CAN0RXIDR1) >> 5;	//Récupération de l'id du packet
+   slaveId = (rxId & 0x3C0)>>6;			//Récupérer le ID de l'esclave destinataire
+   length = CAN0RXDLR; 					//on récupère la longueur du message (8 octets max)
+   msgId = (rxId & 0x3F);           	//Récupération de l'identificateur des données du message
 
-   length = (CAN0RXDLR & 0x0F);
-   for (index=0; index<length; index++)
-   rxdata[index] = *(&CAN0RXDSR0 + index); /* Get received data */
    
+    if(slaveId == gSlaveID || slaveId == BROADCAST_ID) {		//Si le message nous est destiné
+        for (i=0; i<length; i++)
+            rxData[i] = *(&CAN0RXDSR0 + i); //on récupère les données
+
+        switch(msgId)
+        {
+            case CAN_EQUI_COMMAND_ID:
+            //Si on recoit une commande d'equilibrage
+            //on definie la nouvelle config selon le vecteur d'équilibration reçu
+            //et le seuil de tension
+            balVector = (((unsigned int) rxData[0]) << 8) | (unsigned int) rxData[1];
+            balThres = (((unsigned int) rxData[2]) << 8) | (unsigned int) rxData[3];
+            gBalanceFlag = 1;
+            gEquiStatusChange = 1;
+            break;
+
+            default:
+            break;
+        }
+    } 
    
-   //Si on recoit une commande d'equilibrage
-   //on definie la nouvelle config: toutes les cellules en decharge
-   //on mets les flags gEqui et gEquiStatChanged à 1
-   //la config est envoyée au linear dans le main
-   if ((rxdata[0]<<8 | rxdata[1] == COMMAND_BAL) && (rxdata[6]<<8 | rxdata[7]==0xFFFF)) {
-      gBalanceVector = rxdata[2]<<8|rxdata[3];
-      gBalThres = rxdata[4]<<8|rxdata[5];
-      gBalanceFlag = 1;
-      gEquiStatusChange = 1;
-   }
-   
-   CAN0RFLG = 0x01;   /* Clear RXF */
+    //pour lever l'interruption et relâcher le buffer de réception foreground
+    CAN0RFLG_RXF = 1;
 }
 /* end of iCAN0RxISR */
 #pragma CODE_SEG DEFAULT
@@ -634,6 +614,26 @@ __interrupt void isrVporth(void)
 #pragma CODE_SEG __NEAR_SEG NON_BANKED
 /*
 ** ===================================================================
+**     Interrupt handler : isrVportj
+**
+**     Description :
+**         User interrupt service routine. 
+**     Parameters  : None
+**     Returns     : Nothing
+** ===================================================================
+*/
+__interrupt void isrVportj(void)
+{
+  /* Write your interrupt code here ... */
+
+}
+/* end of isrVportj */
+#pragma CODE_SEG DEFAULT
+
+
+#pragma CODE_SEG __NEAR_SEG NON_BANKED
+/*
+** ===================================================================
 **     Interrupt handler : iADC1_seq_complete
 **
 **     Description :
@@ -644,12 +644,10 @@ __interrupt void isrVporth(void)
 */
 __interrupt void iADC1_seq_complete(void)
 {
-
    ATD1STAT0_SCF = 1;
-   gTemp[0] = ADC_ConvertVol2Temp(ATD1DR1);
-   gTemp[1] = ADC_ConvertVol2Temp(ATD1DR0);
+   gTemp[0] = ATD1DR1;
+   gTemp[1] = ATD1DR0;
    gADC1done = 1;
-
 }
 /* end of iADC1_seq_complete */
 #pragma CODE_SEG DEFAULT
@@ -668,28 +666,27 @@ __interrupt void iADC1_seq_complete(void)
 */
 __interrupt void iADC0_seq_complete(void)
 {
-   unsigned char i;
-   unsigned char* pReg = &ATD0DR0H;
+   uint8 i;
+   uint16 *result = (uint16*) &ATD0DR0H;
 
-   ATD0STAT0_SCF = 1;
-
-   //Pointers on the first ADC channel to acquire
-   pReg += (8-(NB_CELL-2))<<1; 
+   ATD0STAT0_SCF = 1;   //Clear the Sequence Compelte Flag
 
    for(i=0; i<(NB_CELL-2); i++){
-      gTemp[NB_CELL-i-1] = ADC_ConvertVol2Temp(((unsigned int) (*pReg)<<8) + *(pReg+1));
-      pReg += 2;   
-   } 
+      gTemp[NB_CELL-i-1] = *result;
+      result++;   
+   }
    
-  gADC0done = 1;
-
+   gADC0done = 1;
 }
 /* end of iADC0_seq_complete */
 #pragma CODE_SEG DEFAULT
 
 
+/*lint -restore Enable MISRA rule (8.10) checking. */
 
+/*lint -save  -e950 Disable MISRA rule (1.1) checking. */
 /* Initialization of the CPU registers in FLASH */
+/*lint -restore Enable MISRA rule (1.1) checking. */
 
 
 
@@ -703,234 +700,145 @@ typedef void (*near tIsrFunc)(void);
 #ifndef UNASSIGNED_ISR
   #define UNASSIGNED_ISR isr_default   /* unassigned interrupt service routine */
 #endif
-const tIsrFunc _InterruptVectorTable[] @0xFF10 = { /* Interrupt vector table */
+/*lint -save  -e950 Disable MISRA rule (1.1) checking. */
+static const tIsrFunc _InterruptVectorTable[] @0xFF10U = { /* Interrupt vector table */
+/*lint -restore Enable MISRA rule (1.1) checking. */
   /* ISR name                               No.  Address Pri XGATE Name          Description */
-  UNASSIGNED_ISR,                       /* 0x08  0xFF10   -   -    ivVsi         unused by PE */
-  UNASSIGNED_ISR,                       /* 0x09  0xFF12   1   no   ivReserved119 unused by PE */
-  UNASSIGNED_ISR,                       /* 0x0A  0xFF14   1   no   ivReserved118 unused by PE */
-  UNASSIGNED_ISR,                       /* 0x0B  0xFF16   1   no   ivReserved117 unused by PE */
-  UNASSIGNED_ISR,                       /* 0x0C  0xFF18   1   no   ivReserved116 unused by PE */
-  UNASSIGNED_ISR,                       /* 0x0D  0xFF1A   1   no   ivReserved115 unused by PE */
-  UNASSIGNED_ISR,                       /* 0x0E  0xFF1C   1   no   ivReserved114 unused by PE */
-  UNASSIGNED_ISR,                       /* 0x0F  0xFF1E   1   no   ivReserved113 unused by PE */
-  UNASSIGNED_ISR,                       /* 0x10  0xFF20   1   no   ivReserved112 unused by PE */
-  UNASSIGNED_ISR,                       /* 0x11  0xFF22   1   no   ivReserved111 unused by PE */
-  UNASSIGNED_ISR,                       /* 0x12  0xFF24   1   no   ivReserved110 unused by PE */
-  UNASSIGNED_ISR,                       /* 0x13  0xFF26   1   no   ivReserved109 unused by PE */
-  UNASSIGNED_ISR,                       /* 0x14  0xFF28   1   no   ivReserved108 unused by PE */
-  UNASSIGNED_ISR,                       /* 0x15  0xFF2A   1   no   ivReserved107 unused by PE */
-  UNASSIGNED_ISR,                       /* 0x16  0xFF2C   1   no   ivReserved106 unused by PE */
-  UNASSIGNED_ISR,                       /* 0x17  0xFF2E   1   no   ivReserved105 unused by PE */
-  UNASSIGNED_ISR,                       /* 0x18  0xFF30   1   no   ivReserved104 unused by PE */
-  UNASSIGNED_ISR,                       /* 0x19  0xFF32   1   no   ivReserved103 unused by PE */
-  UNASSIGNED_ISR,                       /* 0x1A  0xFF34   1   no   ivReserved102 unused by PE */
-  UNASSIGNED_ISR,                       /* 0x1B  0xFF36   1   no   ivReserved101 unused by PE */
-  UNASSIGNED_ISR,                       /* 0x1C  0xFF38   1   no   ivReserved100 unused by PE */
-  UNASSIGNED_ISR,                       /* 0x1D  0xFF3A   1   no   ivReserved99  unused by PE */
-  UNASSIGNED_ISR,                       /* 0x1E  0xFF3C   1   no   ivReserved98  unused by PE */
-  UNASSIGNED_ISR,                       /* 0x1F  0xFF3E   1   no   ivReserved97  unused by PE */
-  UNASSIGNED_ISR,                       /* 0x20  0xFF40   1   no   ivReserved96  unused by PE */
-  UNASSIGNED_ISR,                       /* 0x21  0xFF42   1   no   ivReserved95  unused by PE */
-  UNASSIGNED_ISR,                       /* 0x22  0xFF44   1   no   ivReserved94  unused by PE */
-  UNASSIGNED_ISR,                       /* 0x23  0xFF46   1   no   ivReserved93  unused by PE */
-  UNASSIGNED_ISR,                       /* 0x24  0xFF48   1   no   ivReserved92  unused by PE */
-  UNASSIGNED_ISR,                       /* 0x25  0xFF4A   1   no   ivReserved91  unused by PE */
-  UNASSIGNED_ISR,                       /* 0x26  0xFF4C   1   no   ivReserved90  unused by PE */
-  UNASSIGNED_ISR,                       /* 0x27  0xFF4E   1   no   ivReserved89  unused by PE */
-  UNASSIGNED_ISR,                       /* 0x28  0xFF50   1   no   ivReserved88  unused by PE */
-  UNASSIGNED_ISR,                       /* 0x29  0xFF52   1   no   ivReserved87  unused by PE */
-  UNASSIGNED_ISR,                       /* 0x2A  0xFF54   1   no   ivReserved86  unused by PE */
-  UNASSIGNED_ISR,                       /* 0x2B  0xFF56   1   no   ivReserved85  unused by PE */
-  UNASSIGNED_ISR,                       /* 0x2C  0xFF58   1   no   ivReserved84  unused by PE */
-  UNASSIGNED_ISR,                       /* 0x2D  0xFF5A   1   no   ivReserved83  unused by PE */
-  UNASSIGNED_ISR,                       /* 0x2E  0xFF5C   1   no   ivReserved82  unused by PE */
-  UNASSIGNED_ISR,                       /* 0x2F  0xFF5E   1   no   ivReserved81  unused by PE */
-  UNASSIGNED_ISR,                       /* 0x30  0xFF60   1   -    ivVxsramav    unused by PE */
-  UNASSIGNED_ISR,                       /* 0x31  0xFF62   1   -    ivVxsei       unused by PE */
-  UNASSIGNED_ISR,                       /* 0x32  0xFF64   1   no   ivVxst7       unused by PE */
-  UNASSIGNED_ISR,                       /* 0x33  0xFF66   1   no   ivVxst6       unused by PE */
-  UNASSIGNED_ISR,                       /* 0x34  0xFF68   1   no   ivVxst5       unused by PE */
-  UNASSIGNED_ISR,                       /* 0x35  0xFF6A   1   no   ivVxst4       unused by PE */
-  UNASSIGNED_ISR,                       /* 0x36  0xFF6C   1   no   ivVxst3       unused by PE */
-  UNASSIGNED_ISR,                       /* 0x37  0xFF6E   1   no   ivVxst2       unused by PE */
-  UNASSIGNED_ISR,                       /* 0x38  0xFF70   1   no   ivVxst1       unused by PE */
-  UNASSIGNED_ISR,                       /* 0x39  0xFF72   1   no   ivVxst0       unused by PE */
-  UNASSIGNED_ISR,                       /* 0x3A  0xFF74   1   no   ivVpit3       unused by PE */
-  UNASSIGNED_ISR,                       /* 0x3B  0xFF76   1   no   ivVpit2       unused by PE */
-  iPIT1_mesure_temp,                    /* 0x3C  0xFF78   1   no   ivVpit1       used by PE */
-  iPIT0_mesure_volt,                    /* 0x3D  0xFF7A   1   no   ivVpit0       used by PE */
-  UNASSIGNED_ISR,                       /* 0x3E  0xFF7C   1   no   ivVReserved65 unused by PE */
-  UNASSIGNED_ISR,                       /* 0x3F  0xFF7E   1   no   ivVapi        unused by PE */
-  UNASSIGNED_ISR,                       /* 0x40  0xFF80   1   no   ivVlvi        unused by PE */
-  UNASSIGNED_ISR,                       /* 0x41  0xFF82   1   no   ivVReserved62 unused by PE */
-  UNASSIGNED_ISR,                       /* 0x42  0xFF84   1   no   ivVsci5       unused by PE */
-  UNASSIGNED_ISR,                       /* 0x43  0xFF86   1   no   ivVsci4       unused by PE */
-  UNASSIGNED_ISR,                       /* 0x44  0xFF88   1   no   ivVsci3       unused by PE */
-  UNASSIGNED_ISR,                       /* 0x45  0xFF8A   1   no   ivVsci2       unused by PE */
-  UNASSIGNED_ISR,                       /* 0x46  0xFF8C   1   no   ivVpwmesdn    unused by PE */
-  UNASSIGNED_ISR,                       /* 0x47  0xFF8E   1   no   ivVportp      unused by PE */
-  UNASSIGNED_ISR,                       /* 0x48  0xFF90   1   no   ivVcan4tx     unused by PE */
-  UNASSIGNED_ISR,                       /* 0x49  0xFF92   1   no   ivVcan4rx     unused by PE */
-  UNASSIGNED_ISR,                       /* 0x4A  0xFF94   1   no   ivVcan4err    unused by PE */
-  UNASSIGNED_ISR,                       /* 0x4B  0xFF96   1   no   ivVcan4wkup   unused by PE */
-  UNASSIGNED_ISR,                       /* 0x4C  0xFF98   1   no   ivVcan3tx     unused by PE */
-  UNASSIGNED_ISR,                       /* 0x4D  0xFF9A   1   no   ivVcan3rx     unused by PE */
-  UNASSIGNED_ISR,                       /* 0x4E  0xFF9C   1   no   ivVcan3err    unused by PE */
-  UNASSIGNED_ISR,                       /* 0x4F  0xFF9E   1   no   ivVcan3wkup   unused by PE */
-  UNASSIGNED_ISR,                       /* 0x50  0xFFA0   1   no   ivVcan2tx     unused by PE */
-  UNASSIGNED_ISR,                       /* 0x51  0xFFA2   1   no   ivVcan2rx     unused by PE */
-  UNASSIGNED_ISR,                       /* 0x52  0xFFA4   1   no   ivVcan2err    unused by PE */
-  UNASSIGNED_ISR,                       /* 0x53  0xFFA6   1   no   ivVcan2wkup   unused by PE */
-  UNASSIGNED_ISR,                       /* 0x54  0xFFA8   1   no   ivVcan1tx     unused by PE */
-  UNASSIGNED_ISR,                       /* 0x55  0xFFAA   1   no   ivVcan1rx     unused by PE */
-  UNASSIGNED_ISR,                       /* 0x56  0xFFAC   1   no   ivVcan1err    unused by PE */
-  UNASSIGNED_ISR,                       /* 0x57  0xFFAE   1   no   ivVcan1wkup   unused by PE */
-  isrVcan0tx,                           /* 0x58  0xFFB0   1   no   ivVcan0tx     used by PE */
-  iCAN0RxISR,                           /* 0x59  0xFFB2   1   no   ivVcan0rx     used by PE */
-  isrVcan0err,                          /* 0x5A  0xFFB4   1   no   ivVcan0err    used by PE */
-  isrVcan0wkup,                         /* 0x5B  0xFFB6   1   no   ivVcan0wkup   used by PE */
-  UNASSIGNED_ISR,                       /* 0x5C  0xFFB8   1   no   ivVflash      unused by PE */
-  UNASSIGNED_ISR,                       /* 0x5D  0xFFBA   1   no   ivVeeprom     unused by PE */
-  UNASSIGNED_ISR,                       /* 0x5E  0xFFBC   1   no   ivVspi2       unused by PE */
-  isrVspi1,                             /* 0x5F  0xFFBE   1   no   ivVspi1       used by PE */
-  UNASSIGNED_ISR,                       /* 0x60  0xFFC0   1   no   ivViic0       unused by PE */
-  UNASSIGNED_ISR,                       /* 0x61  0xFFC2   1   no   ivVReserved30 unused by PE */
-  UNASSIGNED_ISR,                       /* 0x62  0xFFC4   1   no   ivVcrgscm     unused by PE */
-  UNASSIGNED_ISR,                       /* 0x63  0xFFC6   1   no   ivVcrgplllck  unused by PE */
-  UNASSIGNED_ISR,                       /* 0x64  0xFFC8   1   no   ivVtimpabovf  unused by PE */
-  UNASSIGNED_ISR,                       /* 0x65  0xFFCA   1   no   ivVtimmdcu    unused by PE */
-  isrVporth,                            /* 0x66  0xFFCC   1   no   ivVporth      used by PE */
-  UNASSIGNED_ISR,                       /* 0x67  0xFFCE   1   no   ivVportj      unused by PE */
-  iADC1_seq_complete,                   /* 0x68  0xFFD0   1   no   ivVatd1       used by PE */
-  iADC0_seq_complete,                   /* 0x69  0xFFD2   1   no   ivVatd0       used by PE */
-  UNASSIGNED_ISR,                       /* 0x6A  0xFFD4   1   no   ivVsci1       unused by PE */
-  UNASSIGNED_ISR,                       /* 0x6B  0xFFD6   1   no   ivVsci0       unused by PE */
-  UNASSIGNED_ISR,                       /* 0x6C  0xFFD8   1   no   ivVspi0       unused by PE */
-  UNASSIGNED_ISR,                       /* 0x6D  0xFFDA   1   no   ivVtimpaie    unused by PE */
-  UNASSIGNED_ISR,                       /* 0x6E  0xFFDC   1   no   ivVtimpaaovf  unused by PE */
-  UNASSIGNED_ISR,                       /* 0x6F  0xFFDE   1   no   ivVtimovf     unused by PE */
-  UNASSIGNED_ISR,                       /* 0x70  0xFFE0   1   no   ivVtimch7     unused by PE */
-  UNASSIGNED_ISR,                       /* 0x71  0xFFE2   1   no   ivVtimch6     unused by PE */
-  UNASSIGNED_ISR,                       /* 0x72  0xFFE4   1   no   ivVtimch5     unused by PE */
-  UNASSIGNED_ISR,                       /* 0x73  0xFFE6   1   no   ivVtimch4     unused by PE */
-  UNASSIGNED_ISR,                       /* 0x74  0xFFE8   1   no   ivVtimch3     unused by PE */
-  UNASSIGNED_ISR,                       /* 0x75  0xFFEA   1   no   ivVtimch2     unused by PE */
-  UNASSIGNED_ISR,                       /* 0x76  0xFFEC   1   no   ivVtimch1     unused by PE */
-  UNASSIGNED_ISR,                       /* 0x77  0xFFEE   1   no   ivVtimch0     unused by PE */
-  UNASSIGNED_ISR,                       /* 0x78  0xFFF0   1   no   ivVrti        unused by PE */
-  UNASSIGNED_ISR,                       /* 0x79  0xFFF2   1   no   ivVirq        unused by PE */
-  UNASSIGNED_ISR,                       /* 0x7A  0xFFF4   -   -    ivVxirq       unused by PE */
-  UNASSIGNED_ISR,                       /* 0x7B  0xFFF6   -   -    ivVswi        unused by PE */
-  UNASSIGNED_ISR                        /* 0x7C  0xFFF8   -   -    ivVtrap       unused by PE */
+  &UNASSIGNED_ISR,                      /* 0x08  0xFF10   -   -    ivVsi         unused by PE */
+  &UNASSIGNED_ISR,                      /* 0x09  0xFF12   1   no   ivReserved119 unused by PE */
+  &UNASSIGNED_ISR,                      /* 0x0A  0xFF14   1   no   ivReserved118 unused by PE */
+  &UNASSIGNED_ISR,                      /* 0x0B  0xFF16   1   no   ivReserved117 unused by PE */
+  &UNASSIGNED_ISR,                      /* 0x0C  0xFF18   1   no   ivReserved116 unused by PE */
+  &UNASSIGNED_ISR,                      /* 0x0D  0xFF1A   1   no   ivReserved115 unused by PE */
+  &UNASSIGNED_ISR,                      /* 0x0E  0xFF1C   1   no   ivReserved114 unused by PE */
+  &UNASSIGNED_ISR,                      /* 0x0F  0xFF1E   1   no   ivReserved113 unused by PE */
+  &UNASSIGNED_ISR,                      /* 0x10  0xFF20   1   no   ivReserved112 unused by PE */
+  &UNASSIGNED_ISR,                      /* 0x11  0xFF22   1   no   ivReserved111 unused by PE */
+  &UNASSIGNED_ISR,                      /* 0x12  0xFF24   1   no   ivReserved110 unused by PE */
+  &UNASSIGNED_ISR,                      /* 0x13  0xFF26   1   no   ivReserved109 unused by PE */
+  &UNASSIGNED_ISR,                      /* 0x14  0xFF28   1   no   ivReserved108 unused by PE */
+  &UNASSIGNED_ISR,                      /* 0x15  0xFF2A   1   no   ivReserved107 unused by PE */
+  &UNASSIGNED_ISR,                      /* 0x16  0xFF2C   1   no   ivReserved106 unused by PE */
+  &UNASSIGNED_ISR,                      /* 0x17  0xFF2E   1   no   ivReserved105 unused by PE */
+  &UNASSIGNED_ISR,                      /* 0x18  0xFF30   1   no   ivReserved104 unused by PE */
+  &UNASSIGNED_ISR,                      /* 0x19  0xFF32   1   no   ivReserved103 unused by PE */
+  &UNASSIGNED_ISR,                      /* 0x1A  0xFF34   1   no   ivReserved102 unused by PE */
+  &UNASSIGNED_ISR,                      /* 0x1B  0xFF36   1   no   ivReserved101 unused by PE */
+  &UNASSIGNED_ISR,                      /* 0x1C  0xFF38   1   no   ivReserved100 unused by PE */
+  &UNASSIGNED_ISR,                      /* 0x1D  0xFF3A   1   no   ivReserved99  unused by PE */
+  &UNASSIGNED_ISR,                      /* 0x1E  0xFF3C   1   no   ivReserved98  unused by PE */
+  &UNASSIGNED_ISR,                      /* 0x1F  0xFF3E   1   no   ivReserved97  unused by PE */
+  &UNASSIGNED_ISR,                      /* 0x20  0xFF40   1   no   ivReserved96  unused by PE */
+  &UNASSIGNED_ISR,                      /* 0x21  0xFF42   1   no   ivReserved95  unused by PE */
+  &UNASSIGNED_ISR,                      /* 0x22  0xFF44   1   no   ivReserved94  unused by PE */
+  &UNASSIGNED_ISR,                      /* 0x23  0xFF46   1   no   ivReserved93  unused by PE */
+  &UNASSIGNED_ISR,                      /* 0x24  0xFF48   1   no   ivReserved92  unused by PE */
+  &UNASSIGNED_ISR,                      /* 0x25  0xFF4A   1   no   ivReserved91  unused by PE */
+  &UNASSIGNED_ISR,                      /* 0x26  0xFF4C   1   no   ivReserved90  unused by PE */
+  &UNASSIGNED_ISR,                      /* 0x27  0xFF4E   1   no   ivReserved89  unused by PE */
+  &UNASSIGNED_ISR,                      /* 0x28  0xFF50   1   no   ivReserved88  unused by PE */
+  &UNASSIGNED_ISR,                      /* 0x29  0xFF52   1   no   ivReserved87  unused by PE */
+  &UNASSIGNED_ISR,                      /* 0x2A  0xFF54   1   no   ivReserved86  unused by PE */
+  &UNASSIGNED_ISR,                      /* 0x2B  0xFF56   1   no   ivReserved85  unused by PE */
+  &UNASSIGNED_ISR,                      /* 0x2C  0xFF58   1   no   ivReserved84  unused by PE */
+  &UNASSIGNED_ISR,                      /* 0x2D  0xFF5A   1   no   ivReserved83  unused by PE */
+  &UNASSIGNED_ISR,                      /* 0x2E  0xFF5C   1   no   ivReserved82  unused by PE */
+  &UNASSIGNED_ISR,                      /* 0x2F  0xFF5E   1   no   ivReserved81  unused by PE */
+  &UNASSIGNED_ISR,                      /* 0x30  0xFF60   1   -    ivVxsramav    unused by PE */
+  &UNASSIGNED_ISR,                      /* 0x31  0xFF62   1   -    ivVxsei       unused by PE */
+  &UNASSIGNED_ISR,                      /* 0x32  0xFF64   1   no   ivVxst7       unused by PE */
+  &UNASSIGNED_ISR,                      /* 0x33  0xFF66   1   no   ivVxst6       unused by PE */
+  &UNASSIGNED_ISR,                      /* 0x34  0xFF68   1   no   ivVxst5       unused by PE */
+  &UNASSIGNED_ISR,                      /* 0x35  0xFF6A   1   no   ivVxst4       unused by PE */
+  &UNASSIGNED_ISR,                      /* 0x36  0xFF6C   1   no   ivVxst3       unused by PE */
+  &UNASSIGNED_ISR,                      /* 0x37  0xFF6E   1   no   ivVxst2       unused by PE */
+  &UNASSIGNED_ISR,                      /* 0x38  0xFF70   1   no   ivVxst1       unused by PE */
+  &UNASSIGNED_ISR,                      /* 0x39  0xFF72   1   no   ivVxst0       unused by PE */
+  &UNASSIGNED_ISR,                      /* 0x3A  0xFF74   1   no   ivVpit3       unused by PE */
+  &UNASSIGNED_ISR,                      /* 0x3B  0xFF76   1   no   ivVpit2       unused by PE */
+  &iPIT1_mesure_temp,                   /* 0x3C  0xFF78   1   no   ivVpit1       used by PE */
+  &iPIT0_mesure_volt,                   /* 0x3D  0xFF7A   1   no   ivVpit0       used by PE */
+  &UNASSIGNED_ISR,                      /* 0x3E  0xFF7C   1   no   ivVReserved65 unused by PE */
+  &UNASSIGNED_ISR,                      /* 0x3F  0xFF7E   1   no   ivVapi        unused by PE */
+  &UNASSIGNED_ISR,                      /* 0x40  0xFF80   1   no   ivVlvi        unused by PE */
+  &UNASSIGNED_ISR,                      /* 0x41  0xFF82   1   no   ivVReserved62 unused by PE */
+  &UNASSIGNED_ISR,                      /* 0x42  0xFF84   1   no   ivVsci5       unused by PE */
+  &UNASSIGNED_ISR,                      /* 0x43  0xFF86   1   no   ivVsci4       unused by PE */
+  &UNASSIGNED_ISR,                      /* 0x44  0xFF88   1   no   ivVsci3       unused by PE */
+  &UNASSIGNED_ISR,                      /* 0x45  0xFF8A   1   no   ivVsci2       unused by PE */
+  &UNASSIGNED_ISR,                      /* 0x46  0xFF8C   1   no   ivVpwmesdn    unused by PE */
+  &isrVportp,                           /* 0x47  0xFF8E   1   no   ivVportp      used by PE */
+  &UNASSIGNED_ISR,                      /* 0x48  0xFF90   1   no   ivVcan4tx     unused by PE */
+  &UNASSIGNED_ISR,                      /* 0x49  0xFF92   1   no   ivVcan4rx     unused by PE */
+  &UNASSIGNED_ISR,                      /* 0x4A  0xFF94   1   no   ivVcan4err    unused by PE */
+  &UNASSIGNED_ISR,                      /* 0x4B  0xFF96   1   no   ivVcan4wkup   unused by PE */
+  &UNASSIGNED_ISR,                      /* 0x4C  0xFF98   1   no   ivVcan3tx     unused by PE */
+  &UNASSIGNED_ISR,                      /* 0x4D  0xFF9A   1   no   ivVcan3rx     unused by PE */
+  &UNASSIGNED_ISR,                      /* 0x4E  0xFF9C   1   no   ivVcan3err    unused by PE */
+  &UNASSIGNED_ISR,                      /* 0x4F  0xFF9E   1   no   ivVcan3wkup   unused by PE */
+  &UNASSIGNED_ISR,                      /* 0x50  0xFFA0   1   no   ivVcan2tx     unused by PE */
+  &UNASSIGNED_ISR,                      /* 0x51  0xFFA2   1   no   ivVcan2rx     unused by PE */
+  &UNASSIGNED_ISR,                      /* 0x52  0xFFA4   1   no   ivVcan2err    unused by PE */
+  &UNASSIGNED_ISR,                      /* 0x53  0xFFA6   1   no   ivVcan2wkup   unused by PE */
+  &UNASSIGNED_ISR,                      /* 0x54  0xFFA8   1   no   ivVcan1tx     unused by PE */
+  &UNASSIGNED_ISR,                      /* 0x55  0xFFAA   1   no   ivVcan1rx     unused by PE */
+  &UNASSIGNED_ISR,                      /* 0x56  0xFFAC   1   no   ivVcan1err    unused by PE */
+  &UNASSIGNED_ISR,                      /* 0x57  0xFFAE   1   no   ivVcan1wkup   unused by PE */
+  &isrVcan0tx,                          /* 0x58  0xFFB0   1   no   ivVcan0tx     used by PE */
+  &iCAN0RxISR,                          /* 0x59  0xFFB2   1   no   ivVcan0rx     used by PE */
+  &isrVcan0err,                         /* 0x5A  0xFFB4   1   no   ivVcan0err    used by PE */
+  &isrVcan0wkup,                        /* 0x5B  0xFFB6   1   no   ivVcan0wkup   used by PE */
+  &UNASSIGNED_ISR,                      /* 0x5C  0xFFB8   1   no   ivVflash      unused by PE */
+  &UNASSIGNED_ISR,                      /* 0x5D  0xFFBA   1   no   ivVeeprom     unused by PE */
+  &UNASSIGNED_ISR,                      /* 0x5E  0xFFBC   1   no   ivVspi2       unused by PE */
+  &isrVspi1,                            /* 0x5F  0xFFBE   1   no   ivVspi1       used by PE */
+  &UNASSIGNED_ISR,                      /* 0x60  0xFFC0   1   no   ivViic0       unused by PE */
+  &UNASSIGNED_ISR,                      /* 0x61  0xFFC2   1   no   ivVReserved30 unused by PE */
+  &UNASSIGNED_ISR,                      /* 0x62  0xFFC4   1   no   ivVcrgscm     unused by PE */
+  &UNASSIGNED_ISR,                      /* 0x63  0xFFC6   1   no   ivVcrgplllck  unused by PE */
+  &UNASSIGNED_ISR,                      /* 0x64  0xFFC8   1   no   ivVtimpabovf  unused by PE */
+  &UNASSIGNED_ISR,                      /* 0x65  0xFFCA   1   no   ivVtimmdcu    unused by PE */
+  &isrVporth,                           /* 0x66  0xFFCC   1   no   ivVporth      used by PE */
+  &isrVportj,                           /* 0x67  0xFFCE   1   no   ivVportj      used by PE */
+  &iADC1_seq_complete,                  /* 0x68  0xFFD0   1   no   ivVatd1       used by PE */
+  &iADC0_seq_complete,                  /* 0x69  0xFFD2   1   no   ivVatd0       used by PE */
+  &UNASSIGNED_ISR,                      /* 0x6A  0xFFD4   1   no   ivVsci1       unused by PE */
+  &UNASSIGNED_ISR,                      /* 0x6B  0xFFD6   1   no   ivVsci0       unused by PE */
+  &UNASSIGNED_ISR,                      /* 0x6C  0xFFD8   1   no   ivVspi0       unused by PE */
+  &UNASSIGNED_ISR,                      /* 0x6D  0xFFDA   1   no   ivVtimpaie    unused by PE */
+  &UNASSIGNED_ISR,                      /* 0x6E  0xFFDC   1   no   ivVtimpaaovf  unused by PE */
+  &UNASSIGNED_ISR,                      /* 0x6F  0xFFDE   1   no   ivVtimovf     unused by PE */
+  &UNASSIGNED_ISR,                      /* 0x70  0xFFE0   1   no   ivVtimch7     unused by PE */
+  &UNASSIGNED_ISR,                      /* 0x71  0xFFE2   1   no   ivVtimch6     unused by PE */
+  &UNASSIGNED_ISR,                      /* 0x72  0xFFE4   1   no   ivVtimch5     unused by PE */
+  &UNASSIGNED_ISR,                      /* 0x73  0xFFE6   1   no   ivVtimch4     unused by PE */
+  &UNASSIGNED_ISR,                      /* 0x74  0xFFE8   1   no   ivVtimch3     unused by PE */
+  &UNASSIGNED_ISR,                      /* 0x75  0xFFEA   1   no   ivVtimch2     unused by PE */
+  &UNASSIGNED_ISR,                      /* 0x76  0xFFEC   1   no   ivVtimch1     unused by PE */
+  &UNASSIGNED_ISR,                      /* 0x77  0xFFEE   1   no   ivVtimch0     unused by PE */
+  &UNASSIGNED_ISR,                      /* 0x78  0xFFF0   1   no   ivVrti        unused by PE */
+  &UNASSIGNED_ISR,                      /* 0x79  0xFFF2   1   no   ivVirq        unused by PE */
+  &UNASSIGNED_ISR,                      /* 0x7A  0xFFF4   -   -    ivVxirq       unused by PE */
+  &UNASSIGNED_ISR,                      /* 0x7B  0xFFF6   -   -    ivVswi        unused by PE */
+  &UNASSIGNED_ISR                       /* 0x7C  0xFFF8   -   -    ivVtrap       unused by PE */
 };
 
-const tIsrFunc _ResetVectorTable[] @0xFFFA = { /* Reset vector table */
+/*lint -save  -e950 Disable MISRA rule (1.1) checking. */
+static const tIsrFunc _ResetVectorTable[] @0xFFFAU = { /* Reset vector table */
+/*lint -restore Enable MISRA rule (1.1) checking. */
   /* Reset handler name                    Address Name           Description */
-  MCU_init_reset,                       /* 0xFFFA  ivVcop         unused by PE */
-  MCU_init_reset,                       /* 0xFFFC  ivVclkmon      unused by PE */
-  MCU_init_reset                        /* 0xFFFE  ivVreset       used by PE */
+  &MCU_init_reset,                      /* 0xFFFA  ivVcop         unused by PE */
+  &MCU_init_reset,                      /* 0xFFFC  ivVclkmon      unused by PE */
+  &MCU_init_reset                       /* 0xFFFE  ivVreset       used by PE */
 };
 
-
-
-#pragma CODE_SEG __NEAR_SEG NON_BANKED
-/*
-** ===================================================================
-**     Interrupt handler : iPIT0_can_transmit
-**
-**     Description :
-**         User interrupt service routine. 
-**     Parameters  : None
-**     Returns     : Nothing
-** ===================================================================
-*/
-__interrupt void iPIT0_can_transmit(void)
-{
-
-	  
-}
-/* end of iPIT0_can_transmit */
-
-
-#pragma CODE_SEG __NEAR_SEG NON_BANKED
-/*
-** ===================================================================
-**     Interrupt handler : isrVspi0
-**
-**     Description :
-**         User interrupt service routine. 
-**     Parameters  : None
-**     Returns     : Nothing
-** ===================================================================
-*/
-__interrupt void isrVspi0(void)
-{
-}
-/* end of isrVspi0 */
-
-
-#pragma CODE_SEG __NEAR_SEG NON_BANKED
-/*
-** ===================================================================
-**     Interrupt handler : isrVcan0rx
-**
-**     Description :
-**         User interrupt service routine. 
-**     Parameters  : None
-**     Returns     : Nothing
-** ===================================================================
-*/
-__interrupt void isrVcan0rx(void)
-{
-  /* Write your interrupt code here ... */
-
-}
-/* end of isrVcan0rx */
-
-
-#pragma CODE_SEG __NEAR_SEG NON_BANKED
-/*
-** ===================================================================
-**     Interrupt handler : isrVatd0
-**
-**     Description :
-**         User interrupt service routine. 
-**     Parameters  : None
-**     Returns     : Nothing
-** ===================================================================
-*/
-__interrupt void isrVatd0(void)
-{
-  /* Write your interrupt code here ... */
-
-}
-/* end of isrVatd0 */
-
-
-#pragma CODE_SEG __NEAR_SEG NON_BANKED
-/*
-** ===================================================================
-**     Interrupt handler : isrVatd1
-**
-**     Description :
-**         User interrupt service routine. 
-**     Parameters  : None
-**     Returns     : Nothing
-** ===================================================================
-*/
-__interrupt void isrVatd1(void)
-{
-  /* Write your interrupt code here ... */
-
-}
-/* end of isrVatd1 */
 
 /* END MCUinit */
 
 /*
 ** ###################################################################
 **
-**     This file was created by UNIS Processor Expert 3.00 [04.12]
+**     This file was created by Processor Expert 3.02 [04.44]
 **     for the Freescale HCS12X series of microcontrollers.
 **
 ** ###################################################################

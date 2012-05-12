@@ -1,17 +1,9 @@
 #include <hidef.h>      /* common defines and macros */
 #include "derivative.h"
 #include "CANSlave.h"
-#include "Defines.h"
+#include "defines.h"
 
 
-/***************************
-      Global variables
-***************************/
-
-unsigned char idOffset = 1;
-unsigned char slaveID = 0;
-extern unsigned int 	 gInt_Voltage_Table[NB_CELL];
-extern unsigned int   gTemp[NB_CELL];
 
 /***************************
       Functions
@@ -19,181 +11,111 @@ extern unsigned int   gTemp[NB_CELL];
 
 
 
-/*
+/******************************************************************************
  * CAN0SendChar: Transmit an array of char by CAN0
  *
- * Parameters:  id: the usual CAN ID times 0x200000
+ * Parameters:  id: the usual CAN ID on 11 bits right justified
  *              priority: the transmit buffer priority
- *              length: the length of the table of char
- *              *txdata: the name of the array
+ *              length: the number of bytes to send
+ *              *txdata: a pointer to the first byte
  *
  * Return :
- */
-unsigned char CAN0SendChar(unsigned long id, unsigned char priority, unsigned char length, unsigned char *txdata ){
-    
-    unsigned char index = 0;
-    unsigned char txbuffer = {0};
-
-    if (!CAN0TFLG)              /* Is Transmit Buffer full?? */
-        return ERR_BUFFER_FULL;
-
-    CAN0TBSEL = CAN0TFLG;       /* Select lowest empty buffer */
-    txbuffer = CAN0TBSEL;		/* Backup selected buffer */
-    
-    /* Load Id to IDR Registers */
-    *((unsigned long *) ((unsigned long)(&CAN0TXIDR0)))= id;
-        
-    for (index=0;index<length;index++) {
-        *(&CAN0TXDSR0 + index) = txdata[index];  /* Load data to Tx buffer 
-                                                  * Data Segment Registers
-                                                  */
-    }
-
-    CAN0TXDLR = length;                          /* Set Data Length Code */
-    CAN0TXTBPR = priority;                       /* Set Priority */
-
-    CAN0TFLG = txbuffer;	                     /* Start transmission */
-                
-    while ( (CAN0TFLG & txbuffer) != txbuffer);  /* Wait for Transmission 
-                                                  * completion 
-                                                  */
-    return NO_ERR;
- }
- 
-//%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
- 
- /*
- * CAN0SendInt: Transmit an array of int by CAN0
- *
- * Parameters:  id: the usual CAN ID times 0x200000
- *              priority: the transmit buffer priority
- *              start: the first item of the array you want to transmit
- *              length: the length of the table of int
- *              *txdata: the name of the array
- *
- * Return :
- */
-unsigned char CAN0SendInt(unsigned long id, unsigned char priority, unsigned char start,
-                           unsigned char length, unsigned int *txdata )
+ *****************************************************************************/
+  unsigned char CAN0SendChar( unsigned int id, unsigned char priority,
+                              unsigned char length, unsigned char *txdata)
  {
-    
-    unsigned char index = 0;
-    unsigned char MSB = 0;
-    unsigned char txbuffer = {0};
+   unsigned char index = 0;
+   unsigned char txbuffer = 0;
+   
+   if(length > 8)  return CAN_ERR_MAX_LEN;
+   if (!CAN0TFLG)  return CAN_ERR_BUFFER_FULL;    /* Are all the tansmit buffers full? */
 
-    if (!CAN0TFLG)              /* Is Transmit Buffer full?? */
-        return ERR_BUFFER_FULL;
+   CAN0TBSEL = CAN0TFLG;                  /* Select lowest empty buffer */
+   txbuffer = CAN0TBSEL;                  /* Backup selected buffer */
+   CAN0TXIDR0 = (unsigned char) (id>>3);  // Load Id to IDR Registers. Id is on 11 bits,
+   CAN0TXIDR1 = (unsigned char) (id<<5);  // and must be left justified.
+                                                
+   /* Load data to Tx buffer Data Segment Registers */
+   for (index=0; index<length; index++)
+      *(&CAN0TXDSR0 + index) = txdata[index];   
 
-    CAN0TBSEL = CAN0TFLG;       /* Select lowest empty buffer */
-    txbuffer = CAN0TBSEL;		/* Backup selected buffer */
-    
-    /* Load Id to IDR Registers */
-    *((unsigned long *) ((unsigned long)(&CAN0TXIDR0)))= id;
-        
-    for (index=0;index<length;index++) {           //H: La modification que j'essaie pour pouvoir utiliser les int
-        MSB = txdata[index+start] >> 8;
-        *(&CAN0TXDSR0 + 2*index) = MSB; 
-        *(&CAN0TXDSR0 + 2*index + 1) = (unsigned char) txdata[index+start];  /* Load data to Tx buffer
-                                                  * Data Segment Registers*/                                          
-    }
-
-    CAN0TXDLR = length*2;                        /* Set Data Length Code */
-    CAN0TXTBPR = priority;                       /* Set Priority */
-
-    CAN0TFLG = txbuffer;	                     /* Start transmission */
-                
-    while ( (CAN0TFLG & txbuffer) != txbuffer);  /* Wait for Transmission 
-                                                  * completion 
-                                                  */
-    return NO_ERR;
- }
+   CAN0TXDLR = length;           /* Set data length code */
+   CAN0TXTBPR = priority;        /* Set priority. As compared to other buffered TX messages */
+   CAN0TFLG = txbuffer;          /* Start transmission. Write of 1 clears the flag. */
+      
+   while ((CAN0TFLG & txbuffer) != txbuffer);  // Wait for transmission completion.
+                                            // When the buffer is empty, the flag goes to 1.
+   return CAN_NO_ERR;
+}
  
- 
- unsigned char CAN0SendInt2(unsigned long id, unsigned char priority, unsigned char length, unsigned int *txdata)
- {
-    
-    unsigned char index = 0;
-    unsigned char MSB = 0;
-    unsigned char txbuffer = {0};
 
-    if (!CAN0TFLG)              /* Is Transmit Buffer full?? */
-        return ERR_BUFFER_FULL;
-
-    CAN0TBSEL = CAN0TFLG;       /* Select lowest empty buffer */
-    txbuffer = CAN0TBSEL;		/* Backup selected buffer */
-    
-    /* Load Id to IDR Registers */
-    *((unsigned long *) ((unsigned long)(&CAN0TXIDR0)))= id;
-        
-    for (index=0;index<length;index++) {           //H: La modification que j'essaie pour pouvoir utiliser les int
-        MSB = txdata[index] >> 8;
-        *(&CAN0TXDSR0 + 2*index) = MSB; 
-        *(&CAN0TXDSR0 + 2*index + 1) = (unsigned char) txdata[index];  /* Load data to Tx buffer
-                                                  * Data Segment Registers*/                                          
-    }
-
-    CAN0TXDLR = length*2;                        /* Set Data Length Code */
-    CAN0TXTBPR = priority;                       /* Set Priority */
-
-    CAN0TFLG = txbuffer;	                     /* Start transmission */
-                
-    while ( (CAN0TFLG & txbuffer) != txbuffer);  /* Wait for Transmission 
-                                                  * completion 
-                                                  */
-    return NO_ERR;
- }
- 
- 
-unsigned char CAN0SendCommand(unsigned char command, unsigned char id, //if slaveID = 3F: Broadcast
-                              unsigned int param1,   unsigned int  param2)
+unsigned char CAN0SendEquiStatus(unsigned int balVector, unsigned int balThres, unsigned char slaveId)
 {
-    unsigned int txdata[4] = {0,0,0,0};
-    unsigned char errorflag = NO_ERR;
+    unsigned int txdata[3];
     
-    txdata[0] = command;
-    txdata[1] = param1;
-    txdata[2] = param2;
-    txdata[3] = 0xFFFF;
-    
-    switch(command)
-    {
-      case COMMAND_BAL_DONE:
-         errorflag = CAN0SendInt(ID_780 + slaveID*0x200000, 0x03, 0, 4, txdata);//ID,priorité,start,length 
-         break;
-    }
-    
-    return errorflag;
+    txdata[0] = balVector;
+    txdata[1] = balThres;
+    txdata[2] = 0xFFFF;       //For transmission error detection purpose
+
+    return CAN0SendChar(   MAKE_CAN_ID(slaveId, CAN_EQUI_REPORT_ID),
+                           CAN_EQUI_STATUS_PRIORITY,
+                           6,
+                           (unsigned char*) txdata);
 }
 
 
-void CAN0SendVoltages(void)
+unsigned char CAN0SendVoltages(unsigned int *voltages, unsigned char slaveId)
 {
-   unsigned char i = 0;
-	unsigned char errorflag = NO_ERR;
-   unsigned char cellRemain = NB_CELL;
+	unsigned char errorFlag = CAN_NO_ERR;
 
-   while(cellRemain > 4) {
-      cellRemain -= 4;
-      errorflag = CAN0SendInt2((ID_580 + (i + slaveID*4)*0x200000), 0x01, 4, &gInt_Voltage_Table[i<<2]);
-      i++;
-   }
-   errorflag = CAN0SendInt2((ID_580 + (i + slaveID*4)*0x200000), 0x01, cellRemain, &gInt_Voltage_Table[i<<2]);
+   errorFlag = CAN0SendChar(  MAKE_CAN_ID(slaveId, CAN_VOLTAGES_1TO4_ID),
+                              CAN_VOLTAGES_PRIORITY,
+                              8,
+                              (unsigned char*) &voltages[0]);
+   if(errorFlag != CAN_NO_ERR)
+      return errorFlag;
+      
+   errorFlag = CAN0SendChar(  MAKE_CAN_ID(slaveId, CAN_VOLTAGES_5TO8_ID),
+                              CAN_VOLTAGES_PRIORITY,
+                              8,
+                              (unsigned char*) &voltages[4]);
+   if(errorFlag != CAN_NO_ERR)
+      return errorFlag;
+      
+   errorFlag = CAN0SendChar(  MAKE_CAN_ID(slaveId, CAN_VOLTAGES_9TO10_ID),
+                              CAN_VOLTAGES_PRIORITY,
+                              4,
+                              (unsigned char*) &voltages[8]);                                
+   return errorFlag;   
 }	
 
 
-void CAN0SendTemp(void)
+unsigned char CAN0SendTemp(int *temperatures, unsigned char slaveId)
 {
-   unsigned char i = 0;
-   unsigned char cellRemain = NB_CELL;
-   unsigned char errorFlag = 0;
+	unsigned char errorFlag = CAN_NO_ERR;
 
-   while(cellRemain > 4) {
-      cellRemain -= 4;
-      errorFlag = CAN0SendInt2((ID_680 + (i + slaveID*4)*0x200000), 0x02, 4, &gTemp[i<<2]);
-      i++;
-   }
-   errorFlag = CAN0SendInt2((ID_680 + (i + slaveID*4)*0x200000), 0x02, cellRemain, &gTemp[i<<2]);
-}
+   errorFlag = CAN0SendChar(  MAKE_CAN_ID(slaveId, CAN_TEMP_1TO4_ID),
+                              CAN_TEMP_PRIORITY,
+                              8,
+                              (unsigned char*) &temperatures[0]);
+   if(errorFlag != CAN_NO_ERR)
+      return errorFlag;
+      
+   errorFlag = CAN0SendChar(  MAKE_CAN_ID(slaveId, CAN_TEMP_5TO8_ID),
+                              CAN_TEMP_PRIORITY,
+                              8,
+                              (unsigned char*) &temperatures[4]);
+   if(errorFlag != CAN_NO_ERR)
+      return errorFlag;
+      
+   errorFlag = CAN0SendChar(  MAKE_CAN_ID(slaveId, CAN_TEMP_9TO10_ID),
+                              CAN_TEMP_PRIORITY,
+                              4,
+                              (unsigned char*) &temperatures[8]);                                
+   return errorFlag;   
+}	
+
+
 
 
 
