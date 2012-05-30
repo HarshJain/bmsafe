@@ -28,8 +28,8 @@ Entry point: 0xC000 (_Startup)
 _startupData is allocated at 0xC00F and uses 6 Bytes
 extern struct _tagStartup {
   unsigned nofZeroOut     1
-  _Range   pZeroOut       0x2100     56
-  _Copy    *toCopyDownBeg 0xC45D
+  _Range   pZeroOut       0x2100     53
+  _Copy    *toCopyDownBeg 0xC70F
 } _startupData;
 
 *********************************************************************************************
@@ -38,10 +38,10 @@ Section Name                    Size  Type     From       To       Segment
 ---------------------------------------------------------------------------------------------
 .init                             15     R     0xC000     0xC00E   ROM_C000
 .startData                        22     R     0xC00F     0xC024   ROM_C000
-.rodata                          824     R     0xC025     0xC35C   ROM_C000
-NON_BANKED                       256     R     0xC35D     0xC45C   ROM_C000
-.copy                              2     R     0xC45D     0xC45E   ROM_C000
-.text                           1754     R   0xFE8000   0xFE86D9   PAGE_FE
+.rodata                         1444     R     0xC025     0xC5C8   ROM_C000
+NON_BANKED                       326     R     0xC5C9     0xC70E   ROM_C000
+.copy                              2     R     0xC70F     0xC710   ROM_C000
+.text                           1861     R   0xFE8000   0xFE8744   PAGE_FE
 .stack                           256   R/W     0x2000     0x20FF   RAM
 .abs_section_ff10                234     R     0xFF10     0xFFF9   .absSeg0
 .abs_section_fffa                  6     R     0xFFFA     0xFFFF   .absSeg1
@@ -692,12 +692,12 @@ NON_BANKED                       256     R     0xC35D     0xC45C   ROM_C000
 .abs_section_3aa                   2   N/I      0x3AA      0x3AB   .absSeg646
 .abs_section_3ac                   2   N/I      0x3AC      0x3AD   .absSeg647
 .abs_section_3ae                   2   N/I      0x3AE      0x3AF   .absSeg648
-.bss                              16   R/W     0x2100     0x210F   RAM
-.common                           40   R/W     0x2110     0x2137   RAM
+.bss                              13   R/W     0x2100     0x210C   RAM
+.common                           40   R/W     0x210D     0x2134   RAM
 
 Summary of section sizes per section type:
-READ_ONLY (R):         C29 (dec:     3113)
-READ_WRITE (R/W):      138 (dec:      312)
+READ_ONLY (R):         F46 (dec:     3910)
+READ_WRITE (R/W):      135 (dec:      309)
 NO_INIT (N/I):         300 (dec:      768)
 
 *********************************************************************************************
@@ -711,25 +711,19 @@ OBJECT-ALLOCATION SECTION
 ---------------------------------------------------------------------------------------------
 MODULE:                 -- main.c.o --
 - PROCEDURES:
-     main                                    FE8000     146     326       5   .text       
-     checkForBalancedCells                   FE8146      42      66       2   .text       
+     main                                    FE8000     18A     394      15   .text       
+     checkForBalancedCells                   FE818A      41      65       2   .text       
 - VARIABLES:
-     gBalanceFlag                              2100       1       1       3   .bss        
-     gEquiStatusChange                         2101       1       1       4   .bss        
-     gBalanceVector                            2102       2       2       3   .bss        
-     gVoltTimeout                              2104       1       1       3   .bss        
-     gADC0done                                 2105       1       1       3   .bss        
-     gADC1done                                 2106       1       1       3   .bss        
-     gErrorFlags                               2107       1       1       7   .bss        
-     gSPItimeout                               2108       1       1       3   .bss        
-     gElapsedTime                              2109       4       4       8   .bss        
-     gSlaveID                                  210D       1       1       5   .bss        
-     gBalThres                                 210E       2       2       2   .bss        
-     gVoltages                                 2110      14      20       3   .common     
-     gTemp                                     2124      14      20       6   .common     
+     gElapsedTime                              2100       4       4       8   .bss        
+     gSlaveID                                  2104       1       1       7   .bss        
+     gBalThres                                 2105       2       2       3   .bss        
+     gBalanceVector                            2107       2       2       4   .bss        
+     gFlags                                    2109       2       2      23   .bss        
+     gVoltages                                 210D      14      20       3   .common     
+     gTemp                                     2121      14      20       6   .common     
 MODULE:                 -- Start12.c.o --
 - PROCEDURES:
-     Init                                    FE8188      29      41       2   .text       
+     Init                                    FE81CB      29      41       2   .text       
      _Startup                                  C000       F      15       1   .init       
 - VARIABLES:
      _startupData                              C00F       6       6       3   .startData  
@@ -737,28 +731,27 @@ MODULE:                 -- Start12.c.o --
      __SEG_END_SSTACK                          2100       0       0       1               
 MODULE:                 -- rtshc12.c.o (ansixb.lib) --
 - PROCEDURES:
-     _ISHL                                     C35D       B      11       1   NON_BANKED  
-     _LCMP                                     C368       A      10       1   NON_BANKED  
-     _LINC                                     C372       5       5       1   NON_BANKED  
+     _ISHL                                     C5C9       B      11       1   NON_BANKED  
+     _LCMP                                     C5D4       A      10       1   NON_BANKED  
+     _LINC                                     C5DE       5       5       1   NON_BANKED  
 - VARIABLES:
 MODULE:                 -- MCUinit.c.o --
 - PROCEDURES:
-     MCU_init                                FE81B1     159     345      24   .text       
-     MCU_init_reset                            C377      12      18       3   NON_BANKED  
-     isr_default                               C389       1       1     105   NON_BANKED  
-     iPIT1_mesure_temp                         C38A       C      12       1   NON_BANKED  
-     iPIT0_mesure_volt                         C396      19      25       1   NON_BANKED  
-     isrVportp                                 C3AF       1       1       1   NON_BANKED  
-     isrVcan0tx                                C3B0       1       1       1   NON_BANKED  
-     iCAN0RxISR                                C3B1      68     104       1   NON_BANKED  
-     isrVcan0err                               C419       1       1       1   NON_BANKED  
-     isrVcan0wkup                              C41A       1       1       1   NON_BANKED  
-     isrVspi1                                  C41B       1       1       1   NON_BANKED  
-     isrVporth                                 C41C       1       1       1   NON_BANKED  
-     isrVportj                                 C41D       1       1       1   NON_BANKED  
-     iADC1_seq_complete                        C41E      13      19       1   NON_BANKED  
-     iADC0_seq_complete                        C431      2C      44       1   NON_BANKED  
+     MCU_init                                FE81F4     140     320      24   .text       
+     MCU_init_reset                            C5E3      12      18       3   NON_BANKED  
+     isr_default                               C5F5       1       1     108   NON_BANKED  
+     iPIT0_1Hz                                 C5F6      47      71       1   NON_BANKED  
+     isrVcan0tx                                C63D       1       1       1   NON_BANKED  
+     iCAN0_RX                                  C63E      90     144       1   NON_BANKED  
+     isrVcan0err                               C6CE       1       1       1   NON_BANKED  
+     isrVcan0wkup                              C6CF       1       1       1   NON_BANKED  
+     isrVspi1                                  C6D0       1       1       1   NON_BANKED  
+     isrVporth                                 C6D1       1       1       1   NON_BANKED  
+     iADC1_seq_complete                        C6D2      12      18       1   NON_BANKED  
+     iADC0_seq_complete                        C6E4      2B      43       1   NON_BANKED  
 - VARIABLES:
+     voltCount.1                               210B       1       1       3   .bss        
+     tempCount.2                               210C       1       1       3   .bss        
      _InterruptVectorTable                     FF10      EA     234       0   .abs_section_ff10
      _ResetVectorTable                         FFFA       6       6       0   .abs_section_fffa
 MODULE:                 -- mc9s12xdp512.c.o --
@@ -768,7 +761,7 @@ MODULE:                 -- mc9s12xdp512.c.o --
      _DDRE                                        9       1       1       0   .abs_section_9
      _MMCCTL0                                     A       1       1       0   .abs_section_a
      _MODE                                        B       1       1       0   .abs_section_b
-     _PUCR                                        C       1       1       2   .abs_section_c
+     _PUCR                                        C       1       1       0   .abs_section_c
      _RDRIV                                       D       1       1       0   .abs_section_d
      _EBICTL0                                     E       1       1       0   .abs_section_e
      _EBICTL1                                     F       1       1       0   .abs_section_f
@@ -1189,7 +1182,7 @@ MODULE:                 -- mc9s12xdp512.c.o --
      _PTIH                                      261       1       1       0   .abs_section_261
      _DDRH                                      262       1       1       1   .abs_section_262
      _RDRH                                      263       1       1       1   .abs_section_263
-     _PERH                                      264       1       1       2   .abs_section_264
+     _PERH                                      264       1       1       1   .abs_section_264
      _PPSH                                      265       1       1       0   .abs_section_265
      _PIEH                                      266       1       1       0   .abs_section_266
      _PIFH                                      267       1       1       0   .abs_section_267
@@ -1282,10 +1275,10 @@ MODULE:                 -- mc9s12xdp512.c.o --
      _PWMSDN                                    324       1       1       0   .abs_section_324
      _PITCFLMT                                  340       1       1       1   .abs_section_340
      _PITFLT                                    341       1       1       0   .abs_section_341
-     _PITCE                                     342       1       1       2   .abs_section_342
+     _PITCE                                     342       1       1       1   .abs_section_342
      _PITMUX                                    343       1       1       0   .abs_section_343
      _PITINTE                                   344       1       1       1   .abs_section_344
-     _PITTF                                     345       1       1       2   .abs_section_345
+     _PITTF                                     345       1       1       1   .abs_section_345
      _PITMTLD0                                  346       1       1       1   .abs_section_346
      _PITMTLD1                                  347       1       1       0   .abs_section_347
      _XGCHID                                    382       1       1       0   .abs_section_382
@@ -1315,9 +1308,9 @@ MODULE:                 -- mc9s12xdp512.c.o --
      _TC2H                                       7C       2       2       0   .abs_section_7c
      _TC3H                                       7E       2       2       0   .abs_section_7e
      _ATD1CTL01                                  80       2       2       0   .abs_section_80
-     _ATD1CTL23                                  82       2       2       2   .abs_section_82
+     _ATD1CTL23                                  82       2       2       4   .abs_section_82
      _ATD1CTL45                                  84       2       2       2   .abs_section_84
-     _ATD1DIEN                                   8C       2       2       1   .abs_section_8c
+     _ATD1DIEN                                   8C       2       2       0   .abs_section_8c
      _ATD1PTAD                                   8E       2       2       0   .abs_section_8e
      _ATD1DR0                                    90       2       2       1   .abs_section_90
      _ATD1DR1                                    92       2       2       1   .abs_section_92
@@ -1360,7 +1353,7 @@ MODULE:                 -- mc9s12xdp512.c.o --
      _CAN4RXTSR                                 2AE       2       2       0   .abs_section_2ae
      _CAN4TXTSR                                 2BE       2       2       0   .abs_section_2be
      _ATD0CTL01                                 2C0       2       2       0   .abs_section_2c0
-     _ATD0CTL23                                 2C2       2       2       2   .abs_section_2c2
+     _ATD0CTL23                                 2C2       2       2       4   .abs_section_2c2
      _ATD0CTL45                                 2C4       2       2       2   .abs_section_2c4
      _ATD0DR0                                   2D0       2       2       1   .abs_section_2d0
      _ATD0DR1                                   2D2       2       2       0   .abs_section_2d2
@@ -1385,7 +1378,7 @@ MODULE:                 -- mc9s12xdp512.c.o --
      _PWMDTY67                                  322       2       2       0   .abs_section_322
      _PITLD0                                    348       2       2       1   .abs_section_348
      _PITCNT0                                   34A       2       2       0   .abs_section_34a
-     _PITLD1                                    34C       2       2       1   .abs_section_34c
+     _PITLD1                                    34C       2       2       0   .abs_section_34c
      _PITCNT1                                   34E       2       2       0   .abs_section_34e
      _PITLD2                                    350       2       2       0   .abs_section_350
      _PITCNT2                                   352       2       2       0   .abs_section_352
@@ -1413,41 +1406,43 @@ MODULE:                 -- mc9s12xdp512.c.o --
      _XGR7                                      3AE       2       2       0   .abs_section_3ae
 MODULE:                 -- CANSlave.c.o --
 - PROCEDURES:
-     CAN0SendChar                            FE830A      65     101      14   .text       
-     CAN0SendEquiStatus                      FE836F      32      50       2   .text       
-     CAN0SendVoltages                        FE83A1      5B      91       2   .text       
-     CAN0SendTemp                            FE83FC      5D      93       2   .text       
+     CAN0SendChar                            FE8334      65     101      18   .text       
+     CAN0SendEquiStatus                      FE8399      32      50       2   .text       
+     CAN0SendVoltages                        FE83CB      5B      91       2   .text       
+     CAN0SendTemp                            FE8426      5D      93       2   .text       
+     CAN0SendInitStatus                      FE8483      1B      27       2   .text       
+     CAN0SendFirmwareRevision                FE849E      27      39       2   .text       
 - VARIABLES:
 MODULE:                 -- ltc6802.c.o --
 - PROCEDURES:
-     SPI_send                                FE8459      3B      59      20   .text       
-     ltcMakeConfigRegister                   FE8494      16      22       2   .text       
-     ltcWriteConfig                          FE84AA      30      48       4   .text       
-     ltcReadConfig                           FE84DA      45      69       2   .text       
-     ltcStartVoltageMeasure                  FE851F      17      23       6   .text       
-     convertVoltages                         FE8536      6D     109       2   .text       
-     ltcReadCellVoltage                      FE85A3      60      96       6   .text       
-     ltcVerifyOpenWire                       FE8603      5E      94       2   .text       
-     ltcComputeCRC                           FE8661      38      56       4   .text       
+     SPI_send                                FE84C5      3A      58      20   .text       
+     ltcMakeConfigRegister                   FE84FF      16      22       2   .text       
+     ltcWriteConfig                          FE8515      30      48       4   .text       
+     ltcReadConfig                           FE8545      45      69       2   .text       
+     ltcStartVoltageMeasure                  FE858A      17      23       6   .text       
+     convertVoltages                         FE85A1      6D     109       2   .text       
+     ltcReadCellVoltage                      FE860E      60      96       6   .text       
+     ltcVerifyOpenWire                       FE866E      5E      94       2   .text       
+     ltcComputeCRC                           FE86CC      38      56       4   .text       
 - VARIABLES:
 MODULE:                 -- temp.c.o --
 - PROCEDURES:
-     convertTemp                             FE8699      41      65       2   .text       
+     convertTemp                             FE8704      41      65       2   .text       
 - VARIABLES:
-     convertTempTable                          C025     338     824       7   .rodata     
+     convertTempTable                          C025     5A4    1444       7   .rodata     
 
 *********************************************************************************************
 MODULE STATISTIC
   Name                                      Data   Code  Const
 ---------------------------------------------------------------------------------------------
-  main.c.o                                    56    392      0
+  main.c.o                                    51    459      0
   Start12.c.o                                  0     56      0
   rtshc12.c.o (ansixb.lib)                     0     26      0
-  MCUinit.c.o                                  0    575    240
+  MCUinit.c.o                                  2    620    240
   mc9s12xdp512.c.o                           768      0      0
-  CANSlave.c.o                                 0    335      0
-  ltc6802.c.o                                  0    576      0
-  temp.c.o                                     0     65    824
+  CANSlave.c.o                                 0    401      0
+  ltc6802.c.o                                  0    575      0
+  temp.c.o                                     0     65   1444
   other                                      256     22      2
 
 *********************************************************************************************
@@ -1455,20 +1450,21 @@ SECTION USE IN OBJECT-ALLOCATION SECTION
 ---------------------------------------------------------------------------------------------
 SECTION: ".text"
   main checkForBalancedCells Init MCU_init CAN0SendChar CAN0SendEquiStatus 
-  CAN0SendVoltages CAN0SendTemp SPI_send ltcMakeConfigRegister ltcWriteConfig 
-  ltcReadConfig ltcStartVoltageMeasure convertVoltages ltcReadCellVoltage 
-  ltcVerifyOpenWire ltcComputeCRC convertTemp 
+  CAN0SendVoltages CAN0SendTemp CAN0SendInitStatus CAN0SendFirmwareRevision 
+  SPI_send ltcMakeConfigRegister ltcWriteConfig ltcReadConfig 
+  ltcStartVoltageMeasure convertVoltages ltcReadCellVoltage ltcVerifyOpenWire 
+  ltcComputeCRC convertTemp 
 SECTION: ".bss"
-  gBalanceFlag gEquiStatusChange gBalanceVector gVoltTimeout gADC0done 
-  gADC1done gErrorFlags gSPItimeout gElapsedTime gSlaveID gBalThres 
+  gElapsedTime gSlaveID gBalThres gBalanceVector gFlags voltCount.1 
+  tempCount.2 
 SECTION: ".init"
   _Startup 
 SECTION: ".rodata"
   convertTempTable 
 SECTION: "NON_BANKED"
-  _ISHL _LCMP _LINC MCU_init_reset isr_default iPIT1_mesure_temp 
-  iPIT0_mesure_volt isrVportp isrVcan0tx iCAN0RxISR isrVcan0err isrVcan0wkup 
-  isrVspi1 isrVporth isrVportj iADC1_seq_complete iADC0_seq_complete 
+  _ISHL _LCMP _LINC MCU_init_reset isr_default iPIT0_1Hz isrVcan0tx iCAN0_RX 
+  isrVcan0err isrVcan0wkup isrVspi1 isrVporth iADC1_seq_complete 
+  iADC0_seq_complete 
 SECTION: ".common"
   gVoltages gTemp 
 SECTION: ".abs_section_ff10"
@@ -2782,7 +2778,7 @@ OBJECT LIST SORTED BY ADDRESS
      _DDRE                                        9       1       1       0   .abs_section_9
      _MMCCTL0                                     A       1       1       0   .abs_section_a
      _MODE                                        B       1       1       0   .abs_section_b
-     _PUCR                                        C       1       1       2   .abs_section_c
+     _PUCR                                        C       1       1       0   .abs_section_c
      _RDRIV                                       D       1       1       0   .abs_section_d
      _EBICTL0                                     E       1       1       0   .abs_section_e
      _EBICTL1                                     F       1       1       0   .abs_section_f
@@ -2866,13 +2862,13 @@ OBJECT LIST SORTED BY ADDRESS
      _TC2H                                       7C       2       2       0   .abs_section_7c
      _TC3H                                       7E       2       2       0   .abs_section_7e
      _ATD1CTL01                                  80       2       2       0   .abs_section_80
-     _ATD1CTL23                                  82       2       2       2   .abs_section_82
+     _ATD1CTL23                                  82       2       2       4   .abs_section_82
      _ATD1CTL45                                  84       2       2       2   .abs_section_84
      _ATD1STAT0                                  86       1       1       1   .abs_section_86
      _ATD1TEST1                                  89       1       1       0   .abs_section_89
      _ATD1STAT2                                  8A       1       1       0   .abs_section_8a
      _ATD1STAT1                                  8B       1       1       0   .abs_section_8b
-     _ATD1DIEN                                   8C       2       2       1   .abs_section_8c
+     _ATD1DIEN                                   8C       2       2       0   .abs_section_8c
      _ATD1PTAD                                   8E       2       2       0   .abs_section_8e
      _ATD1DR0                                    90       2       2       1   .abs_section_90
      _ATD1DR1                                    92       2       2       1   .abs_section_92
@@ -3262,7 +3258,7 @@ OBJECT LIST SORTED BY ADDRESS
      _PTIH                                      261       1       1       0   .abs_section_261
      _DDRH                                      262       1       1       1   .abs_section_262
      _RDRH                                      263       1       1       1   .abs_section_263
-     _PERH                                      264       1       1       2   .abs_section_264
+     _PERH                                      264       1       1       1   .abs_section_264
      _PPSH                                      265       1       1       0   .abs_section_265
      _PIEH                                      266       1       1       0   .abs_section_266
      _PIFH                                      267       1       1       0   .abs_section_267
@@ -3343,7 +3339,7 @@ OBJECT LIST SORTED BY ADDRESS
      _CAN4TXTBPR                                2BD       1       1       0   .abs_section_2bd
      _CAN4TXTSR                                 2BE       2       2       0   .abs_section_2be
      _ATD0CTL01                                 2C0       2       2       0   .abs_section_2c0
-     _ATD0CTL23                                 2C2       2       2       2   .abs_section_2c2
+     _ATD0CTL23                                 2C2       2       2       4   .abs_section_2c2
      _ATD0CTL45                                 2C4       2       2       2   .abs_section_2c4
      _ATD0STAT0                                 2C6       1       1       1   .abs_section_2c6
      _ATD0TEST1                                 2C9       1       1       0   .abs_section_2c9
@@ -3385,15 +3381,15 @@ OBJECT LIST SORTED BY ADDRESS
      _PWMSDN                                    324       1       1       0   .abs_section_324
      _PITCFLMT                                  340       1       1       1   .abs_section_340
      _PITFLT                                    341       1       1       0   .abs_section_341
-     _PITCE                                     342       1       1       2   .abs_section_342
+     _PITCE                                     342       1       1       1   .abs_section_342
      _PITMUX                                    343       1       1       0   .abs_section_343
      _PITINTE                                   344       1       1       1   .abs_section_344
-     _PITTF                                     345       1       1       2   .abs_section_345
+     _PITTF                                     345       1       1       1   .abs_section_345
      _PITMTLD0                                  346       1       1       1   .abs_section_346
      _PITMTLD1                                  347       1       1       0   .abs_section_347
      _PITLD0                                    348       2       2       1   .abs_section_348
      _PITCNT0                                   34A       2       2       0   .abs_section_34a
-     _PITLD1                                    34C       2       2       1   .abs_section_34c
+     _PITLD1                                    34C       2       2       0   .abs_section_34c
      _PITCNT1                                   34E       2       2       0   .abs_section_34e
      _PITLD2                                    350       2       2       0   .abs_section_350
      _PITCNT2                                   352       2       2       0   .abs_section_352
@@ -3421,58 +3417,53 @@ OBJECT LIST SORTED BY ADDRESS
      _XGR5                                      3AA       2       2       0   .abs_section_3aa
      _XGR6                                      3AC       2       2       0   .abs_section_3ac
      _XGR7                                      3AE       2       2       0   .abs_section_3ae
-     gBalanceFlag                              2100       1       1       3   .bss        
-     gEquiStatusChange                         2101       1       1       4   .bss        
-     gBalanceVector                            2102       2       2       3   .bss        
-     gVoltTimeout                              2104       1       1       3   .bss        
-     gADC0done                                 2105       1       1       3   .bss        
-     gADC1done                                 2106       1       1       3   .bss        
-     gErrorFlags                               2107       1       1       7   .bss        
-     gSPItimeout                               2108       1       1       3   .bss        
-     gElapsedTime                              2109       4       4       8   .bss        
-     gSlaveID                                  210D       1       1       5   .bss        
-     gBalThres                                 210E       2       2       2   .bss        
-     gVoltages                                 2110      14      20       3   .common     
-     gTemp                                     2124      14      20       6   .common     
+     gElapsedTime                              2100       4       4       8   .bss        
+     gSlaveID                                  2104       1       1       7   .bss        
+     gBalThres                                 2105       2       2       3   .bss        
+     gBalanceVector                            2107       2       2       4   .bss        
+     gFlags                                    2109       2       2      23   .bss        
+     voltCount.1                               210B       1       1       3   .bss        
+     tempCount.2                               210C       1       1       3   .bss        
+     gVoltages                                 210D      14      20       3   .common     
+     gTemp                                     2121      14      20       6   .common     
      _Startup                                  C000       F      15       1   .init       
-     convertTempTable                          C025     338     824       7   .rodata     
-     _ISHL                                     C35D       B      11       1   NON_BANKED  
-     _LCMP                                     C368       A      10       1   NON_BANKED  
-     _LINC                                     C372       5       5       1   NON_BANKED  
-     MCU_init_reset                            C377      12      18       3   NON_BANKED  
-     isr_default                               C389       1       1     105   NON_BANKED  
-     iPIT1_mesure_temp                         C38A       C      12       1   NON_BANKED  
-     iPIT0_mesure_volt                         C396      19      25       1   NON_BANKED  
-     isrVportp                                 C3AF       1       1       1   NON_BANKED  
-     isrVcan0tx                                C3B0       1       1       1   NON_BANKED  
-     iCAN0RxISR                                C3B1      68     104       1   NON_BANKED  
-     isrVcan0err                               C419       1       1       1   NON_BANKED  
-     isrVcan0wkup                              C41A       1       1       1   NON_BANKED  
-     isrVspi1                                  C41B       1       1       1   NON_BANKED  
-     isrVporth                                 C41C       1       1       1   NON_BANKED  
-     isrVportj                                 C41D       1       1       1   NON_BANKED  
-     iADC1_seq_complete                        C41E      13      19       1   NON_BANKED  
-     iADC0_seq_complete                        C431      2C      44       1   NON_BANKED  
+     convertTempTable                          C025     5A4    1444       7   .rodata     
+     _ISHL                                     C5C9       B      11       1   NON_BANKED  
+     _LCMP                                     C5D4       A      10       1   NON_BANKED  
+     _LINC                                     C5DE       5       5       1   NON_BANKED  
+     MCU_init_reset                            C5E3      12      18       3   NON_BANKED  
+     isr_default                               C5F5       1       1     108   NON_BANKED  
+     iPIT0_1Hz                                 C5F6      47      71       1   NON_BANKED  
+     isrVcan0tx                                C63D       1       1       1   NON_BANKED  
+     iCAN0_RX                                  C63E      90     144       1   NON_BANKED  
+     isrVcan0err                               C6CE       1       1       1   NON_BANKED  
+     isrVcan0wkup                              C6CF       1       1       1   NON_BANKED  
+     isrVspi1                                  C6D0       1       1       1   NON_BANKED  
+     isrVporth                                 C6D1       1       1       1   NON_BANKED  
+     iADC1_seq_complete                        C6D2      12      18       1   NON_BANKED  
+     iADC0_seq_complete                        C6E4      2B      43       1   NON_BANKED  
      _InterruptVectorTable                     FF10      EA     234       0   .abs_section_ff10
      _ResetVectorTable                         FFFA       6       6       0   .abs_section_fffa
-     main                                    FE8000     146     326       5   .text       
-     checkForBalancedCells                   FE8146      42      66       2   .text       
-     Init                                    FE8188      29      41       2   .text       
-     MCU_init                                FE81B1     159     345      24   .text       
-     CAN0SendChar                            FE830A      65     101      14   .text       
-     CAN0SendEquiStatus                      FE836F      32      50       2   .text       
-     CAN0SendVoltages                        FE83A1      5B      91       2   .text       
-     CAN0SendTemp                            FE83FC      5D      93       2   .text       
-     SPI_send                                FE8459      3B      59      20   .text       
-     ltcMakeConfigRegister                   FE8494      16      22       2   .text       
-     ltcWriteConfig                          FE84AA      30      48       4   .text       
-     ltcReadConfig                           FE84DA      45      69       2   .text       
-     ltcStartVoltageMeasure                  FE851F      17      23       6   .text       
-     convertVoltages                         FE8536      6D     109       2   .text       
-     ltcReadCellVoltage                      FE85A3      60      96       6   .text       
-     ltcVerifyOpenWire                       FE8603      5E      94       2   .text       
-     ltcComputeCRC                           FE8661      38      56       4   .text       
-     convertTemp                             FE8699      41      65       2   .text       
+     main                                    FE8000     18A     394      15   .text       
+     checkForBalancedCells                   FE818A      41      65       2   .text       
+     Init                                    FE81CB      29      41       2   .text       
+     MCU_init                                FE81F4     140     320      24   .text       
+     CAN0SendChar                            FE8334      65     101      18   .text       
+     CAN0SendEquiStatus                      FE8399      32      50       2   .text       
+     CAN0SendVoltages                        FE83CB      5B      91       2   .text       
+     CAN0SendTemp                            FE8426      5D      93       2   .text       
+     CAN0SendInitStatus                      FE8483      1B      27       2   .text       
+     CAN0SendFirmwareRevision                FE849E      27      39       2   .text       
+     SPI_send                                FE84C5      3A      58      20   .text       
+     ltcMakeConfigRegister                   FE84FF      16      22       2   .text       
+     ltcWriteConfig                          FE8515      30      48       4   .text       
+     ltcReadConfig                           FE8545      45      69       2   .text       
+     ltcStartVoltageMeasure                  FE858A      17      23       6   .text       
+     convertVoltages                         FE85A1      6D     109       2   .text       
+     ltcReadCellVoltage                      FE860E      60      96       6   .text       
+     ltcVerifyOpenWire                       FE866E      5E      94       2   .text       
+     ltcComputeCRC                           FE86CC      38      56       4   .text       
+     convertTemp                             FE8704      41      65       2   .text       
 
 *********************************************************************************************
 UNUSED-OBJECTS SECTION
@@ -3485,6 +3476,8 @@ rtshc12.c.o (ansixb.lib):
   _COPY _CASE_DIRECT _CASE_DIRECT_BYTE _CASE_CHECKED _CASE_CHECKED_BYTE 
   _CASE_SEARCH _CASE_SEARCH_BYTE _CASE_SEARCH_8 _CASE_SEARCH_8_BYTE _FCALL 
   _FPCMP _PADD _PSUB _PINC _PDEC 
+MCUinit.c.o:
+  isrVportp isrVportj 
 ltc6802.c.o:
   ltcStartOpenWireADC 
 NOT USED VARIABLES
@@ -3494,7 +3487,7 @@ rtshc12.c.o (ansixb.lib):
 *********************************************************************************************
 COPYDOWN SECTION
 ---------------------------------------------------------------------------------------------
-------- ROM-ADDRESS: 0xC45D ---- SIZE       2 ---
+------- ROM-ADDRESS: 0xC70F ---- SIZE       2 ---
 Filling bytes inserted
  0000
 
@@ -3503,46 +3496,47 @@ OBJECT-DEPENDENCIES SECTION
 ---------------------------------------------------------------------------------------------
 _Startup                  USES __SEG_END_SSTACK Init main 
 MCU_init_reset            USES _MMCCTL1 _DIRECT _IVBR _ECLKCTL _Startup 
-iPIT1_mesure_temp         USES _PITTF _ATD0CTL45 _ATD1CTL45 
-iPIT0_mesure_volt         USES gVoltTimeout gElapsedTime _LINC _PITTF 
-iCAN0RxISR                USES _CAN0RXIDR0 _CAN0RXIDR1 _CAN0RXDLR gSlaveID 
-                                _CAN0RXDSR0 gBalanceFlag gEquiStatusChange _CAN0RFLG 
-iADC1_seq_complete        USES _ATD1STAT0 _ATD1DR1 gTemp _ATD1DR0 gADC1done 
-iADC0_seq_complete        USES _ATD0DR0 _ATD0STAT0 gTemp gADC0done 
-_InterruptVectorTable     USES isr_default iPIT1_mesure_temp iPIT0_mesure_volt 
-                                isrVportp isrVcan0tx iCAN0RxISR isrVcan0err isrVcan0wkup 
-                                isrVspi1 isrVporth isrVportj iADC1_seq_complete 
-                                iADC0_seq_complete 
+iPIT0_1Hz                 USES gElapsedTime _LINC voltCount.1 tempCount.2 
+                                gFlags _ATD0CTL23 _ATD1CTL23 _ATD0CTL45 _ATD1CTL45 
+                                _PITTF 
+iCAN0_RX                  USES _CAN0RXIDR0 _CAN0RXIDR1 _CAN0RXDLR gSlaveID 
+                                _CAN0RXDSR0 gBalanceVector gBalThres gFlags _CAN0RFLG 
+iADC1_seq_complete        USES _ATD1STAT0 _ATD1DR1 gTemp _ATD1DR0 gFlags 
+iADC0_seq_complete        USES _ATD0DR0 _ATD0STAT0 gTemp gFlags 
+_InterruptVectorTable     USES isr_default iPIT0_1Hz isrVcan0tx iCAN0_RX 
+                                isrVcan0err isrVcan0wkup isrVspi1 isrVporth 
+                                iADC1_seq_complete iADC0_seq_complete 
 _ResetVectorTable         USES MCU_init_reset 
-main                      USES MCU_init _PORTE gSlaveID gErrorFlags _CAN0CTL0 
-                                _PITCE _PITCFLMT main gADC0done gADC1done gTemp 
-                                convertTemp CAN0SendTemp gVoltTimeout ltcReadConfig 
-                                gSPItimeout ltcStartVoltageMeasure gVoltages 
-                                ltcReadCellVoltage ltcVerifyOpenWire CAN0SendVoltages 
-                                gEquiStatusChange gBalanceVector ltcMakeConfigRegister 
-                                ltcWriteConfig gBalanceFlag gBalThres checkForBalancedCells 
-                                CAN0SendEquiStatus 
-checkForBalancedCells     USES _ISHL gEquiStatusChange 
+main                      USES MCU_init _PORTE gSlaveID gFlags _CAN0CTL0 
+                                CAN0SendInitStatus main _PITCE _PITCFLMT _ATD0CTL23 _ATD1CTL23 
+                                gTemp convertTemp CAN0SendTemp ltcReadConfig 
+                                ltcStartVoltageMeasure gVoltages ltcReadCellVoltage ltcVerifyOpenWire 
+                                CAN0SendVoltages gBalanceVector ltcMakeConfigRegister 
+                                ltcWriteConfig gBalThres checkForBalancedCells 
+                                CAN0SendEquiStatus CAN0SendFirmwareRevision 
+checkForBalancedCells     USES _ISHL gFlags 
 Init                      USES _startupData 
 MCU_init                  USES _CLKSEL _PLLCTL _INT_CFADDR MCU_init 
-                                _INT_CFDATA0 _INT_CFDATA1 _MODRR _RDRH _PERH _COPCTL _IRQCR 
-                                _PTH _DDRH _SPI1CR2 _SPI1BR _SPI1CR1 _PITMTLD0 
-                                _PITLD0 _PITLD1 _PITINTE _CAN0CTL1 _CAN0BTR1 _CAN0BTR0 
-                                _CAN0IDAC _CAN0IDAR0 _CAN0IDMR0 _CAN0IDMR1 _CAN0IDMR2 
-                                _CAN0IDMR3 _CAN0CTL0 _CAN0RIER _ATD0CTL23 _ATD0CTL45 
-                                _ATD1CTL23 _ATD1CTL45 _PUCR _PERM _PERP _PERT _ATD1DIEN 
-                                _PER01AD1 _INT_CFDATA2 _INT_CFDATA3 _INT_CFDATA4 
-                                _INT_CFDATA5 _INT_CFDATA6 _INT_CFDATA7 
+                                _INT_CFDATA0 _INT_CFDATA1 _MODRR _RDRH _PERH _COPCTL _PERP 
+                                _PERT _PER01AD1 _PERM _IRQCR _PTH _DDRH _SPI1CR2 
+                                _SPI1BR _SPI1CR1 _PITMTLD0 _PITLD0 _PITINTE _CAN0CTL1 
+                                _CAN0BTR1 _CAN0BTR0 _CAN0IDAC _CAN0IDAR0 _CAN0IDMR0 
+                                _CAN0IDMR1 _CAN0IDMR2 _CAN0IDMR3 _CAN0CTL0 _CAN0RIER 
+                                _ATD0CTL23 _ATD0CTL45 _ATD1CTL23 _ATD1CTL45 _INT_CFDATA2 
+                                _INT_CFDATA3 _INT_CFDATA4 _INT_CFDATA5 _INT_CFDATA6 
+                                _INT_CFDATA7 
 CAN0SendChar              USES _CAN0TFLG _CAN0TBSEL _CAN0TXIDR0 _CAN0TXIDR1 
                                 _CAN0TXDSR0 _CAN0TXDLR _CAN0TXTBPR 
 CAN0SendEquiStatus        USES CAN0SendChar 
 CAN0SendVoltages          USES CAN0SendChar 
 CAN0SendTemp              USES CAN0SendChar 
-SPI_send                  USES _SPI1DR gElapsedTime _LCMP gSPItimeout _SPI1SR 
+CAN0SendInitStatus        USES CAN0SendChar 
+CAN0SendFirmwareRevision  USES CAN0SendChar 
+SPI_send                  USES _SPI1DR gElapsedTime _LCMP gFlags _SPI1SR 
 ltcWriteConfig            USES _PTH SPI_send 
 ltcReadConfig             USES _PTH SPI_send ltcComputeCRC 
 ltcStartVoltageMeasure    USES _PTH SPI_send 
-ltcReadCellVoltage        USES _PTH SPI_send ltcComputeCRC gSPItimeout 
+ltcReadCellVoltage        USES _PTH SPI_send ltcComputeCRC gFlags 
                                 convertVoltages 
 ltcVerifyOpenWire         USES ltcStartVoltageMeasure ltcReadCellVoltage 
 convertTemp               USES convertTempTable 
@@ -3556,12 +3550,16 @@ DEPENDENCY TREE
  |  | 
  |  +- MCU_init            
  |  |    
+ |  +- CAN0SendInitStatus  
+ |  |  | 
+ |  |  +- CAN0SendChar        
+ |  |       
  |  +- convertTemp         
  |  |    
  |  +- CAN0SendTemp        
  |  |  | 
- |  |  +- CAN0SendChar        
- |  |       
+ |  |  +- CAN0SendChar         (see above)
+ |  |     
  |  +- ltcReadConfig       
  |  |  | 
  |  |  +- SPI_send            
@@ -3603,6 +3601,10 @@ DEPENDENCY TREE
  |  |  +- _ISHL               
  |  |       
  |  +- CAN0SendEquiStatus  
+ |  |  | 
+ |  |  +- CAN0SendChar         (see above)
+ |  |     
+ |  +- CAN0SendFirmwareRevision
  |     | 
  |     +- CAN0SendChar         (see above)
  |        
@@ -3616,17 +3618,13 @@ DEPENDENCY TREE
  | 
  +- isr_default         
  |    
- +- iPIT1_mesure_temp   
- |    
- +- iPIT0_mesure_volt   
+ +- iPIT0_1Hz           
  |  | 
  |  +- _LINC               
  |       
- +- isrVportp           
- |    
  +- isrVcan0tx          
  |    
- +- iCAN0RxISR          
+ +- iCAN0_RX            
  |    
  +- isrVcan0err         
  |    
@@ -3635,8 +3633,6 @@ DEPENDENCY TREE
  +- isrVspi1            
  |    
  +- isrVporth           
- |    
- +- isrVportj           
  |    
  +- iADC1_seq_complete  
  |    
@@ -3654,6 +3650,6 @@ STATISTIC SECTION
 
 ExeFile:
 --------
-Number of blocks to be downloaded: 6
-Total size of all blocks to be downloaded: 3113
+Number of blocks to be downloaded: 7
+Total size of all blocks to be downloaded: 3910
 
