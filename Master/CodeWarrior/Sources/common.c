@@ -1,91 +1,79 @@
 #include "common.h"
 #include "derivative.h"
 #include "defines.h"
-#include "parameters.h"
-
-extern int glowestT;
-extern int gmaxT;
-extern unsigned int glowestV;
-extern unsigned int gmaxV;
-extern int gCellTemp[N_MOD_MAX][N_CELL_SLV_MAX];
-extern unsigned int gCellVolt[N_MOD_MAX][N_CELL_SLV_MAX];
 
 /***********************
       Common functions
 ************************/
 
 
-// Find max voltage
-unsigned int find_MaxVolt(unsigned int *table, unsigned char numElements, unsigned char *index)
+// Find biggest unsigned integer
+unsigned int findMaxUint(unsigned int *table, unsigned char numElements, unsigned char *index)
 {
-	unsigned int Vmax = table[0];
+	unsigned int max = table[0];
 	unsigned char i = 0;
 	
-	for(i=1; i<numElements; i++)
-	{
-		if (table[i] > Vmax)
-		{
-			Vmax = table[i];
+	for(i=1; i<numElements; i++) {
+		if (table[i] > max) {
+			max = table[i];
 			*index = i;
 		}
 	}
-	return Vmax;
+	
+	return max;
 }
 
                 
-// Find min voltage
-unsigned int find_MinVolt(unsigned int *table, unsigned char numElements, unsigned char *index)
+// Find smallest unsigned integer
+unsigned int findMinUint(unsigned int *table, unsigned char numElements, unsigned char *index)
 {
-
-	unsigned int Vmin = table[0];
+	unsigned int min = table[0];
 	unsigned char i;
 	
-	for(i=0; i<numElements; ++i)
-	{
-		if (table[i] < Vmin)
-		{
-			Vmin = table[i];
+	for(i=0; i<numElements; ++i) {
+		if (table[i] < min) {
+			min = table[i];
 			*index = i;
 		}
 	}
-	return Vmin;
+	
+	return min;
 }
 
-// Find max temperature
-int find_MaxTemp(int *table, unsigned char numElements, unsigned char *index)
+
+// Find biggest integer
+int findMaxInt(int *table, unsigned char numElements, unsigned char *index)
 {
-	int Tmax = table[0];
+	int max = table[0];
 	unsigned char i = 0;
 	
-	for(i=1; i<numElements; i++)
-	{
-		if (table[i] > Tmax)
-		{
-			Tmax = table[i];
+	for(i=1; i<numElements; i++) {
+		if (table[i] > max) {
+			max = table[i];
 			*index = i;
 		}
 	}
-	return Tmax;
+	
+	return max;
 }
 
                 
-// Find min temperature
-int find_MinTemp(int *table, unsigned char numElements, unsigned char *index)
+// Find smallest integer
+int findMinInt(int *table, unsigned char numElements, unsigned char *index)
 {
-
-	int Tmin = table[0];
+	int min = table[0];
 	unsigned char i;
 	
-	for(i=0; i<numElements; ++i)
-	{
-		if (table[i] < Tmin)
-		{
-			Tmin = table[i];
+	for(i=0; i<numElements; ++i) {
+		if (table[i] < min) {
+			min = table[i];
 			*index = i;
 		}
 	}
-	return Tmin;
+	
+	return min;
 }
+
 
 //*****************************************************************************
 // delayMs
@@ -115,22 +103,21 @@ void delayMs(unsigned int numMs)
 // Finds min & max temperature
 //******************************************************************************
 
-void temperatureCompare(void)
+void temperatureCompare(int cellTemp[][N_CELL], int *lowestT, int *maxT)
 {
   unsigned char indexMax = 0;
   unsigned char indexMin = 0;
   unsigned char i = 0;
-  int lowT[N_MOD_MAX];
-  int maxT[N_MOD_MAX];
+  int lowTable[N_MOD];
+  int maxTable[N_MOD];
   
-  for(i=0; i<gMesuresParams.N_MOD; i++)
-  {
-    lowT[i] = find_MinTemp(gCellTemp[i], gMesuresParams.N_CELL, &indexMin);
-    maxT[i] = find_MaxTemp(gCellTemp[i], gMesuresParams.N_CELL, &indexMax);                
+  for(i=0; i<N_MOD; i++){
+    lowTable[i] = findMinInt(cellTemp[i], N_CELL, &indexMin);
+    maxTable[i] = findMaxInt(cellTemp[i], N_CELL, &indexMax);                
   }
 
-  glowestT = find_MinTemp(lowT, gMesuresParams.N_MOD, &indexMin);
-  gmaxT =    find_MaxTemp(maxT, gMesuresParams.N_MOD, &indexMax);
+  *lowestT = findMinInt(lowTable, N_MOD, &indexMin);
+  *maxT =    findMaxInt(maxTable, N_MOD, &indexMax);
 }
 
 
@@ -138,20 +125,19 @@ void temperatureCompare(void)
 // Finds min & max voltages
 //******************************************************************************
 
-void voltageCompare(void)
+void voltageCompare(unsigned int cellVolt[][N_CELL], unsigned int *lowestV, unsigned int *maxV)
 {
   unsigned char indexMax = 0;
   unsigned char indexMin = 0;
   unsigned char i = 0;
-  unsigned int lowV[N_MOD_MAX];
-  unsigned int maxV[N_MOD_MAX];
+  unsigned int lowTable[N_MOD];
+  unsigned int maxTable[N_MOD];
   
-  for(i=0; i<gMesuresParams.N_MOD; i++)
-  {
-    lowV[i] = find_MinVolt(gCellVolt[i], gMesuresParams.N_CELL, &indexMin);
-    maxV[i] = find_MaxVolt(gCellVolt[i], gMesuresParams.N_CELL, &indexMax);                
+  for(i=0; i<N_MOD; i++){
+    lowTable[i] = findMinUint(cellVolt[i], N_CELL, &indexMin);
+    maxTable[i] = findMaxUint(cellVolt[i], N_CELL, &indexMax);                
   }
 
-  glowestV = find_MinVolt(lowV, gMesuresParams.N_MOD, &indexMin);
-  gmaxV =    find_MaxVolt(maxV, gMesuresParams.N_MOD, &indexMax);
+  *lowestV = findMinUint(lowTable, N_MOD, &indexMin);
+  *maxV =    findMaxUint(maxTable, N_MOD, &indexMax);
 }

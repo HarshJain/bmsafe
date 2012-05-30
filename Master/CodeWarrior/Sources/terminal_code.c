@@ -1,10 +1,9 @@
 
-#include <hidef.h>      /* common defines and macros */
-#include "derivative.h"      /* derivative-specific definitions */
+#include <hidef.h>              /* common defines and macros */
+#include "derivative.h"         /* derivative-specific definitions */
 
-#include <stdio.h> // pour utiliser printf et sprintf
+#include <stdio.h>               // pour utiliser printf et sprintf
 #include "terminal_code.h"
-#include "parameters.h"
 #include "relays.h"
 #include "defines.h"
 #include "can.h"
@@ -14,44 +13,16 @@
 //  Variables definitions
 //************************** 
 
-
 // définitions générales
-
 const char* formatTemp = "%2.1f oC";       //Temperature en dixième de oC
 const char* formatVolt = "%1.3f V";        //1 mV precision
 const char* formatCurr = "%d A";           //Les courants en ampères (paramètres)
 const char* formatCurrMa = "%1.3f A";      //Les courants en ampères (précision 10 mA)
 const char* formatTime = "%d ms";          //Temps en ms
-const char* formatSOC = "%3.1f %%";        //Le SOC
 
-
-//Declarations
-extern unsigned int lastSOC;  
-extern unsigned int glowestV;
-extern unsigned int glowestT;
-extern unsigned int gmaxV;
-extern unsigned int gmaxT;
-extern long int gLastCurrent;
-
-extern unsigned int gCellVolt[N_MOD_MAX][N_CELL_SLV_MAX];
-extern int gCellTemp[N_MOD_MAX][N_CELL_SLV_MAX];
-
-extern int gErrorBits;
-extern unsigned int gSlaveEquiStatus;
-extern unsigned int gSlaveComState;
-extern char gRelaysClosed;
-extern char gActivEqui;
-extern char gActivCharge;
-                      
-//**********************************************************                        
-
-                       
 // système d'index pour les menus
-
-unsigned int niveau_1 = 0;  // 1 = configuration, 2 = status, 3 = commandes
+unsigned int niveau_1 = 0;                  // 1 = configuration, 2 = status, 3 = commandes
 unsigned int niveau_2 = 0;
-unsigned int niveau_3 = 0;
-
 
 // strings du menu d'affichage des paramètres                                            
 unsigned int num_module;                  // numéro du slave à afficher
@@ -59,230 +30,65 @@ unsigned int sci_interrupt_mode = 0;      //0 = mode menu, 1 = mode assignation
 
 
 //***************************************************************
+// Menu principal (niveau 0)
+//***************************************************************
+char *mainMenu =
+"1- Paramètres\n\r\
+2- Status\n\r\
+3- Commandes\n\n\r\
+Attente d'une instruction\n\n\r";
 
-// menu principal (niveau 0)
-char *main_menu[4] = {
-                        "1- Configuration",
-                        "2- Status",
-                        "3- Commandes",
-                        "Wating for user input" 
-                        };
+                        
 //**************************************************************  
 // sous-menu (niveau 1)  
-                        
+//***************************************************************      
 
-// menu de configuration (niveau 1)						 
-char *configuration_menu[5] = {
-                        "1- Paramètres de sécurité",
-                        "2- Paramètres d'équilibration",
-                        "3- Paramètres de mesure",
-                        "4- Paramètres de communication",
-                        "Waiting for user input"
-                        };                     
-// menu d'affichage de données (niveau 1)						 
-char *status_menu[4] = {
-                        "1- Affichage du STATUS",
-                        "2- Affichage des tensions et températures",
-                        "3- Mode continu: affichage des tensions et températures",
-						"Waiting for user input"
-                        }; 
-                         
-// menu de commande (niveau 1)						 
-char *commande_menu[7] = {
-                          "1- Activer équilibration",
-                          "2- Désactiver équilibration",
-                          "3- Fermer relais",
-                          "4- Ouvrir relais",
-                          "5- Activer charge",
-                          "6- Désactiver charge", 
-                          "Waiting for user input"						
-                          }; 
+//menu des paramètres (niveau 1)						 
+char *parametersMenu =
+"1- minDischargeCellTemp\n\r\
+2- maxDischargeCellTemp\n\r\
+3- lowDischargeCellTemp\n\r\
+4- highDischargeCellTemp\n\r\
+5- minChargeCellTemp\n\r\
+6- maxChargeCellTemp\n\r\
+7- lowChargeCellTemp\n\r\
+8- highChargeCellTemp\n\r\
+9- minCellVoltage\n\r\
+a- maxCellVoltage\n\r\
+b- lowCellVoltage\n\r\
+c- highCellVoltage\n\r\
+d- maxMeanChargeCurrent\n\r\
+e- maxMeanDischargeCurrent\n\r\
+f- maxDischargePeakCurrent\n\r\
+g- manualMode\n\n\r\
+Attente d'une instruction\n\n\n\r";
+                       
+//menu d'affichage de données (niveau 1)						 
+char *statusMenu =
+"1- Affichage du STATUS\n\r\
+2- Affichage des tensions et températures\n\r\
+3- Mode continu: affichage des tensions et températures\n\n\r\
+Attente d'une instruction\n\n\n\r";
 
-//***************************************************************
-// menu de configuration niveau 2 (choix des paramètres à modifier)	
+ 
+//menu de commande (niveau 1)						 
+ char *commandsMenu =
+"1- Activer équilibration\n\r\
+2- Désactiver équilibration\n\r\
+3- Fermer relais\n\r\
+4- Ouvrir relais\n\r\
+5- Activer charge\n\r\
+6- Désactiver charge\n\n\r\
+Attente d'une instruction\n\n\n\r";	   				
 
-// sécurité		
-char *configuration_menu_1[16] = {
-                                    "1- TD_MIN_LIM",
-                                    "2- TD_MAX_LIM",
-                                    "3- TD_MIN",
-                                    "4- TD_MAX",
-                                    "5- TC_MIN_LIM",
-                                    "6- TC_MAX_LIM",
-                                    "7- TC_MIN",
-                                    "8- TC_MAX",
-                                    "9- V_MIN_LIM",
-                                    "q- V_MAX_LIM",
-                                    "w- V_MIN",
-								            "e- V_MAX",
-                                    "r- IC_MAX",
-                                    "t- ID_MAX",
-                                    "y- IDP_MAX",
-                                    "Waiting for user input"
-									       };
-
-// équilibrage								
-char *configuration_menu_2[6] = {									
-                                    "1- I_BAL",
-                                    "2- V_BAL",
-                                    "3- DV",
-                                    "4- MAN_CHARGE",
-                                    "5- DEMO_MODE",
-									         "Waiting for user input"
-									      };
-
-// mesures									
-char *configuration_menu_3[8] = {											
-          									"1- DT_V",
-          									"2- DT_VS",
-          									"3- DT_T",
-          									"4- DT_TS",
-          									"5- DT_I",
-          									"6- N_MOD",
-          									"7- N_CELL",                  									                									                									                									
-          									"Waiting for user input"
-                						};
-
-// communication									
-char *configuration_menu_4[3] = {											
-          									"1- DATA_RATE",
-          									"2- BASE_ID",
-          									"Waiting for user input"
-									     };
-
-//***********************************
-// Indications à afficher pour guider l'usager
-// de modification des paramètres
-
- char *help_string[4]= 
-  {
-     "Commandes supplémentaires utiles:",
-     "Appuyer sur la touche 'm' pour afficher le menu principal",
-	 "Appuyer sur la touche 'Enter' pour saisir une donnée",
-     "Appuyer sur la touche 'BS' pour retourner au menu précédent ou interrompre l'action en cours"
-  };
-// Indications pour l'utilisateur lors du processus du processur 
-// de modification des paramètres  
- char *config_string[4]= 
-  {
-     "Modification de ",
-     "Valeurs actuelle du paramètre: ",
-     "\nEntrez une nouvelle valeur",
-     "Nouvelle valeur du paramètre: "    
-  };  
-//************************************
-
-
- //Liste des paramètres
-                									
-// liste de paramètres de sécurité                									
-char *list_param_securite[15] = {
-                                    "TD_MIN_LIM",
-                                    "TD_MAX_LIM",
-                                    "TD_MIN",
-                                    "TD_MAX",
-                                    "TC_MIN_LIM",
-                                    "TC_MAX_LIM",
-                                    "TC_MIN",
-                                    "TC_MAX",
-                                    "V_MIN_LIM",
-                                    "V_MAX_LIM",
-                                    "V_MIN",
-								            "V_MAX",
-                                    "IC_MAX",
-                                    "ID_MAX",
-                                    "IDP_MAX"
-									                };
-									                
-// liste des paramètres d'équilibrage									                
-char *list_param_equilibrage[5] = {									
-                                    "I_BAL",
-                                    "V_BAL",
-                                    "DV",
-                                    "MAN_CHARGE",
-                                    "DEMO_MODE"  
-									              };
-
-
-
-
-// liste des paramètres de mesure							
-char *list_param_mesure[11] = {											
-                									"DT_V",
-                									"DT_VS",
-                									"DT_T",
-                									"DT_TS",
-                									"DT_I",
-                									"N_MOD",
-                									"N_CELL",  
-                									"K_HALL1",
-                									"O_HALL1",                									
-                									"K_HALL2",                									
-                									"O_HALL2"                									                									                									                								
-                									};
-
-									              
-// liste des paramètres de communication									
-char *list_param_comm[2] = {											
-                									"DATA_RATE",
-                									"BASE_ID"
-									              };									              									                                									
-                									
-                									
-                									
-              									
-                									
-//*****************************************
-                																		              
-									
-									
-//********************************************************
-// menu status niveau 2 (choix des données à afficher)
-
-
-char *status_menu_1[8] = {
-                         "STATUS du BMS",
-                         "SOC: ",
-						        "courant: ",
-                         "Vmin: ",
-                         "Vmax: ",
-                         "Tmin: ",
-                         "Tmax: ",
-                         "erreurs: "
-                         }; 
-                        
-char *status_menu_2[2] = {
-                            "Entrer le # du module esclave suivi de la touche enter",
-                            "Affichage des données du module" 
-                         };                        
-
-
-char *status_menu_3[1] = {
-                         "Affichage des données en mode continu pour le module"
-                         }; 
-                        
-
-						
-//**********************************************************
-// menu de commandes niveau 2 (choix des données à afficher)	
-
-char *commande_menu_1[2] = {
-                             "Équilibrage activé",
-                             "Équilibrage désactivé"
-                           }; 
-
-char *commande_menu_2[2] = {
-                           "Relais fermés",
-                           "Relais ouverts",
-                           }; 	
-                         
-
-                                  
-
-//*************************************************************
-//  Functions
-//************************************************************* 
-
+                          
+//Indications à afficher pour guider l'usager de modification des paramètres
+char *help =
+"Commandes supplémentaires utiles\n\r\
+Appuyer sur la touche 'm' pour afficher le menu principal\n\r\
+Appuyer sur la touche 'Enter' pour saisir une donnée\n\r\
+Appuyer sur la touche 'BS' pour retourner au menu précédent ou interrompre l'action en cours\n\n\n\n\r";
+			
 
 //*****************************************************************************
 // SCIPutChar
@@ -291,7 +97,6 @@ char *commande_menu_2[2] = {
 //
 //*****************************************************************************
 void SCIPutChar(char ch) {
-
    while (!(SCI5SR1 & 0x80)) {};
    SCI5DRL = ch;
 }
@@ -310,144 +115,8 @@ void SCIprintString(char* charBuf)
    while (charBuf[i] != '\0') {
       SCIPutChar(charBuf[i]);
       i++;
-   }  
-}
-
-
-//*****************************************************************************
-// skip_lines
-//
-// Description:   Print a number of blank lines. 
-//
-//*****************************************************************************
-void skip_lines (unsigned int number)
-{
-   unsigned int i;
-
-   for(i=0; i<number; i++)
-      SCIPutChar(0xA);
-
-   SCIPutChar(0xD) ;
-}
-
-
-     
-/*
-* SCITx: Write data byte to SCIDRL register to transmission. 
-* 
-*
-* Parameters: array[] : vecteur conteant les string à printer
-*             index   : # de l'élément à imprimer
-*             options : 0 saut de ligne (CR + LF)
-*             options : 1 espace entre 2 données
-*
-* Return : None
-*/
-void SCITx(char *array[], unsigned int index,unsigned int options)
- {
-   
-   unsigned int char_pos = 0;
-
-   while (array[index][char_pos] != '\0')
-   {
-      SCIPutChar(array[index][char_pos]);
-      char_pos++;
    }
-     
-   switch (options)
-   {
-      case 0: 
-          // 1 élément par ligne
-          skip_lines(1);
-          break; 
-
-       case 1: 
-           // Les éléments sont sur une même ligne et espacés par 1 tab
-          SCIPutChar(0x20);     //space                       
-          break;
-     }
- }    
-   
-   
-/*
-* show_menu: Affiche un menu 
-*            L'usager peut interagir avec le MCU.
-*                     
-* Parameters:  Tableau de char* contenant les strings à afficher
-*                              
-*
-* Return : 
-*/ 
-void show_menu(char *menu[], unsigned int nb_elements)
-{
-   unsigned int i;
-
-   for(i=0; i<nb_elements; i++)
-      SCITx(menu, i, 0);
-
-   skip_lines(1);
-}
-
-
-
-/*
-* print_string: Convertie un int en un array de char et print dans le terminal.
-* 
-* Parameters: int arg: valeur à imprimer stocké dans un entier
-*                      type : -0 aucune dimension 		" "
-*                             -1 voltage 				"V"
-*                             -2 temperature 			"oC"
-*                             -3 SOC "State of Charge"  "%"                         
-*						      -4 courant 				"A"
-*							  -5 délai					"ms"
-
-* Return : Aucun
-*
-* NOTE: Cette fonction fait juster shooter le data au terminal
-*        (i.e ne gère aucun saut de ligne)
-*/
-void print_string(int arg, int type)
-{
-   char buffer[20];
-   int char_pos = 0;
-   int sizeof_char_buffer;
-
-   switch (type)
-   {
-      case 0:
-         //conversion du parametre int en char pour nombre sans décimale
-         sizeof_char_buffer = sprintf(buffer,"%d", arg);
-         break;
-         
-      case 1:
-         //conversion du parametre int en char pour voltage
-         sizeof_char_buffer = sprintf(buffer,"%1.2f V", arg/(float)100);
-         break;
-         
-      case 2:
-         //conversion du parametre int en char pour une temperature
-         sizeof_char_buffer = sprintf(buffer,"%2.1f oC", arg/(float)10);
-         break;
-         
-      case 3:
-         //conversion du parametre int en char pour le SOC (%)
-         sizeof_char_buffer = sprintf(buffer,"%3.1f %%", arg/(float)10);
-         break;
-         
-      case 4:
-         //conversion du parametre int en char pour un courant
-         sizeof_char_buffer = sprintf(buffer,"%d A", arg);
-         break;
-         
-      case 5:
-         //conversion du parametre int en char pour un délai en ms
-         sizeof_char_buffer = sprintf(buffer,"%d ms", arg);
-         break;
-   }
-   
-   for(char_pos=0; char_pos <= sizeof_char_buffer; char_pos++)
-      SCIPutChar(buffer[char_pos]);
-   
+   SCIPutChar(charBuf[i]);
 }
 
 
@@ -460,9 +129,8 @@ void print_string(int arg, int type)
 *              int nb_cell : nombre de cellule par module
 * Return : aucun.
 */
-void get_cells_data(unsigned int volt[][N_CELL_SLV_MAX], int temp[][N_CELL_SLV_MAX], int numer_mod, int nb_cell)
+void get_cells_data(unsigned int volt[][N_CELL], int temp[][N_CELL], int numer_mod)
 {
-  
    char cbuffer[8]; //buffer pour la conversion en char
    int nb_char;     // nombre de char dans le buffer (<8)
    int char_pos;  // position du char dans la loop d'écriture du *char
@@ -471,7 +139,7 @@ void get_cells_data(unsigned int volt[][N_CELL_SLV_MAX], int temp[][N_CELL_SLV_M
 
    unsigned int cell = 0; // cellule pour laquelle on affiche des donnés
    
-   for(cell=0; cell < nb_cell; cell++)
+   for(cell=0; cell < N_CELL; cell++)
    {
       nb_char = sprintf(cbuffer,"cell %d:", cell);
 
@@ -479,14 +147,13 @@ void get_cells_data(unsigned int volt[][N_CELL_SLV_MAX], int temp[][N_CELL_SLV_M
          SCIPutChar(cbuffer[char_pos]);
 
       SCIPutChar(0x20);                       //space
-      //print_string(volt[numer_mod][cell],1);  // écriture du voltage
       junk = sprintf(buf, formatVolt, (float)volt[numer_mod][cell]/1000.0);
       SCIprintString(buf);
       SCIPutChar(0x20);                       //space   
-      //print_string(temp[numer_mod][cell],2);  //écriture de la température
+
       junk = sprintf(buf, formatTemp, (float)temp[numer_mod][cell]/10.0);
       SCIprintString(buf);
-      skip_lines(1);
+      SCIprintString("\n\r");
    }
      
 }
@@ -495,7 +162,6 @@ void get_cells_data(unsigned int volt[][N_CELL_SLV_MAX], int temp[][N_CELL_SLV_M
 // SCIprintStatus
 //
 // Description:   Print the status of the BMS. Including:
-//                - SOC
 //                - Last current measurement
 //                - Minimal cell voltage, maximal cell voltage
 //                - Minimal cell temperature, maximal cell temperature
@@ -504,45 +170,35 @@ void get_cells_data(unsigned int volt[][N_CELL_SLV_MAX], int temp[][N_CELL_SLV_M
 //*****************************************************************************
 void SCIprintStatus(void)
 {
-   int junk;
-   char buf[40];
+    int junk;
+    char buf[70];
 
-    SCITx(status_menu_1, 0 ,1);  //"STATUS du BMS "
-	 skip_lines(1);
-	 												
-	 SCITx(status_menu_1, 1 ,1);  //"SOC: "
-	 junk = sprintf(buf, formatSOC, (float)lastSOC/10.0);
+    SCIprintString("-------------\n\rStatus du BMS\n\r-------------\n\r");
+    
+    SCIprintString("Courant moyen: ");
+    junk = sprintf(buf, formatCurrMa, (float)gMeanCurrent/1000.0);
     SCIprintString(buf);
-	 skip_lines(1);
-	 
-	 SCITx(status_menu_1, 2 ,1);  //"courant: "
-	 junk = sprintf(buf, formatCurrMa, (float)gLastCurrent/1000.0);
-    SCIprintString(buf);
-	 skip_lines(1);
-	 
-	 SCITx(status_menu_1, 3 ,1);  //"Vmin: "
-	 junk = sprintf(buf, formatVolt, (float)glowestV/1000.0);
-    SCIprintString(buf);
-	 skip_lines(1);
-	 
-	 SCITx(status_menu_1, 4 ,1);  //"Vmax: "
-	 junk = sprintf(buf, formatVolt, (float)gmaxV/1000.0);
-    SCIprintString(buf);
-	 skip_lines(1);
-	 
-	 SCITx(status_menu_1, 5 ,1);  //"Tmin: "
-	 junk = sprintf(buf, formatTemp, (float)glowestT/10.0);
-    SCIprintString(buf);
-	 skip_lines(1);
-	 
-	 SCITx(status_menu_1, 6 ,1);  //"Tmax: "
-	 junk = sprintf(buf, formatTemp, (float)gmaxT/10.0);
-    SCIprintString(buf);
-	 skip_lines(1);
 
-	 SCIprintErrors();
-	 
-	 skip_lines(2);
+    SCIprintString("\n\rTension de cellule minimale: ");
+    junk = sprintf(buf, formatVolt, (float)*gLowestCellVoltage/1000.0);
+    SCIprintString(buf);
+
+    SCIprintString("\n\rTension de cellule maximale: ");
+    junk = sprintf(buf, formatVolt, (float)*gHighestCellVoltage/1000.0);
+    SCIprintString(buf);
+
+    SCIprintString("\n\rTempérature de cellule minimale: ");
+    junk = sprintf(buf, formatTemp, (float)*gLowestCellTemp/10.0);
+    SCIprintString(buf);
+
+    SCIprintString("\n\rTempérature de cellule maximale: ");
+    junk = sprintf(buf, formatTemp, (float)*gHighestCellTemp/10.0);
+    SCIprintString(buf);
+    SCIprintString("\n\n\r");
+    
+    SCIprintErrors();
+    
+    SCIprintString("\n\r");
 }
 
 
@@ -559,47 +215,38 @@ void SCIprintErrors(void)
    int junk;
    unsigned int tmp=0;
 
-   
-   SCIprintString("Errors:\n");
+   SCIprintString("Erreurs:\n\r");
 
-   if(gErrorBits & ERROR_GND_FAULT)
-      SCIprintString("Ground fault error\n");  
-
-   if(gErrorBits & ERROR_SLV_COM_TO){
-      SCIprintString("Slave communication timeout error for module(s): ");
-      for(i=0; i<gMesuresParams.N_MOD; i++) {
+   if(gError.slaveTimeout){
+      SCIprintString("Expiration de la communication avec les modules: ");
+      for(i=0; i<N_MOD; i++) {
          tmp = 1<<i;
          if((gSlaveComState & tmp) == tmp){
-            junk = sprintf(buf,"%d ", i);
+            junk = sprintf(buf,"%d ", i+1);
             SCIprintString(buf);
          }  
       }
-      SCIPutChar('\n');
+      SCIprintString("\n\r");
    } 
 
-   if(gErrorBits & ERROR_SLV_COM_DATA)
-      SCIprintString("Slave communication data integrity error\n");
+   if(gError.cellOpenConnection)
+      SCIprintString("Une cellule est déconnectée\n\r");
 
-   if(gErrorBits & ERROR_OPEN_CONNECT)
-      SCIprintString("Cell open connection error\n");
+   if(gError.cellMaxVolt)
+      SCIprintString("Tension de cellules maximale atteinte\n\r");
 
-   if(gErrorBits & ERROR_MAX_VOLT)
-      SCIprintString("Cell overvoltage error\n");
+   if(gError.cellMinVolt)
+      SCIprintString("Tension de cellules minimale atteinte\n\r");
 
-   if(gErrorBits & ERROR_MIN_VOLT)
-      SCIprintString("Cell undervoltage error\n");
+   if(gError.cellMaxTemp)
+      SCIprintString("Température de cellule maximale atteinte\n\r");
 
-   if(gErrorBits & ERROR_MAX_TEMP)
-      SCIprintString("Temperature too high error\n");
+   if(gError.cellMinTemp)
+      SCIprintString("Température de cellule minimale atteinte\n\r");
 
-   if(gErrorBits & ERROR_MIN_TEMP)
-      SCIprintString("Temperature too low error\n");
+   if(gError.maxPeakCurrent)
+      SCIprintString("Courant moyen sur 10 s maximal atteint\n\r");
 
-   if(gErrorBits & ERROR_MAX_MEAN_CURR)
-      SCIprintString("Maximum mean current error\n");
-
-   if(gErrorBits & ERROR_MAX_PEAK_CURR)
-      SCIprintString("Maximum peak current error\n");
 
 }
 
@@ -614,50 +261,12 @@ void SCIprintErrors(void)
 //*****************************************************************************
 void SCIupAlevel(void)
 {
-   if(niveau_3 != 0){
-      niveau_3 = 0;
-      
-   } else if(niveau_2 != 0) {
-      niveau_2 = 0;
-      	      
-   } else {  
+   if(niveau_2 != 0)
+      niveau_2 = 0;  	      
+    else  
       niveau_1 = 0; 
-   }
 }
 
-/*
-void SCIcontinuous(void)
-{
-
-   static unsigned char count = 10;
-   unsigned int i;
-   char buf[160];
-   int nChar;
-   char* bufPos;
-   
-   bufPos = buf;
-
-   if(count == 10){
-      count = 0;
-      for(i=0; i<gMesuresParams.N_CELL; i++){
-         nChar = sprintf(bufPos, "CELL%d          ",i);
-         bufPos += (nChar-1);  
-      }
-      sprintf(bufPos, "\n",i);
-      SCIprintString(buf);
-   }
-
-   bufPos = buf;
-
-   for(i=0; i<gMesuresParams.N_CELL; i++){
-      nChar = sprintf(bufPos, "%1.3f/%2.1f      ", (float)gCellVolt[num_module-1][i]/1000.0, (float)gCellTemp[num_module-1][i]/10.0);
-      bufPos += (nChar-1);  
-   }
-   sprintf(bufPos, "\n",i);
-   SCIprintString(buf);
-   
-}
-*/
 
 //*****************************************************************************
 // SCIshowMenu
@@ -675,542 +284,272 @@ void SCIshowMenu(unsigned char input)
 //***************************************
 //menu principal (3 choix)		
 //***************************************
-		if (niveau_1 == 0 && niveau_2 == 0 && niveau_3 == 0)  															 
+		if (niveau_1 == 0 && niveau_2 == 0)  															 
 		{
 			//chaque case permet d'afficher un sous-menu différent à l'écran
-			switch (input)
-			{
-            case 0:    //Root menu
-               show_menu(main_menu, 4);
-         		skip_lines(1);
-         		show_menu(help_string, 4);   
-               break;
-            case '1':  //affichage menu configuration
-               show_menu(configuration_menu, 5);
-               niveau_1 = 1; 
-               break;
-            case '2':  //Affichage menu status
-               show_menu(status_menu, 4);
-               niveau_1 = 2;
-               break;
-            case '3': //Affichage menu commande
-               show_menu(commande_menu, 7);
-               niveau_1 = 3;
-               break;
+			switch (input) {
+                case 0:    //Root menu
+                   SCIprintString(mainMenu);
+                   SCIprintString(help);
+                   break;
+                case '1':  //affichage menu paramètres
+                   SCIprintString(parametersMenu);
+                   niveau_1 = 1; 
+                   break;
+                case '2':  //Affichage menu status
+                   SCIprintString(statusMenu);
+                   niveau_1 = 2;
+                   break;
+                case '3': //Affichage menu commande
+                   SCIprintString(commandsMenu);
+                   niveau_1 = 3;
+                   break;
 			} 
-			
-			skip_lines(2);
 		}
-//menu de configuration (4 sous menus de paramètres à modifier)
-		else if (niveau_1 == 1 && niveau_2 == 0 && niveau_3 == 0)  
-		{													  
-			//chaque case permet d'afficher un sous-menu du menu de configuration
-			switch (input)
-			{
-			  case 0:    //Root menu
-               show_menu(configuration_menu, 5);   
-               break;
-			  case '1':  //Paramètres de sécurité
-					show_menu(configuration_menu_1, 16);			
-					niveau_2 = 1;				
-					break;
-			  case '2':  //Paramètres d'équilibrage
-					show_menu(configuration_menu_2, 6);							
-					niveau_2 = 2;				
-					break;
-			  case '3': //Paramètres de mesures
-					show_menu(configuration_menu_3, 8);				
-					niveau_2 = 3; 				
-					break;
-			  case '4': //Paramètres de communication
-					show_menu(configuration_menu_4, 3);			
-					niveau_2 = 4; 								
-					break;				
-			}
-			
-			skip_lines(2);
-		}	
-//sous-menu configuration_menu_1 (liste des paramètres de sécurité (16 choix))
-		else if (niveau_1 == 1 && niveau_2 == 1 && niveau_3 == 0)  
-		{													  
-			//chaque case permet d'afficher un sous-menu du menu de configuration
-			switch (input)
-			{
-			  case 0:    //Root menu
-               show_menu(configuration_menu_1, 16);   
-               break;    
-               
-			  case '1':  //TD_MIN_LIM
-				niveau_3 = 1;
-				SCITx(config_string, 0 ,1);         //"Modification de "
-				SCITx(list_param_securite, 0 ,0);   //nom du param que l'on modifie	
-				SCITx(config_string, 1 ,1);         // "Valeurs actuelle du paramètre: "
-            junk = sprintf(buf,formatTemp, (float)gSecurityParams.TD_MIN_LIM/10.0);
-            SCIprintString(buf); 
-				SCITx(config_string, 2 ,0);         //"Entrez une nouvelle valeur",
-				sci_interrupt_mode = 1;             //input mode (sci_interrupt_mode = 1)
-				break;
-				
-			  case '2':  //TD_MAX_LIM
-				niveau_3 = 2;
-				SCITx(config_string, 0 ,1); //"Modification de "
-				SCITx(list_param_securite, 1 ,0); //nom du param que l'on modifie
-				SCITx(config_string, 1 ,1); // "Valeurs actuelle du paramètre: "
-				junk = sprintf(buf,formatTemp, (float)gSecurityParams.TD_MAX_LIM/10.0);
-            SCIprintString(buf);
-				SCITx(config_string, 2 ,0);  //"Entrez une nouvelle valeur",
-				sci_interrupt_mode = 1;  //input mode (sci_interrupt_mode =1)				
-				break;
-				
-			  case '3': //TD_MIN
-				niveau_3 = 3;
-				SCITx(config_string, 0 ,1); //"Modification de "
-				SCITx(list_param_securite, 2 ,0); //nom du param que l'on modifie
-				SCITx(config_string, 1 ,1); // "Valeurs actuelle du paramètre: "
-				junk = sprintf(buf,formatTemp, (float)gSecurityParams.TD_MIN/10.0);
-            SCIprintString(buf);
-				SCITx(config_string, 2 ,0);  //"Entrez une nouvelle valeur",
-				sci_interrupt_mode = 1;  //input mode (sci_interrupt_mode =1)				
-				break;
-				
-			  case '4': //TD_MAX
-				niveau_3 = 4;
-				SCITx(config_string, 0 ,1); //"Modification de "
-				SCITx(list_param_securite, 3 ,0); //nom du param que l'on modifie
-				SCITx(config_string, 1 ,1); // "Valeurs actuelle du paramètre: "
-		   	junk = sprintf(buf,formatTemp, (float)gSecurityParams.TD_MAX/10.0);
-            SCIprintString(buf); 
-				SCITx(config_string, 2 ,0);  //"Entrez une nouvelle valeur",
-				sci_interrupt_mode = 1;  //input mode (sci_interrupt_mode =1)				
-				break;
-								
-			  case '5': //TC_MIN_LIM 
-				niveau_3 = 5;
-				SCITx(config_string, 0 ,1); //"Modification de "
-				SCITx(list_param_securite, 4 ,0); //nom du param que l'on modifie
-				SCITx(config_string, 1 ,1); // "Valeurs actuelle du paramètre: "
-				junk = sprintf(buf,formatTemp, (float)gSecurityParams.TC_MIN_LIM/10.0);
-            SCIprintString(buf);
-				SCITx(config_string, 2 ,0);  //"Entrez une nouvelle valeur",
-				sci_interrupt_mode = 1;  //input mode (sci_interrupt_mode =1)				
-				break;
-				
-			  case '6': //TC_MAX_LIM
-				niveau_3 = 6;
-				SCITx(config_string, 0 ,1); //"Modification de "
-				SCITx(list_param_securite, 5 ,0); //nom du param que l'on modifie
-				SCITx(config_string, 1 ,1); // "Valeurs actuelle du paramètre: "
-				junk = sprintf(buf,formatTemp, (float)gSecurityParams.TC_MAX_LIM/10.0);
-            SCIprintString(buf);
-				SCITx(config_string, 2 ,0);  //"Entrez une nouvelle valeur",
-				sci_interrupt_mode = 1;  //input mode (sci_interrupt_mode =1)				
-				break;
-				
-			  case '7': //TC_MIN 
-				niveau_3 = 7;
-				SCITx(config_string, 0 ,1); //"Modification de "
-				SCITx(list_param_securite, 6 ,0); //nom du param que l'on modifie
-				SCITx(config_string, 1 ,1); // "Valeurs actuelle du paramètre: " 
-		   	junk = sprintf(buf,formatTemp, (float)gSecurityParams.TC_MIN/10.0);
-            SCIprintString(buf);
-				SCITx(config_string, 2 ,0);  //"Entrez une nouvelle valeur",
-				sci_interrupt_mode = 1;  //input mode (sci_interrupt_mode =1)				
-				break;
-				
-			  case '8': //TC_MAX 
-				niveau_3 = 8;
-				SCITx(config_string, 0 ,1); //"Modification de "
-				SCITx(list_param_securite, 7 ,0); //nom du param que l'on modifie
-				SCITx(config_string, 1 ,1); // "Valeurs actuelle du paramètre: "
-				junk = sprintf(buf,formatTemp, (float)gSecurityParams.TC_MAX/10.0);
-            SCIprintString(buf); 
-				SCITx(config_string, 2 ,0);  //"Entrez une nouvelle valeur",
-				sci_interrupt_mode = 1;  //input mode (sci_interrupt_mode =1)				
-				break;
-				
-			  case '9': //V_MIN_LIM
-				niveau_3 = 9;
-				SCITx(config_string, 0 ,1); //"Modification de "
-				SCITx(list_param_securite, 8 ,0); //nom du param que l'on modifie
-				SCITx(config_string, 1 ,1); // "Valeurs actuelle du paramètre: "
-		   	junk = sprintf(buf,formatVolt, (float)gSecurityParams.V_MIN_LIM/1000.0);
-            SCIprintString(buf);
-				SCITx(config_string, 2 ,0);  //"Entrez une nouvelle valeur",
-				sci_interrupt_mode = 1;  //input mode (sci_interrupt_mode =1)				
-				break;
-				
-			  case 'q': //V_MAX_LIM 
-				niveau_3 = 10;
-				SCITx(config_string, 0 ,1); //"Modification de "
-				SCITx(list_param_securite, 9 ,0); //nom du param que l'on modifie
-				SCITx(config_string, 1 ,1); // "Valeurs actuelle du paramètre: "
-				junk = sprintf(buf,formatVolt, (float)gSecurityParams.V_MAX_LIM/1000.0);
-            SCIprintString(buf);
-				SCITx(config_string, 2 ,0);  //"Entrez une nouvelle valeur",
-				sci_interrupt_mode = 1;  //input mode (sci_interrupt_mode =1)				
-				break;
-				
-			  case 'w': //V_MIN 
-				niveau_3 = 11;
-				SCITx(config_string, 0 ,1); //"Modification de "
-				SCITx(list_param_securite, 10 ,0); //nom du param que l'on modifie
-				SCITx(config_string, 1 ,1); // "Valeurs actuelle du paramètre: "
-				junk = sprintf(buf,formatVolt, (float)gSecurityParams.V_MIN/1000.0);
-            SCIprintString(buf);
-				SCITx(config_string, 2 ,0);  //"Entrez une nouvelle valeur",
-				sci_interrupt_mode = 1;  //input mode (sci_interrupt_mode =1)				
-				break;
-				
-			  case 'e': //V_MAX 
-				niveau_3 = 12;
-				SCITx(config_string, 0 ,1); //"Modification de "
-				SCITx(list_param_securite, 11 ,0); //nom du param que l'on modifie
-				SCITx(config_string, 1 ,1); // "Valeurs actuelle du paramètre: "
-				junk = sprintf(buf,formatVolt, (float)gSecurityParams.V_MAX/1000.0);
-            SCIprintString(buf);
-				SCITx(config_string, 2 ,0);  //"Entrez une nouvelle valeur",
-				sci_interrupt_mode = 1;  //input mode (sci_interrupt_mode =1)				
-				break;
-				
-			  case 'r': //IC_MAX			  
-				niveau_3 = 13;
-				SCITx(config_string, 0 ,1); //"Modification de "
-				SCITx(list_param_securite, 12 ,0); //nom du param que l'on modifie
-				SCITx(config_string, 1 ,1); // "Valeurs actuelle du paramètre: "
-				junk = sprintf(buf,formatCurr, gSecurityParams.IC_MAX);
-            SCIprintString(buf);
-				SCITx(config_string, 2 ,0);  //"Entrez une nouvelle valeur",
-				sci_interrupt_mode = 1;  //input mode (sci_interrupt_mode =1)				
-				break;
-				
-			  case 't': //ID_MAX			  
-				niveau_3 = 14;
-				SCITx(config_string, 0 ,1); //"Modification de "
-				SCITx(list_param_securite, 13 ,0); //nom du param que l'on modifie
-				SCITx(config_string, 1 ,1); // "Valeurs actuelle du paramètre: "
-				junk = sprintf(buf,formatCurr, gSecurityParams.ID_MAX);
-            SCIprintString(buf);
-				SCITx(config_string, 2 ,0);  //"Entrez une nouvelle valeur",
-				sci_interrupt_mode = 1;  //input mode (sci_interrupt_mode =1)				
-				break;
-				
-			  case 'y': //IDP_MAX			  
-				niveau_3 = 15;
-				SCITx(config_string, 0 ,1);         //"Modification de "
-				SCITx(list_param_securite, 14 ,0);  //nom du param que l'on modifie
-				SCITx(config_string, 1 ,1);         // "Valeurs actuelle du paramètre: "
-				junk = sprintf(buf,formatCurr, gSecurityParams.IDP_MAX);
-            SCIprintString(buf);
-				SCITx(config_string, 2 ,0);         //"Entrez une nouvelle valeur",
-				sci_interrupt_mode = 1;             //input mode (sci_interrupt_mode =1)				
-				break;				
-			}
-			
-			skip_lines(1);
-		}		
-//sous-menu configuration_menu_2 (liste des paramètres d'équilibrage(4 choix))
-		else if (niveau_1 == 1 && niveau_2 == 2 && niveau_3 == 0)  
-		{													  
-			//chaque case permet d'afficher un sous-menu du menu de configuration
-			switch (input)
-			{
-            case 0:    //Root menu
-               show_menu(configuration_menu_2, 6);   
-               break;
-			  case '1':  //I_BAL			    
-				niveau_3 = 1;
-				SCITx(config_string, 0 ,1); //"Modification de "
-				SCITx(list_param_equilibrage, 0 ,0); //nom du param que l'on modifie							
-				SCITx(config_string, 1,1); // "Valeurs actuelle du paramètre: "
-				junk = sprintf(buf,formatCurr, gEquiParams.I_BAL);
-            SCIprintString(buf);
-				SCITx(config_string, 2 ,1);  //"Entrez une nouvelle valeur",
-				sci_interrupt_mode = 1;  //input mode (sci_interrupt_mode =1)
-				break;			  
-			  case '2':  //V_BAL			  
-				niveau_3 = 2;
-				SCITx(config_string, 0 ,1); //"Modification de "
-				SCITx(list_param_equilibrage, 1 ,0);	//nom du param que l'on modifie
-				SCITx(config_string, 1 ,1); // "Valeurs actuelle du paramètre: "
-				junk = sprintf(buf,formatVolt, (float)gEquiParams.V_BAL/1000.0);
-            SCIprintString(buf);
-				SCITx(config_string, 2 ,0);  //"Entrez une nouvelle valeur",
-				sci_interrupt_mode = 1;  //input mode (sci_interrupt_mode =1)				
-				break;
-			  case '3': //DV			  
-				niveau_3 = 3;
-				SCITx(config_string, 0 ,1); //"Modification de "
-				SCITx(list_param_equilibrage, 2 ,0);	//nom du param que l'on modifie
-				SCITx(config_string, 1 ,1); // "Valeurs actuelle du paramètre: "
-				junk = sprintf(buf,formatVolt, (float)gEquiParams.DV/1000.0);
-            SCIprintString(buf);
-				SCITx(config_string, 2 ,0);  //"Entrez une nouvelle valeur",
-				sci_interrupt_mode = 1;  //input mode (sci_interrupt_mode =1)				
-				break;
-			  case '4': //MAN_CHARGE			  
-				niveau_3 = 4;SCITx(config_string, 0 ,1); //"Modification de "
-				SCITx(list_param_equilibrage, 3 ,0);	//nom du param que l'on modifie
-				SCITx(config_string, 1 ,1); // "Valeurs actuelle du paramètre: "
-			   junk = sprintf(buf,"%d", gEquiParams.MAN_CHARGE);
-            SCIprintString(buf);
-				SCITx(config_string, 2 ,0);  //"Entrez une nouvelle valeur",
-				sci_interrupt_mode = 1;  //input mode (sci_interrupt_mode =1)				
-				break;
-			  case '5': //DEMO_MODE			  
-				niveau_3 = 5;SCITx(config_string, 0 ,1); //"Modification de "
-				SCITx(list_param_equilibrage, 4 ,0);	//nom du param que l'on modifie
-				SCITx(config_string, 1 ,1); // "Valeurs actuelle du paramètre: "
-			   junk = sprintf(buf,"%u", gEquiParams.DEMO_MODE);
-            SCIprintString(buf);
-				SCITx(config_string, 2 ,0);  //"Entrez une nouvelle valeur",
-				sci_interrupt_mode = 1;  //input mode (sci_interrupt_mode =1)				
-				break;					
-			}
-			skip_lines(1);			
-		}
-//sous-menu configuration_menu_3 (liste des paramètres de mesure (7 choix))
-		else if (niveau_1 == 1 && niveau_2 == 3 && niveau_3 == 0)  
-		{													  
-			//chaque case permet d'afficher un sous-menu du menu de configuration
-			switch (input)
-			{
-			  case 0:    //Root menu
-               show_menu(configuration_menu_3, 8);   
-               break;
-			  case '1':  //DT_V
-				niveau_3 = 1;
-				SCITx(config_string, 0 ,1); //"Modification de "
-				SCITx(list_param_mesure, 0 ,0); //nom du param que l'on modifie
-				SCITx(config_string, 1 ,1); // "Valeurs actuelle du paramètre: "
-				junk = sprintf(buf,formatTime, gMesuresParams.DT_V);
-            SCIprintString(buf);
-				SCITx(config_string, 2 ,0);  //"Entrez une nouvelle valeur",
-				sci_interrupt_mode = 1;  //input mode (sci_interrupt_mode =1)
-				break;
-			  
-			  case '2':  //DT_VS
-				niveau_3 = 2;
-				SCITx(config_string, 0 ,1); //"Modification de "
-				SCITx(list_param_mesure, 1 ,0); //nom du param que l'on modifie
-				SCITx(config_string, 1 ,1); // "Valeurs actuelle du paramètre: "
-				junk = sprintf(buf,formatTime, gMesuresParams.DT_VS);
-            SCIprintString(buf);
-				SCITx(config_string, 2 ,0);  //"Entrez une nouvelle valeur",
-				sci_interrupt_mode = 1;  //input mode (sci_interrupt_mode =1)				
-				break;
-
-			  case '3': //DT_T  			  
-				niveau_3 = 3;
-				SCITx(config_string, 0 ,1); //"Modification de "
-				SCITx(list_param_mesure, 2 ,0); //nom du param que l'on modifie
-				SCITx(config_string, 1 ,1); // "Valeurs actuelle du paramètre: "
-				junk = sprintf(buf,formatTime, gMesuresParams.DT_T);
-            SCIprintString(buf);
-				SCITx(config_string, 2 ,0);  //"Entrez une nouvelle valeur",
-				sci_interrupt_mode = 1;  //input mode (sci_interrupt_mode =1)				
-				break;
-
-			  case '4': //DT_TS 			   
-				niveau_3 = 4;
-				SCITx(config_string, 0 ,1); //"Modification de "
-				SCITx(list_param_mesure, 3 ,0); //nom du param que l'on modifie
-				SCITx(config_string, 1 ,1); // "Valeurs actuelle du paramètre: "
-				junk = sprintf(buf,formatTime, gMesuresParams.DT_TS);
-            SCIprintString(buf);
-				SCITx(config_string, 2 ,0);  //"Entrez une nouvelle valeur",
-				sci_interrupt_mode = 1;  //input mode (sci_interrupt_mode =1)				
-				break;							
-			  case '5': //DT_I			  
-				niveau_3 = 5;
-				SCITx(config_string, 0 ,1); //"Modification de "
-				SCITx(list_param_mesure, 4 ,0); //nom du param que l'on modifie
-				SCITx(config_string, 1 ,1); // "Valeurs actuelle du paramètre: "
-				junk = sprintf(buf,formatTime, gMesuresParams.DT_I);
-            SCIprintString(buf);
-				SCITx(config_string, 2 ,0);  //"Entrez une nouvelle valeur",
-				sci_interrupt_mode = 1;  //input mode (sci_interrupt_mode =1)				
-				break;
-			  case '6': //N_MOD     			   
-				niveau_3 = 6;
-				SCITx(config_string, 0 ,1); //"Modification de "
-				SCITx(list_param_mesure, 5 ,0); //nom du param que l'on modifie
-				SCITx(config_string, 1 ,1); // "Valeurs actuelle du paramètre: "
-				junk = sprintf(buf,"%u", gMesuresParams.N_MOD);
-            SCIprintString(buf);
-				SCITx(config_string, 2 ,0);  //"Entrez une nouvelle valeur",
-				sci_interrupt_mode = 1;  //input mode (sci_interrupt_mode =1)				
-				break;
         
-			  case '7': //N_CELL			  
-				niveau_3 = 7;
-				SCITx(config_string, 0 ,1); //"Modification de "
-				SCITx(list_param_mesure, 6 ,0); //nom du param que l'on modifie
-				SCITx(config_string, 1 ,1); // "Valeurs actuelle du paramètre: "
-				junk = sprintf(buf,"%u", gMesuresParams.N_CELL);
-            SCIprintString(buf);
-				SCITx(config_string, 2 ,0);  //"Entrez une nouvelle valeur",
-				sci_interrupt_mode = 1;  //input mode (sci_interrupt_mode =1)				
-				break;
-	
-			}
-			skip_lines(1);
-		}			  		
-//sous-menu configuration_menu_4 (liste des paramètres de communication (2 choix))
-		else if (niveau_1 == 1 && niveau_2 == 4 && niveau_3 == 0)  
-		{													  
-			//chaque case permet d'afficher un sous-menu du menu de configuration
-			switch (input)
-			{
-			  case 0:    //Root menu
-               show_menu(configuration_menu_4, 3);   
-               break;			
-			  case '1':  //DATA_RATE
-				niveau_3 = 1;
-				SCITx(config_string, 0 ,1); //"Modification de "
-				SCITx(list_param_comm, 0 ,0); //nom du param que l'on modifie
-				SCITx(config_string, 1 ,1); // "Valeurs actuelle du paramètre: "
-				junk = sprintf(buf,"%u", gComParams.DATA_RATE);
-            SCIprintString(buf);
-				SCITx(config_string, 2 ,0);  //"Entrez une nouvelle valeur",
-				sci_interrupt_mode = 1;  //input mode (sci_interrupt_mode =1)
-				break;			  
-			  case '2':  //BASE_ID			  
-				niveau_3 = 2;
-				SCITx(config_string, 0 ,1); //"Modification de "
-				SCITx(list_param_comm, 1 ,0); //nom du param que l'on modifie
-				SCITx(config_string, 1 ,1); // "Valeurs actuelle du paramètre: "
-				junk = sprintf(buf,"%u", gComParams.BASE_ID);
-            SCIprintString(buf);
-				SCITx(config_string, 2 ,0);  //"Entrez une nouvelle valeur",
-				sci_interrupt_mode = 1;  //input mode (sci_interrupt_mode =1)				
-				break;		
-			}
-			skip_lines(1);
-		}		
+//menu de paramètres
+		else if (niveau_1 == 1 && niveau_2 == 0)  
+		{	
+            if(input == 0) {    //Root menu
+                SCIprintString(parametersMenu);
+                
+            } else if((input >= '1' && input <= '9') || (input >= 'a' && input <= 'g')) {   //Bon choix
+            
+                switch (input) {
+
+                  case '1':  //minDischargeCellTemp
+                    junk = sprintf(buf, formatTemp, (float)gParams.minDischargeCellTemp/10.0);
+                    niveau_2 = 1;
+                    break;
+                    
+                  case '2':  //maxDischargeCellTemp
+                    junk = sprintf(buf,formatTemp, (float)gParams.maxDischargeCellTemp/10.0);
+                    niveau_2 = 2;                
+                    break;
+                    
+                  case '3': //lowDischargeCellTemp
+                    junk = sprintf(buf,formatTemp, (float)gParams.lowDischargeCellTemp/10.0);
+                    niveau_2 = 3;
+                    break;
+                    
+                  case '4': //highDischargeCellTemp
+                    junk = sprintf(buf,formatTemp, (float)gParams.highDischargeCellTemp/10.0);
+                    niveau_2 = 4;
+                    break;
+                                    
+                  case '5': //minChargeCellTemp 
+                    junk = sprintf(buf,formatTemp, (float)gParams.minChargeCellTemp/10.0);
+                    niveau_2 = 5;                
+                    break;
+                    
+                  case '6': //maxChargeCellTemp
+                    junk = sprintf(buf,formatTemp, (float)gParams.maxChargeCellTemp/10.0);
+                    niveau_2 = 6;				
+                    break;
+                    
+                  case '7': //lowChargeCellTemp 
+                    junk = sprintf(buf,formatTemp, (float)gParams.lowChargeCellTemp/10.0);
+                    niveau_2 = 7;
+                    break;
+                    
+                  case '8': //highChargeCellTemp 
+                    niveau_2 = 8;
+                    junk = sprintf(buf,formatTemp, (float)gParams.highChargeCellTemp/10.0);			
+                    break;
+                    
+                  case '9': //minCellVoltage
+                    niveau_2 = 9;
+                    junk = sprintf(buf,formatVolt, (float)gParams.minCellVoltage/1000.0);			
+                    break;
+                    
+                  case 'a': //maxCellVoltage 
+                    niveau_2 = 10;
+                    junk = sprintf(buf,formatVolt, (float)gParams.maxCellVoltage/1000.0);			
+                    break;
+                    
+                  case 'b': //lowCellVoltage 
+                    niveau_2 = 11;
+                    junk = sprintf(buf,formatVolt, (float)gParams.lowCellVoltage/1000.0);			
+                    break;
+                    
+                  case 'c': //highCellVoltage                 
+                    niveau_2 = 12;
+                    junk = sprintf(buf,formatVolt, (float)gParams.highCellVoltage/1000.0);
+                    break;
+                    
+                  case 'd': //maxMeanChargeCurrent
+                    niveau_2 = 13;
+                    junk = sprintf(buf,formatCurr, gParams.maxMeanChargeCurrent);				
+                    break;
+                    
+                  case 'e': //maxMeanDischargeCurrent	
+                    niveau_2 = 14;
+                    junk = sprintf(buf,formatCurr, gParams.maxMeanDischargeCurrent);			
+                    break;
+                    
+                  case 'f': //maxPeakDischargeCurrent
+                    niveau_2 = 15;;
+                    junk = sprintf(buf,formatCurr, gParams.maxPeakDischargeCurrent);		
+                    break;
+
+                  case 'g': //manualMode
+                    niveau_2 = 16;
+                    junk = sprintf(buf,"%u", gParams.manualMode);		
+                    break;
+                }
+                
+                SCIprintString("Valeur actuelle du paramètre: ");
+                SCIprintString(buf);
+                SCIprintString("\n\rEntrez une nouvelle valeur: ");
+                sci_interrupt_mode = 1;             //input mode (sci_interrupt_mode = 1)	
+                
+			} else {
+                SCIprintString("Choix erroné, essayez de nouveau.\n\n\n\r");
+                SCIprintString(parametersMenu);
+                
+            }   //end else if root/bon/mauvais choix
+            
+		}  //end else if(menu de paramètres)	
+
+		
 //***************************************
 //menu de status (3 choix)
 //***************************************
-		else if (niveau_1 == 2 && niveau_2 == 0 && niveau_3 == 0)  
+		else if (niveau_1 == 2 && niveau_2 == 0)  
 		{													  
-
 			//chaque case permet d'afficher un sous-menu du menu de configuration
-			switch (input)
-			{
-				case 0:    //Root menu
-               show_menu(status_menu, 4);  
+			switch (input) {
+            
+			case 0:    //Root menu
+               SCIprintString(statusMenu);
                break;
-            case '1':  //affichage du STATUS du BMS 
-            // soc, vmin, vmax, tmin, tmax, code d'erreur			
+               
+               case '1':  //affichage du STATUS du BMS 			
                SCIprintStatus(); 
-               show_menu(status_menu, 4); 
+               SCIprintString(statusMenu);
                break;
 
-            case '2':  //Affichage des tensions et températures pour 1 module								
+               case '2':  //Affichage des tensions et températures pour 1 module								
                niveau_2 = 2;
-               SCITx(status_menu_2, 0 ,0); // "Entrer le # du module esclave suivi de la touche enter"
+               SCIprintString("Entrer le # du module esclave suivi de la touche enter: ");
                sci_interrupt_mode = 1;  //input mode (sci_interrupt_mode =1)				
                break;
 
-            case '3': //Affichage des données en mode continu pour 1 module							
+               case '3': //Affichage des données en mode continu pour 1 module							
                niveau_2 = 3;				
-               SCITx(status_menu_2, 0 ,0); // "Entrer le # du module esclave suivi de la touche enter"
+               SCIprintString("Entrer le # du module esclave suivi de la touche enter: ");
                sci_interrupt_mode = 1;	//input mode (sci_interrupt_mode =1)
                // NOTE: Dans le mode assignation, une interruption périodique est lancée
                // juste après la saise du module à afficher en loop.
                break;
 				
 			}
-				
-			skip_lines(1);
 		}				
 //***************************************
-//menu de commandes (2 choix)
+//menu de commandes (5 choix)
 //***************************************
-		else if (niveau_1 == 3 && niveau_2 == 0 && niveau_3 == 0)  
+		else if (niveau_1 == 3 && niveau_2 == 0)  
 		{													  
 			//chaque case permet d'afficher un sous-menu du menu de configuration
 			switch (input)
 			{
 			  case 0:    //Root menu
-               show_menu(commande_menu, 7);  
+               SCIprintString(commandsMenu);
                break;
                
-			  case '1':  //Activer équilibrage
-			  
-			      if(!gActivEqui){
-                  if(gEquiParams.DEMO_MODE){
+			  case '1':  //Activer équilibration
+			   if(!gFlags.equilibrating){
+                  if(gParams.manualMode){
                      niveau_2 = 1;
-                     SCIprintString("Entrez la valeur de tension à atteindre (en V): ");
-         				sci_interrupt_mode = 1;  //input mode (sci_interrupt_mode =1)
+                     SCIprintString("Entrez la tension à atteindre (en V): ");
+                     sci_interrupt_mode = 1;  //input mode (sci_interrupt_mode =1)
                   } else {
-                     gActivEqui = 1;
+                     SCIprintString("Vous ne pouvez débuter l'équilibration (mode automatique).\n\n\n\r");
+                     SCIprintString(commandsMenu);
                   }	
                } else {
-                  SCIprintString("Équilibrage déjà activé.\n");
-                  skip_lines(2);
-		            show_menu(commande_menu, 7);
+                  SCIprintString("L'équilibration est déjà activée.\n\n\n\r");
+                  SCIprintString(commandsMenu);
                }
                break;
-				 
-				 
-			  case '2':  //Désactiver l'équilibrage
-			  
-               if(gEquiParams.DEMO_MODE){
-                  //TODO: envoyer commande can de fin d'equilibrage a l'esclave
-                  //On attend la réponse de fin d'équilibrage de tous les esclaves avant
-                  //de mettre le flag à 0. Même mécanisme que pour la fin d'équilibrage
-                  //"naturelle".
-                  CAN0SendCommand(COMMAND_BAL_STOP,0,0x03FF,0);
-                  gActivEqui = 0;  //TODO: enlever cette ligne, pour fin de debug
+				  
+			  case '2':  //Désactiver l'équilibration
+               if(gFlags.equilibrating) {
+                  if(gParams.manualMode) {
+                      CAN0SendEquiCommand(0, 4500, CAN_BROADCAST_ID);
+                      SCIprintString("\n\rL'équilibration est maintenant est désactivée\n\n\n\r");
+                      gFlags.equilibrating = 0;
+                  } else {
+                      SCIprintString("Vous ne pouvez terminer l'équilibration (mode automatique).\n\n\n\r");
+                  }
                } else {
-                  gActivEqui = 0;   
+                   SCIprintString("\n\rL'équilibration est déjà désactivée\n\n\n\r");                  
                }
-               skip_lines(1);
-               SCITx(commande_menu_1, 1 ,0); // "Équilibrage désactivé"
-               skip_lines(2);
-		      	show_menu(commande_menu, 7);
+               SCIprintString(commandsMenu);
                break;
-				
 						
 			  case '3':  //Fermer Relais
-               if(!gRelaysClosed){
-                  Precharge(PRECHARGE_DELAY);
-                  CloseRelays(RELAY_DELAY);
-                  gRelaysClosed = 1;
+               if(!gFlags.relaysClosed){
+                  if(gParams.manualMode) {
+                      if(INTERLOCK_STATE == INTERLOCK_CLOSED) {
+                          CloseRelays();
+                          gFlags.relaysClosed = 1;
+                          SCIprintString("Les relais sont maintenant fermés.\n\n\n\r");
+                      } else {
+                          SCIprintString("Vous ne pouvez fermer les relais (interlock ouvert).\n\n\n\r");
+                      }
+                  } else {
+                      SCIprintString("Vous ne pouvez fermer les relais (mode automatique).\n\n\n\r");
+                  }
+               } else {
+                 SCIprintString("Les relais sont déjà fermés.\n\n\n\r");
                }
+               SCIprintString(commandsMenu);
                break;
-				
 				
 			  case '4':  //Ouvrir Relais				
-               if(gRelaysClosed)
-                  OpenRelays(RELAY_DELAY);
-                  gRelaysClosed = 0;
-               break;
-           
-           
-           case '5':  //Activer charge				
-               if(!gActivCharge){
-                  if(gEquiParams.DEMO_MODE){
-                     //TODO: vérifier que le chargeur est connecté
-                     PITCE_PCE3 = 1;      //Activer l'envoi de commandes au brusa
-                     gActivCharge = 1;
+               if(gFlags.relaysClosed) {
+                  if(gParams.manualMode) {
+                      OpenRelays();
+                      gFlags.relaysClosed = 0;
+                      SCIprintString("Relais ouverts.\n\n\n\r");
                   } else {
-                     gActivCharge = 1;   
+                    SCIprintString("Vous ne pouvez ouvrir les relais (mode automatique).\n\n\n\r");
                   }
+               } else {
+                  SCIprintString("Les relais sont déjà ouverts.\n\n\n\r");
                }
+               SCIprintString(commandsMenu);
                break;
            
-           
-           case '6':  //Désactiver charge				
-               if(gEquiParams.DEMO_MODE){
-                  PITCE_PCE3 = 0;            //Arret d'envoi de commandes au Brusa: fin de charge automatique
+              case '5':  //Activer charge				
+               if(!gFlags.charging){
+                  if(gParams.manualMode){
+                     SCIprintString("Mode charge activé (pour la détection d'erreurs).\n\n\n\r");
+                     gFlags.charging = 1;
+                  } else {
+                     SCIprintString("Vous ne pouvez pas entrer en mode charge (mode automatique).\n\n\n\r");
+                  }
+               } else {
+                    SCIprintString("Le mode charge est déjà activé.\n\n\n\r");
                }
-               gActivCharge = 0;
-               SCIprintString("Charge désactivée.\n\n");
-		      	show_menu(commande_menu, 7);
+               SCIprintString(commandsMenu);
+               break;
+           
+              case '6':  //Désactiver charge
+               if(gFlags.charging) {
+                   if(gParams.manualMode) {
+                      gFlags.charging = 0;
+                      SCIprintString("Mode charge désactivé.\n\n\n\r");
+                   } else {
+                       SCIprintString("Vous ne pouvez pas sortir du mode charge (mode automatique).\n\n\n\r");
+                   }
+                } else {
+                    SCIprintString("Le mode charge est déjà désactivé.\n\n\n\r");
+                }
+               SCIprintString(commandsMenu);
                break;  								 	
 			}
-	
 		}		
 }
 
@@ -1227,232 +566,123 @@ void SCIassignation(float user_input)
    int iNewParam = 0;
    unsigned int uiNewParam = 0;
    unsigned char ucNewParam = 0;
-   char buf[40];
+   char buf[70];
    int junk;
    unsigned int i=0;
 
-	skip_lines(1);
+	SCIprintString("\n\r");
+    
 	//Menu configuration -> Assignation des paramètres de sécurité
-	if(niveau_1 == 1 && niveau_2 == 1)
+	if(niveau_1 == 1)
 	{
-	   SCITx(config_string, 3 ,1);  //"Nouvelle valeur du paramètre: "
-	
-		switch (niveau_3)
-		{	
-	
+        SCIprintString("Nouvelle valeur du paramètre: ");
+        
+		switch (niveau_2)
+		{
 			case 1: 
 			      iNewParam = (int)(user_input*10);
-			      gSecurityParams.TD_MIN_LIM = iNewParam;
+			      gParams.minDischargeCellTemp = iNewParam;
 			      junk = sprintf(buf,formatTemp, (float)iNewParam/10.0);						
 					break;		
 			case 2: 
 			      iNewParam = (int)(user_input*10);
-			      gSecurityParams.TD_MAX_LIM = iNewParam;
+			      gParams.maxDischargeCellTemp = iNewParam;
 			      junk = sprintf(buf,formatTemp, (float)iNewParam/10.0); 
 					break;
 			case 3:
 			      iNewParam = (int)(user_input*10);
-			      gSecurityParams.TD_MIN = iNewParam;
+			      gParams.lowDischargeCellTemp = iNewParam;
 			      junk = sprintf(buf,formatTemp, (float)iNewParam/10.0);			
 					break;
 			case 4:
 			      iNewParam = (int)(user_input*10);
-			      gSecurityParams.TD_MAX = iNewParam;
+			      gParams.highDischargeCellTemp = iNewParam;
 			      junk = sprintf(buf,formatTemp, (float)iNewParam/10.0); 
 					break;
 			case 5:
 			      iNewParam = (int)(user_input*10);
-			      gSecurityParams.TC_MIN_LIM = iNewParam;
+			      gParams.minChargeCellTemp = iNewParam;
 			      junk = sprintf(buf,formatTemp, (float)iNewParam/10.0); 
 					break;
 			case 6:
 			      iNewParam = (int)(user_input*10);
-			      gSecurityParams.TC_MAX_LIM = iNewParam;
+			      gParams.maxChargeCellTemp = iNewParam;
 			      junk = sprintf(buf,formatTemp, (float)iNewParam/10.0); 
 					break;
 			case 7:
 			      iNewParam = (int)(user_input*10);
-			      gSecurityParams.TC_MIN = iNewParam;
+			      gParams.lowChargeCellTemp = iNewParam;
 			      junk = sprintf(buf,formatTemp, (float)iNewParam/10.0); 
 					break;
 			case 8:
 			      iNewParam = (int)(user_input*10);
-			      gSecurityParams.TC_MAX = iNewParam;
+			      gParams.highChargeCellTemp = iNewParam;
 			      junk = sprintf(buf,formatTemp, (float)iNewParam/10.0);  
 					break;
 			case 9:
 			      uiNewParam = (unsigned int)(user_input*1000);
-			      gSecurityParams.V_MIN_LIM = uiNewParam;
+			      gParams.minCellVoltage = uiNewParam;
 			      junk = sprintf(buf,formatVolt, (float)uiNewParam/1000.0); 
 					break;
 			case 10:
 			      uiNewParam = (unsigned int)(user_input*1000);
-			      gSecurityParams.V_MAX_LIM = uiNewParam;
+			      gParams.maxCellVoltage = uiNewParam;
 			      junk = sprintf(buf,formatVolt, (float)uiNewParam/1000.0); 
 					break;
 			case 11:
 			      uiNewParam = (unsigned int)(user_input*1000);
-			      gSecurityParams.V_MIN = uiNewParam;
+			      gParams.lowCellVoltage = uiNewParam;
 			      junk = sprintf(buf,formatVolt, (float)uiNewParam/1000.0); 
 					break;
 			case 12:
 			      uiNewParam = (unsigned int)(user_input*1000);
-			      gSecurityParams.V_MAX = uiNewParam;
+			      gParams.highCellVoltage = uiNewParam;
 			      junk = sprintf(buf,formatVolt, (float)uiNewParam/1000.0); 
 					break;
 			case 13:
 			      uiNewParam = (unsigned int)user_input;
-			      gSecurityParams.IC_MAX = uiNewParam;
+			      gParams.maxMeanChargeCurrent = uiNewParam;
 			      junk = sprintf(buf,formatCurr, uiNewParam); 
 					break;
 			case 14:
 			      uiNewParam = (unsigned int)user_input;
-			      gSecurityParams.ID_MAX = uiNewParam;
+			      gParams.maxMeanDischargeCurrent = uiNewParam;
 			      junk = sprintf(buf,formatCurr, uiNewParam); 
-					break;
+                  break;
 			case 15:
 			      uiNewParam = (unsigned int)user_input;
-			      gSecurityParams.IDP_MAX = uiNewParam;
+			      gParams.maxPeakDischargeCurrent = uiNewParam;
 			      junk = sprintf(buf,formatCurr, uiNewParam);  
-					break; 
+				  break;
+            case 16:
+			      ucNewParam = (unsigned char)user_input;
+			      gParams.manualMode = ucNewParam;
+			      junk = sprintf(buf, "%u", ucNewParam);  
+				  break; 
 		}
 		
 		SCIprintString(buf);
-		skip_lines(2);
-
+        SCIprintString("\n\n\r");
     } 
-	//Menu configuration -> Assignation des paramètres de d'équilibrage
-	else if(niveau_1 == 1 && niveau_2 == 2)
-	{
-	   SCITx(config_string, 3 ,1);  //"Nouvelle valeur du paramètre: "
 	
-		switch (niveau_3)
-		{
-			case 1:
-			      uiNewParam = (unsigned int)user_input;
-			      gEquiParams.I_BAL = uiNewParam;
-					junk = sprintf(buf,formatCurr, uiNewParam);
-					break;
-			case 2:
-			      uiNewParam = (unsigned int)(user_input*1000);
-			      gEquiParams.V_BAL = uiNewParam;
-					junk = sprintf(buf,formatVolt, (float)uiNewParam/1000.0);
-					break;
-			case 3:
-		      	uiNewParam = (unsigned int)(user_input*1000);
-			      gEquiParams.DV = uiNewParam;
-					junk = sprintf(buf,formatVolt, (float)uiNewParam/1000.0); 
-					break;
-			case 4:
-			      ucNewParam = (unsigned char) user_input;
-			      gEquiParams.MAN_CHARGE = ucNewParam;
-			      junk = sprintf(buf,"%u", ucNewParam); 
-					break;
-			case 5:
-			      ucNewParam = (unsigned char) user_input;
-			      gEquiParams.DEMO_MODE = ucNewParam;
-			      junk = sprintf(buf,"%u", ucNewParam); 
-					break;
-		}
-		
-		SCIprintString(buf);
-		skip_lines(2);	
-	} 	   
-	//Menu configuration -> Assignation des paramètres de mesure
-	else if(niveau_1 == 1 && niveau_2 == 3)
-	{
-	
-	   SCITx(config_string, 3 ,1);  //"Nouvelle valeur du paramètre: "
-	
-		switch (niveau_3)
-		{
-			case 1:
-			      uiNewParam = (unsigned int)user_input;
-			      gMesuresParams.DT_V = uiNewParam;
-					junk = sprintf(buf,formatTime, uiNewParam);
-					break;
-			case 2:
-			      uiNewParam = (unsigned int)user_input;
-			      gMesuresParams.DT_VS = uiNewParam;
-					junk = sprintf(buf,formatTime, uiNewParam); 
-					break;
-			case 3:
-			      uiNewParam = (unsigned int)user_input;
-			      gMesuresParams.DT_T = uiNewParam;
-					junk = sprintf(buf,formatTime, uiNewParam); ;
-					break;
-			case 4:
-			      uiNewParam = (unsigned int)user_input;
-			      gMesuresParams.DT_TS = uiNewParam;
-					junk = sprintf(buf,formatTime, uiNewParam); 
-					break;
-			case 5:
-			      uiNewParam = (unsigned int)user_input;
-			      gMesuresParams.DT_I = uiNewParam;
-					junk = sprintf(buf,formatTime, uiNewParam); 
-					break;
-			case 6:
-			      ucNewParam = (unsigned char)user_input;
-			      gMesuresParams.N_MOD = ucNewParam;
-					junk = sprintf(buf,"%u", ucNewParam); 
-					break;
-					
-			case 7:
-			      ucNewParam = (unsigned char)user_input;
-			      gMesuresParams.N_CELL = ucNewParam;
-					junk = sprintf(buf,"%u", ucNewParam); 
-					break;						
-		}
-		
-		SCIprintString(buf);
-		skip_lines(2);	
-	} 		
-	//Menu configuration -> Assignation des paramètres de communication
-	else if(niveau_1 == 1 && niveau_2 == 4)
-	{
-	
-	   SCITx(config_string, 3 ,1);  //"Nouvelle valeur du paramètre: "
-	   
-		switch (niveau_3)
-		{
-			case 1:
-			      ucNewParam = (unsigned char)user_input;
-			      gComParams.DATA_RATE = ucNewParam;
-					junk = sprintf(buf,"%u", ucNewParam); 			
-					break;
-			case 2:
-		      	uiNewParam = (unsigned int)user_input;
-			      gComParams.BASE_ID = uiNewParam;
-					junk = sprintf(buf,"%u", uiNewParam); 
-					break;
-		}
-		
-		SCIprintString(buf);
-		skip_lines(2);					
-	}
 // Menu status -> sélection du module à afficher dans le terminal
 	else if(niveau_1 == 2)
 	{
+	    num_module = (unsigned int) user_input; //assignation du nombre de module
 	
-	   num_module = (unsigned int) user_input; //assignation du nombre de module
-	
-		switch (niveau_2)
-		{
+		switch (niveau_2) {
+        
 			case 2: 
-            SCITx(status_menu_2, 1 ,1);  //"Affichage des données du module " 
-            junk = sprintf(buf,"%u", num_module);
-            SCIprintString(buf);
-            skip_lines(1);			
-            get_cells_data(gCellVolt, gCellTemp, num_module - 1 ,gMesuresParams.N_CELL );			
-				break;
+            junk = sprintf(buf,"\n\n\rAffichage des données du module %u\n\r", num_module);
+            SCIprintString(buf);		
+            get_cells_data(gCellVolt, gCellTemp, num_module-1);
+            SCIprintString("\n\n\n\r");            
+			break;
 			
 			case 3:
-            SCITx(status_menu_3, 0 ,1);  //"Affichage des données en mode continu pour le module " 
-            junk = sprintf(buf,"%u", num_module);
-            SCIprintString(buf);
-            skip_lines(1);	 
             PITCE_PCE3 = 1; //activation de l'interrupt, le mode continu pourra
             sci_interrupt_mode = 2;
+            SCIprintString("\n\n\r");
             break;          //être interrompu en appuyant sur la touche backspace. 				
 		}
 	}
@@ -1462,26 +692,28 @@ void SCIassignation(float user_input)
 		{
 			case 1:
 			 
-		      uiNewParam = (unsigned int)(user_input*1000);      //Balance threshold
-            junk = sprintf(buf,"Valeur entrée: %u mV\n\n", uiNewParam);
-            SCIprintString(buf);
+		        uiNewParam = (unsigned int)(user_input*1000);      //Balance threshold
+                sprintf(buf, "Valeur entrée: %u mV\n\n\r", uiNewParam);
+                SCIprintString(buf);
             
-		      if((uiNewParam < gSecurityParams.V_MAX_LIM) && (uiNewParam > gSecurityParams.V_MIN_LIM)) {
+		      if((uiNewParam < gParams.maxCellVoltage) && (uiNewParam > gParams.minCellVoltage)) {
 		      
-		         //Envoi de la commande d'équilibration
-		         CAN0SendCommand(COMMAND_BAL,0,0x03FF,uiNewParam);
+		        //Envoi de la commande d'équilibration
+                CAN0SendEquiCommand(0x03FF, uiNewParam, CAN_BROADCAST_ID);
 		         
-		         //On met les flags d'équilibration des modules à 1
-		         for(i=0; i<gMesuresParams.N_MOD; i++)
-		            gSlaveEquiStatus = gSlaveEquiStatus | (1<<i);
+		        //On met les flags d'équilibration des modules à 1
+		        for(i=0; i<N_MOD; i++)
+		           gSlaveEquiStatus = gSlaveEquiStatus | (1<<i);
 		         
-		         //on active le flag interne d'équilibration     
-		         gActivEqui = 1;  
+		        //on active le flag interne d'équilibration     
+		        gFlags.equilibrating = 1; 
+
+                SCIprintString("L'équilibration est maintenant activée.\n\n\n\r");                
 		         
 		      } else {
-		         SCIprintString("Invalid value entered.\n\n\n");   
+		         SCIprintString("La valeur entrée n'est pas admissible.\n\n\n\r");   
 		      }
-				break;
+			  break;
 		} 
 	   
 	}

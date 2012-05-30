@@ -7,16 +7,16 @@
 **
 **     Project   : Master
 **     Processor : MC9S12XEP100MAL
-**     Version   : Component 01.003, Driver 01.05, CPU db: 3.00.035
+**     Version   : Component 01.003, Driver 01.05, CPU db: 3.00.033
 **     Datasheet : MC9S12XEP100 Rev. 1.19 12/2008
-**     Date/Time : 17/04/2012, 12:15 AM
+**     Date/Time : 2012-05-24, 18:38
 **     Abstract  :
 **         This module contains device initialization code 
 **         for selected on-chip peripherals.
 **     Contents  :
 **         Function "MCU_init" initializes selected peripherals
 **
-**     Copyright : 1997 - 2011 Freescale Semiconductor, Inc. All Rights Reserved.
+**     Copyright : 1997 - 2010 Freescale Semiconductor, Inc. All Rights Reserved.
 **     
 **     http      : www.freescale.com
 **     mail      : support@freescale.com
@@ -56,43 +56,12 @@ typedef unsigned long int   uint32_t;
 #include <hidef.h>            /* common defines and macros */
 #include "derivative.h"      /* derivative-specific definitions */
 #include "terminal_code.h"
-#include "parameters.h"
 #include "can.h"
 #include "defines.h"
 #include "termio.h"
 #include "relays.h"
 #include <stdio.h>
 
-
-extern unsigned int gCellVolt[N_MOD_MAX][N_CELL_SLV_MAX];
-extern int gCellTemp[N_MOD_MAX][N_CELL_SLV_MAX];
-
-extern long int gCurrentMsr1[N_CURR_MSR];
-extern long int gCurrentMsr2[N_CURR_MSR];
-extern long int* gCurrentMsr;
-extern unsigned int gSlaveComState;
-extern int gErrorBits;
-extern unsigned int gSlaveEquiStatus; 
-extern char gIgnition;
-extern char gSOCready;
-extern unsigned char gFirstADCdone;
-extern unsigned char gMode;
-extern char gRelaysClosed;
-extern char gActivEqui;
-
-extern unsigned char gbrusa1[7];
-extern unsigned char gbrusa2[7];
-
-//variable de status
-extern unsigned int lastSOC;
-extern unsigned int presSOC;
-extern unsigned int gFaultMeasure;  
-extern unsigned int glowestV;
-extern unsigned int glowestT;
-extern unsigned int gmaxV;
-extern unsigned int gmaxT;
-extern long int gLastCurrent;
-extern unsigned int gi;
 
 /* End of user declarations and definitions */
 
@@ -161,12 +130,6 @@ void MCU_init(void)
   MPUDESC1 = 0U;                                      
   /* MPUDESC0: MSTR0=0,MSTR1=0,MSTR2=0,MSTR3=0,LOW_ADDR22=0,LOW_ADDR21=0,LOW_ADDR20=0,LOW_ADDR19=0 */
   MPUDESC0 = 0U;                                      
-  /* MPUDESC5: HIGH_ADDR10=1,HIGH_ADDR9=1,HIGH_ADDR8=1,HIGH_ADDR7=1,HIGH_ADDR6=1,HIGH_ADDR5=1,HIGH_ADDR4=1,HIGH_ADDR3=1 */
-  MPUDESC5 = 255U;                                      
-  /* MPUDESC4: HIGH_ADDR18=1,HIGH_ADDR17=1,HIGH_ADDR16=1,HIGH_ADDR15=1,HIGH_ADDR14=1,HIGH_ADDR13=1,HIGH_ADDR12=1,HIGH_ADDR11=1 */
-  MPUDESC4 = 255U;                                      
-  /* MPUDESC3: WP=0,NEX=0,HIGH_ADDR22=1,HIGH_ADDR21=1,HIGH_ADDR20=1,HIGH_ADDR19=1 */
-  MPUDESC3 = 15U;                                      
   /* MPUSEL: SVSEN=0,SEL=2 */
   MPUSEL = 2U;                         /* Select Descriptor num. 2 */
   /* MPUDESC2: LOW_ADDR10=0,LOW_ADDR9=0,LOW_ADDR8=0,LOW_ADDR7=0,LOW_ADDR6=0,LOW_ADDR5=0,LOW_ADDR4=0,LOW_ADDR3=0 */
@@ -175,12 +138,6 @@ void MCU_init(void)
   MPUDESC1 = 0U;                                      
   /* MPUDESC0: MSTR0=0,MSTR1=0,MSTR2=0,MSTR3=0,LOW_ADDR22=0,LOW_ADDR21=0,LOW_ADDR20=0,LOW_ADDR19=0 */
   MPUDESC0 = 0U;                                      
-  /* MPUDESC5: HIGH_ADDR10=1,HIGH_ADDR9=1,HIGH_ADDR8=1,HIGH_ADDR7=1,HIGH_ADDR6=1,HIGH_ADDR5=1,HIGH_ADDR4=1,HIGH_ADDR3=1 */
-  MPUDESC5 = 255U;                                      
-  /* MPUDESC4: HIGH_ADDR18=1,HIGH_ADDR17=1,HIGH_ADDR16=1,HIGH_ADDR15=1,HIGH_ADDR14=1,HIGH_ADDR13=1,HIGH_ADDR12=1,HIGH_ADDR11=1 */
-  MPUDESC4 = 255U;                                      
-  /* MPUDESC3: WP=0,NEX=0,HIGH_ADDR22=1,HIGH_ADDR21=1,HIGH_ADDR20=1,HIGH_ADDR19=1 */
-  MPUDESC3 = 15U;                                      
   /* MPUSEL: SVSEN=0,SEL=3 */
   MPUSEL = 3U;                         /* Select Descriptor num. 3 */
   /* MPUDESC2: LOW_ADDR10=0,LOW_ADDR9=0,LOW_ADDR8=0,LOW_ADDR7=0,LOW_ADDR6=0,LOW_ADDR5=0,LOW_ADDR4=0,LOW_ADDR3=0 */
@@ -189,12 +146,6 @@ void MCU_init(void)
   MPUDESC1 = 0U;                                      
   /* MPUDESC0: MSTR0=0,MSTR1=0,MSTR2=0,MSTR3=0,LOW_ADDR22=0,LOW_ADDR21=0,LOW_ADDR20=0,LOW_ADDR19=0 */
   MPUDESC0 = 0U;                                      
-  /* MPUDESC5: HIGH_ADDR10=1,HIGH_ADDR9=1,HIGH_ADDR8=1,HIGH_ADDR7=1,HIGH_ADDR6=1,HIGH_ADDR5=1,HIGH_ADDR4=1,HIGH_ADDR3=1 */
-  MPUDESC5 = 255U;                                      
-  /* MPUDESC4: HIGH_ADDR18=1,HIGH_ADDR17=1,HIGH_ADDR16=1,HIGH_ADDR15=1,HIGH_ADDR14=1,HIGH_ADDR13=1,HIGH_ADDR12=1,HIGH_ADDR11=1 */
-  MPUDESC4 = 255U;                                      
-  /* MPUDESC3: WP=0,NEX=0,HIGH_ADDR22=1,HIGH_ADDR21=1,HIGH_ADDR20=1,HIGH_ADDR19=1 */
-  MPUDESC3 = 15U;                                      
   /* MPUSEL: SVSEN=0,SEL=4 */
   MPUSEL = 4U;                         /* Select Descriptor num. 4 */
   /* MPUDESC2: LOW_ADDR10=0,LOW_ADDR9=0,LOW_ADDR8=0,LOW_ADDR7=0,LOW_ADDR6=0,LOW_ADDR5=0,LOW_ADDR4=0,LOW_ADDR3=0 */
@@ -203,12 +154,6 @@ void MCU_init(void)
   MPUDESC1 = 0U;                                      
   /* MPUDESC0: MSTR0=0,MSTR1=0,MSTR2=0,MSTR3=0,LOW_ADDR22=0,LOW_ADDR21=0,LOW_ADDR20=0,LOW_ADDR19=0 */
   MPUDESC0 = 0U;                                      
-  /* MPUDESC5: HIGH_ADDR10=1,HIGH_ADDR9=1,HIGH_ADDR8=1,HIGH_ADDR7=1,HIGH_ADDR6=1,HIGH_ADDR5=1,HIGH_ADDR4=1,HIGH_ADDR3=1 */
-  MPUDESC5 = 255U;                                      
-  /* MPUDESC4: HIGH_ADDR18=1,HIGH_ADDR17=1,HIGH_ADDR16=1,HIGH_ADDR15=1,HIGH_ADDR14=1,HIGH_ADDR13=1,HIGH_ADDR12=1,HIGH_ADDR11=1 */
-  MPUDESC4 = 255U;                                      
-  /* MPUDESC3: WP=0,NEX=0,HIGH_ADDR22=1,HIGH_ADDR21=1,HIGH_ADDR20=1,HIGH_ADDR19=1 */
-  MPUDESC3 = 15U;                                      
   /* MPUSEL: SVSEN=0,SEL=5 */
   MPUSEL = 5U;                         /* Select Descriptor num. 5 */
   /* MPUDESC2: LOW_ADDR10=0,LOW_ADDR9=0,LOW_ADDR8=0,LOW_ADDR7=0,LOW_ADDR6=0,LOW_ADDR5=0,LOW_ADDR4=0,LOW_ADDR3=0 */
@@ -217,12 +162,6 @@ void MCU_init(void)
   MPUDESC1 = 0U;                                      
   /* MPUDESC0: MSTR0=0,MSTR1=0,MSTR2=0,MSTR3=0,LOW_ADDR22=0,LOW_ADDR21=0,LOW_ADDR20=0,LOW_ADDR19=0 */
   MPUDESC0 = 0U;                                      
-  /* MPUDESC5: HIGH_ADDR10=1,HIGH_ADDR9=1,HIGH_ADDR8=1,HIGH_ADDR7=1,HIGH_ADDR6=1,HIGH_ADDR5=1,HIGH_ADDR4=1,HIGH_ADDR3=1 */
-  MPUDESC5 = 255U;                                      
-  /* MPUDESC4: HIGH_ADDR18=1,HIGH_ADDR17=1,HIGH_ADDR16=1,HIGH_ADDR15=1,HIGH_ADDR14=1,HIGH_ADDR13=1,HIGH_ADDR12=1,HIGH_ADDR11=1 */
-  MPUDESC4 = 255U;                                      
-  /* MPUDESC3: WP=0,NEX=0,HIGH_ADDR22=1,HIGH_ADDR21=1,HIGH_ADDR20=1,HIGH_ADDR19=1 */
-  MPUDESC3 = 15U;                                      
   /* MPUSEL: SVSEN=0,SEL=6 */
   MPUSEL = 6U;                         /* Select Descriptor num. 6 */
   /* MPUDESC2: LOW_ADDR10=0,LOW_ADDR9=0,LOW_ADDR8=0,LOW_ADDR7=0,LOW_ADDR6=0,LOW_ADDR5=0,LOW_ADDR4=0,LOW_ADDR3=0 */
@@ -231,12 +170,6 @@ void MCU_init(void)
   MPUDESC1 = 0U;                                      
   /* MPUDESC0: MSTR0=0,MSTR1=0,MSTR2=0,MSTR3=0,LOW_ADDR22=0,LOW_ADDR21=0,LOW_ADDR20=0,LOW_ADDR19=0 */
   MPUDESC0 = 0U;                                      
-  /* MPUDESC5: HIGH_ADDR10=1,HIGH_ADDR9=1,HIGH_ADDR8=1,HIGH_ADDR7=1,HIGH_ADDR6=1,HIGH_ADDR5=1,HIGH_ADDR4=1,HIGH_ADDR3=1 */
-  MPUDESC5 = 255U;                                      
-  /* MPUDESC4: HIGH_ADDR18=1,HIGH_ADDR17=1,HIGH_ADDR16=1,HIGH_ADDR15=1,HIGH_ADDR14=1,HIGH_ADDR13=1,HIGH_ADDR12=1,HIGH_ADDR11=1 */
-  MPUDESC4 = 255U;                                      
-  /* MPUDESC3: WP=0,NEX=0,HIGH_ADDR22=1,HIGH_ADDR21=1,HIGH_ADDR20=1,HIGH_ADDR19=1 */
-  MPUDESC3 = 15U;                                      
   /* MPUSEL: SVSEN=0,SEL=7 */
   MPUSEL = 7U;                         /* Select Descriptor num. 7 */
   /* MPUDESC2: LOW_ADDR10=0,LOW_ADDR9=0,LOW_ADDR8=0,LOW_ADDR7=0,LOW_ADDR6=0,LOW_ADDR5=0,LOW_ADDR4=0,LOW_ADDR3=0 */
@@ -245,12 +178,6 @@ void MCU_init(void)
   MPUDESC1 = 0U;                                      
   /* MPUDESC0: MSTR0=0,MSTR1=0,MSTR2=0,MSTR3=0,LOW_ADDR22=0,LOW_ADDR21=0,LOW_ADDR20=0,LOW_ADDR19=0 */
   MPUDESC0 = 0U;                                      
-  /* MPUDESC5: HIGH_ADDR10=1,HIGH_ADDR9=1,HIGH_ADDR8=1,HIGH_ADDR7=1,HIGH_ADDR6=1,HIGH_ADDR5=1,HIGH_ADDR4=1,HIGH_ADDR3=1 */
-  MPUDESC5 = 255U;                                      
-  /* MPUDESC4: HIGH_ADDR18=1,HIGH_ADDR17=1,HIGH_ADDR16=1,HIGH_ADDR15=1,HIGH_ADDR14=1,HIGH_ADDR13=1,HIGH_ADDR12=1,HIGH_ADDR11=1 */
-  MPUDESC4 = 255U;                                      
-  /* MPUDESC3: WP=0,NEX=0,HIGH_ADDR22=1,HIGH_ADDR21=1,HIGH_ADDR20=1,HIGH_ADDR19=1 */
-  MPUDESC3 = 15U;                                      
   /* MPUSEL: SVSEN=0,SEL=0 */
   MPUSEL = 0U;                         /* Select Descriptor num. 0 */
   /* MPUDESC2: LOW_ADDR10=0,LOW_ADDR9=0,LOW_ADDR8=0,LOW_ADDR7=0,LOW_ADDR6=0,LOW_ADDR5=0,LOW_ADDR4=0,LOW_ADDR3=0 */
@@ -259,12 +186,6 @@ void MCU_init(void)
   MPUDESC1 = 0U;                                      
   /* MPUDESC0: MSTR0=1,MSTR1=1,MSTR2=1,MSTR3=0,LOW_ADDR22=0,LOW_ADDR21=0,LOW_ADDR20=0,LOW_ADDR19=0 */
   MPUDESC0 = 224U;                                      
-  /* MPUDESC5: HIGH_ADDR10=1,HIGH_ADDR9=1,HIGH_ADDR8=1,HIGH_ADDR7=1,HIGH_ADDR6=1,HIGH_ADDR5=1,HIGH_ADDR4=1,HIGH_ADDR3=1 */
-  MPUDESC5 = 255U;                                      
-  /* MPUDESC4: HIGH_ADDR18=1,HIGH_ADDR17=1,HIGH_ADDR16=1,HIGH_ADDR15=1,HIGH_ADDR14=1,HIGH_ADDR13=1,HIGH_ADDR12=1,HIGH_ADDR11=1 */
-  MPUDESC4 = 255U;                                      
-  /* MPUDESC3: WP=0,NEX=0,HIGH_ADDR22=1,HIGH_ADDR21=1,HIGH_ADDR20=1,HIGH_ADDR19=1 */
-  MPUDESC3 = 15U;                                      
   /* Int. priority initialization */
   /*                                        No. Address Pri XGATE Name            Description */
   INT_CFADDR = 16U;                                      
@@ -393,109 +314,59 @@ void MCU_init(void)
   INT_CFDATA0 = 1U;                    /*  0x78  0xFFF0   1   no   ivVrti          unused by PE */
   INT_CFDATA1 = 1U;                    /*  0x79  0xFFF2   1   no   ivVirq          unused by PE */
   /* Common initialization of the CPU registers */
-  /* PTLRR: PTLRR5=0 */
-  PTLRR &= (unsigned char)~(unsigned char)32U;                     
-  /* RDRH: RDRH7=0,RDRH6=0,RDRH5=0,RDRH4=0,RDRH3=0,RDRH2=0,RDRH1=0,RDRH0=0 */
-  RDRH = 0U;                                      
-  /* RDRJ: RDRJ7=0,RDRJ6=0,RDRJ1=0,RDRJ0=0 */
-  RDRJ &= (unsigned char)~(unsigned char)195U;                     
   /* MODRR: MODRR1=1,MODRR0=1 */
   MODRR |= (unsigned char)3U;                      
-  /* RDRP: RDRP7=0,RDRP6=0,RDRP5=0,RDRP4=0,RDRP3=0,RDRP2=0,RDRP1=0,RDRP0=0 */
-  RDRP = 0U;                                      
-  /* WOMM: WOMM3=0 */
-  WOMM &= (unsigned char)~(unsigned char)8U;                     
-  /* RDRM: RDRM7=0,RDRM6=0,RDRM5=0,RDRM4=0,RDRM3=0,RDRM2=0,RDRM1=0,RDRM0=0 */
-  RDRM = 0U;                                      
-  /* CRGINT: LOCKIE=0,SCMIE=0 */
-  CRGINT &= (unsigned char)~(unsigned char)18U;                     
-  /* VREGCTRL: LVIE=0 */
-  VREGCTRL &= (unsigned char)~(unsigned char)2U;                     
   /* COPCTL: WCOP=0,RSBCK=0,WRTMASK=0,CR2=0,CR1=0,CR0=0 */
   COPCTL = 0U;                                      
-  /* RDRIV: RDPK=0,RDPE=0,RDPB=0,RDPA=0 */
-  RDRIV &= (unsigned char)~(unsigned char)147U;                     
-  /* RDRS: RDRS7=0,RDRS6=0,RDRS5=0,RDRS4=0,RDRS3=0,RDRS2=0,RDRS1=0,RDRS0=0 */
-  RDRS = 0U;                                      
-  /* RDRT: RDRT7=0,RDRT6=0,RDRT5=0,RDRT4=0,RDRT3=0,RDRT2=0,RDRT1=0,RDRT0=0 */
-  RDRT = 0U;                                      
-  /* RDR0AD0: RDR0AD07=0,RDR0AD06=0,RDR0AD05=0,RDR0AD04=0,RDR0AD03=0,RDR0AD02=0,RDR0AD01=0,RDR0AD00=0 */
-  RDR0AD0 = 0U;                                      
-  /* RDR1AD0: RDR1AD07=0,RDR1AD06=0,RDR1AD05=0,RDR1AD04=0,RDR1AD03=0,RDR1AD02=0,RDR1AD01=0,RDR1AD00=0 */
-  RDR1AD0 = 0U;                                      
+  /* PERP: PERP7=1,PERP6=1,PERP5=1,PERP4=1,PERP3=1,PERP2=1,PERP1=1 */
+  PERP |= (unsigned char)254U;                      
+  /* PERT: PERT7=1,PERT6=1,PERT5=1,PERT4=1,PERT3=1,PERT2=1,PERT1=1,PERT0=1 */
+  PERT = 255U;                                      
+  /* PERH: PERH5=1,PERH4=1,PERH3=1,PERH2=1,PERH1=1,PERH0=1 */
+  PERH |= (unsigned char)63U;                      
+  /* PER1AD0: PER1AD06=1,PER1AD05=1,PER1AD04=1,PER1AD03=1,PER1AD02=1,PER1AD01=1,PER1AD00=1 */
+  PER1AD0 |= (unsigned char)127U;                      
+  /* PER0AD0: PER0AD06=1,PER0AD05=1,PER0AD04=1,PER0AD03=1,PER0AD02=1,PER0AD01=1,PER0AD00=1 */
+  PER0AD0 |= (unsigned char)127U;                      
+  /* PERM: PERM6=1,PERM5=1,PERM4=1,PERM1=1,PERM0=1 */
+  PERM |= (unsigned char)115U;                      
   /* IRQCR: IRQEN=0 */
   IRQCR &= (unsigned char)~(unsigned char)64U;                     
   /* ### Init_SCI init code */
-  /* SCI5CR2: TIE=0,TCIE=0,RIE=0,ILIE=0,TE=0,RE=0,RWU=0,SBK=0 */
-  SCI5CR2 = 0U;                        /* Disable the SCI5 module */
-  (void)(SCI5SR1 == 0U);               /* Dummy read of the SCI5SR1 registr to clear flags */
-  (void)(SCI5DRL == 0U);               /* Dummy read of the SCI5DRL registr to clear flags */
-  /* SCI5SR2: AMAP=0,TXPOL=0,RXPOL=0,BRK13=0,TXDIR=0,RAF=0 */
-  SCI5SR2 = 0U;                                      
   /* SCI5BD: IREN=0,TNP1=0,TNP0=0,SBR12=0,SBR11=0,SBR10=0,SBR9=0,SBR8=0,SBR7=0,SBR6=0,SBR5=1,SBR4=1,SBR3=0,SBR2=1,SBR1=0,SBR0=0 */
   SCI5BD = 52U;                            
-  /* SCI5CR1: LOOPS=0,SCISWAI=0,RSRC=0,M=0,WAKE=0,ILT=0,PE=0,PT=0 */
-  SCI5CR1 = 0U;                                      
-  /* SCI5SR2: AMAP=1 */
-  SCI5SR2 |= (unsigned char)128U;      /* Switch to the alternative register set */
-  /* SCI5ASR1: RXEDGIF=1,BERRV=0,BERRIF=1,BKDIF=1 */
-  SCI5ASR1 = 131U;                     /* Clear interrupt flags */
-  /* SCI5ACR1: RXEDGIE=0,BERRIE=0,BKDIE=0 */
-  SCI5ACR1 = 0U;                                      
-  /* SCI5ACR2: BERRM1=0,BERRM0=0,BKDFE=0 */
-  SCI5ACR2 = 0U;                                      
-  /* SCI5SR2: AMAP=0 */
-  SCI5SR2 &= (unsigned char)~(unsigned char)128U; /* Switch to the normal register set */
   /* SCI5CR2: TIE=0,TCIE=0,RIE=0,ILIE=0,TE=1,RE=1,RWU=0,SBK=0 */
   SCI5CR2 = 12U;                                      
   /* ### Init_PIT init code */
-  /* PITCFLMT: PITE=0 */
-  PITCFLMT &= (unsigned char)~(unsigned char)128U;                     
-  /* PITMTLD0: PMTLD7=0,PMTLD6=0,PMTLD5=0,PMTLD4=0,PMTLD3=0,PMTLD2=0,PMTLD1=0,PMTLD0=0 */
-  PITMTLD0 = 0U;                                      
   /* PITMTLD1: PMTLD7=1,PMTLD6=1,PMTLD5=1,PMTLD4=1,PMTLD3=1,PMTLD2=1,PMTLD1=1,PMTLD0=1 */
   PITMTLD1 = 255U;                                      
   /* PITLD0: PLD15=0,PLD14=0,PLD13=0,PLD12=1,PLD11=1,PLD10=1,PLD9=1,PLD8=1,PLD7=0,PLD6=0,PLD5=1,PLD4=1,PLD3=1,PLD2=1,PLD1=1,PLD0=1 */
   PITLD0 = 7999U;                            
   /* PITLD1: PLD15=0,PLD14=1,PLD13=1,PLD12=1,PLD11=1,PLD10=0,PLD9=0,PLD8=1,PLD7=1,PLD6=1,PLD5=1,PLD4=1,PLD3=0,PLD2=1,PLD1=0,PLD0=0 */
   PITLD1 = 31220U;                            
-  /* PITLD2: PLD15=0,PLD14=0,PLD13=0,PLD12=0,PLD11=0,PLD10=0,PLD9=0,PLD8=1,PLD7=1,PLD6=1,PLD5=0,PLD4=1,PLD3=0,PLD2=0,PLD1=1,PLD0=1 */
-  PITLD2 = 467U;                            
+  /* PITLD2: PLD15=0,PLD14=0,PLD13=0,PLD12=0,PLD11=1,PLD10=1,PLD9=0,PLD8=0,PLD7=0,PLD6=0,PLD5=1,PLD4=1,PLD3=0,PLD2=1,PLD1=0,PLD0=0 */
+  PITLD2 = 3124U;                            
   /* PITLD3: PLD15=1,PLD14=1,PLD13=1,PLD12=1,PLD11=1,PLD10=1,PLD9=1,PLD8=1,PLD7=1,PLD6=1,PLD5=1,PLD4=1,PLD3=1,PLD2=1,PLD1=1,PLD0=1 */
   PITLD3 = 65535U;                            
-  /* PITLD4: PLD15=0,PLD14=0,PLD13=0,PLD12=0,PLD11=0,PLD10=1,PLD9=1,PLD8=0,PLD7=0,PLD6=0,PLD5=0,PLD4=1,PLD3=1,PLD2=0,PLD1=0,PLD0=1 */
-  PITLD4 = 1561U;                            
+  /* PITLD4: PLD15=0,PLD14=0,PLD13=0,PLD12=1,PLD11=1,PLD10=1,PLD9=1,PLD8=0,PLD7=1,PLD6=0,PLD5=0,PLD4=0,PLD3=0,PLD2=0,PLD1=1,PLD0=0 */
+  PITLD4 = 7810U;                            
   /* PITMUX: PMUX7=0,PMUX6=0,PMUX5=0,PMUX4=1,PMUX3=1,PMUX2=1,PMUX1=1,PMUX0=0 */
   PITMUX = 30U;                                      
-  /* PITCE: PCE7=0,PCE6=0,PCE5=0,PCE4=0,PCE3=0,PCE2=0,PCE1=0,PCE0=0 */
-  PITCE = 0U;                                      
-  /* PITTF: PTF7=0,PTF6=0,PTF5=0,PTF4=1,PTF3=1,PTF2=1,PTF1=1,PTF0=1 */
-  PITTF = 31U;                                      
   /* PITINTE: PINTE7=0,PINTE6=0,PINTE5=0,PINTE4=1,PINTE3=1,PINTE2=1,PINTE1=1,PINTE0=0 */
   PITINTE = 30U;                                      
   /* PITCFLMT: PITE=1,PITSWAI=0,PITFRZ=0,PFLMT1=0,PFLMT0=0 */
   PITCFLMT = 128U;                                      
   /* ### Init_ADC init code */
   /* Initialization of the ADC0 module */
-  /* ATD0DIEN: IEN15=0,IEN14=0,IEN13=0,IEN12=0,IEN11=0,IEN10=0,IEN9=0,IEN8=0,IEN7=0,IEN6=0,IEN5=0,IEN4=0,IEN3=0,IEN2=0,IEN1=0,IEN0=0 */
-  ATD0DIEN = 0U;                            
-  /* ATD0CTL0: WRAP3=1,WRAP2=1,WRAP1=1,WRAP0=1 */
-  ATD0CTL0 = 15U;                                      
   /* ATD0CTL1: ETRIGSEL=0,SRES1=1,SRES0=0,SMP_DIS=0,ETRIGCH3=1,ETRIGCH2=1,ETRIGCH1=1,ETRIGCH0=1 */
   ATD0CTL1 = 79U;                                      
-  /* ATD0CTL3: DJM=1,S8C=1,S4C=1,S2C=1,S1C=0,FIFO=0,FRZ1=0,FRZ0=0 */
-  ATD0CTL3 = 240U;                                      
-  /* ATD0CTL4: SMP2=0,SMP1=0,SMP0=0,PRS4=0,PRS3=0,PRS2=1,PRS1=0,PRS0=1 */
-  ATD0CTL4 = 5U;                                      
+  /* ATD0CTL3: DJM=1,S8C=1,S4C=0,S2C=0,S1C=1,FIFO=0,FRZ1=0,FRZ0=0 */
+  ATD0CTL3 = 200U;                                      
   /* ATD0CTL5: SC=0,SCAN=0,MULT=1,CD=0,CC=0,CB=0,CA=0 */
   ATD0CTL5 = 16U;                                      
   /* ATD0CTL2: AFFC=0,ICLKSTP=0,ETRIGLE=0,ETRIGP=0,ETRIGE=0,ASCIE=1,ACMPIE=0 */
   ATD0CTL2 = 2U;                                      
   /* ### Init_MSCAN init code */
-  /* CAN0CTL0: INITRQ=1 */
-  CAN0CTL0 |= (unsigned char)1U;                      
-  while(CAN0CTL1_INITAK == 0U) {       /* Wait for init acknowledge */
-  }
   /* CAN0CTL1: CANE=1,CLKSRC=1,LOOPB=0,LISTEN=0,BORM=0,WUPM=0,SLPAK=0,INITAK=1 */
   CAN0CTL1 = 193U;                                      
   /* CAN0BTR1: SAMP=0,TSEG22=0,TSEG21=1,TSEG20=1,TSEG13=1,TSEG12=0,TSEG11=1,TSEG10=0 */
@@ -506,20 +377,6 @@ void MCU_init(void)
   CAN0IDAC = 16U;                                      
   /* CAN0IDAR0: AC7=1,AC6=0,AC5=1,AC4=1,AC3=0,AC2=0,AC1=0,AC0=0 */
   CAN0IDAR0 = 176U;                                      
-  /* CAN0IDAR1: AC7=0,AC6=0,AC5=0,AC4=0,AC3=0,AC2=0,AC1=0,AC0=0 */
-  CAN0IDAR1 = 0U;                                      
-  /* CAN0IDAR2: AC7=0,AC6=0,AC5=0,AC4=0,AC3=0,AC2=0,AC1=0,AC0=0 */
-  CAN0IDAR2 = 0U;                                      
-  /* CAN0IDAR3: AC7=0,AC6=0,AC5=0,AC4=0,AC3=0,AC2=0,AC1=0,AC0=0 */
-  CAN0IDAR3 = 0U;                                      
-  /* CAN0IDAR4: AC7=0,AC6=0,AC5=0,AC4=0,AC3=0,AC2=0,AC1=0,AC0=0 */
-  CAN0IDAR4 = 0U;                                      
-  /* CAN0IDAR5: AC7=0,AC6=0,AC5=0,AC4=0,AC3=0,AC2=0,AC1=0,AC0=0 */
-  CAN0IDAR5 = 0U;                                      
-  /* CAN0IDAR6: AC7=0,AC6=0,AC5=0,AC4=0,AC3=0,AC2=0,AC1=0,AC0=0 */
-  CAN0IDAR6 = 0U;                                      
-  /* CAN0IDAR7: AC7=0,AC6=0,AC5=0,AC4=0,AC3=0,AC2=0,AC1=0,AC0=0 */
-  CAN0IDAR7 = 0U;                                      
   /* CAN0IDMR0: AM7=1,AM6=1,AM5=1,AM4=1,AM3=1,AM2=1,AM1=1,AM0=1 */
   CAN0IDMR0 = 255U;                                      
   /* CAN0IDMR1: AM7=1,AM6=1,AM5=1,AM4=1,AM3=1,AM2=1,AM1=1,AM0=1 */
@@ -544,38 +401,14 @@ void MCU_init(void)
   CAN0CTL0 = 0U;                                      
   /* CAN0RIER: WUPIE=0,CSCIE=0,RSTATE1=0,RSTATE0=0,TSTATE1=0,TSTATE0=0,OVRIE=0,RXFIE=1 */
   CAN0RIER = 1U;                                      
-  /* CAN0TIER: TXEIE2=0,TXEIE1=0,TXEIE0=0 */
-  CAN0TIER = 0U;                                      
   /* ### Init_PWM init code */
-  /* PWME: PWME7=0,PWME6=0,PWME5=0,PWME4=0,PWME3=0,PWME2=0,PWME1=0,PWME0=0 */
-  PWME = 0U;                           /* Disable all PWM channels */
-  /* PWMPOL: PPOL7=0,PPOL6=0,PPOL5=0,PPOL4=0,PPOL3=0,PPOL2=0,PPOL1=0,PPOL0=0 */
-  PWMPOL = 0U;                                      
-  /* PWMCLK: PCLK7=0,PCLK6=0,PCLK5=0,PCLK4=0,PCLK3=0,PCLK2=0,PCLK1=0,PCLK0=0 */
-  PWMCLK = 0U;                                      
-  /* PWMCAE: CAE7=0,CAE6=0,CAE5=0,CAE4=0,CAE3=0,CAE2=0,CAE1=0,CAE0=0 */
-  PWMCAE = 0U;                                      
-  /* PWMCTL: CON67=0,CON45=0,CON23=0,CON01=0,PSWAI=0,PFRZ=0 */
-  PWMCTL = 0U;                                      
   /* PWMDTY0: PWMDTY0=127 */
   PWMDTY0 = 127U;                                      
-  /* PWMPER0: PWMPER0=255 */
-  PWMPER0 = 255U;                                      
-  /* PWMSCLA: BIT7=0,BIT6=0,BIT5=0,BIT4=0,BIT3=0,BIT2=0,BIT1=0,BIT0=0 */
-  PWMSCLA = 0U;                                      
-  /* PWMSCLB: BIT7=0,BIT6=0,BIT5=0,BIT4=0,BIT3=0,BIT2=0,BIT1=0,BIT0=0 */
-  PWMSCLB = 0U;                                      
   /* PWMPRCLK: PCKB2=0,PCKB1=0,PCKB0=0,PCKA2=1,PCKA1=1,PCKA0=1 */
   PWMPRCLK = 7U;                                      
-  /* PWMSDN: PWMIF=1,PWMIE=0,PWMRSTRT=0,PWMLVL=0,PWM7IN=0,PWM7INL=0,PWM7ENA=0 */
-  PWMSDN = 128U;                                      
   /* PWME: PWME7=0,PWME6=0,PWME5=0,PWME4=0,PWME3=0,PWME2=0,PWME1=0,PWME0=1 */
   PWME = 1U;                           /* Enable only configured PWM channels */
   /* ### Init_MSCAN init code */
-  /* CAN1CTL0: INITRQ=1 */
-  CAN1CTL0 |= (unsigned char)1U;                      
-  while(CAN1CTL1_INITAK == 0U) {       /* Wait for init acknowledge */
-  }
   /* CAN1CTL1: CANE=1,CLKSRC=1,LOOPB=0,LISTEN=0,BORM=0,WUPM=0,SLPAK=0,INITAK=1 */
   CAN1CTL1 = 193U;                                      
   /* CAN1BTR1: SAMP=0,TSEG22=0,TSEG21=1,TSEG20=1,TSEG13=1,TSEG12=0,TSEG11=1,TSEG10=0 */
@@ -586,20 +419,6 @@ void MCU_init(void)
   CAN1IDAC = 16U;                                      
   /* CAN1IDAR0: AC7=1,AC6=0,AC5=1,AC4=1,AC3=0,AC2=0,AC1=0,AC0=0 */
   CAN1IDAR0 = 176U;                                      
-  /* CAN1IDAR1: AC7=0,AC6=0,AC5=0,AC4=0,AC3=0,AC2=0,AC1=0,AC0=0 */
-  CAN1IDAR1 = 0U;                                      
-  /* CAN1IDAR2: AC7=0,AC6=0,AC5=0,AC4=0,AC3=0,AC2=0,AC1=0,AC0=0 */
-  CAN1IDAR2 = 0U;                                      
-  /* CAN1IDAR3: AC7=0,AC6=0,AC5=0,AC4=0,AC3=0,AC2=0,AC1=0,AC0=0 */
-  CAN1IDAR3 = 0U;                                      
-  /* CAN1IDAR4: AC7=0,AC6=0,AC5=0,AC4=0,AC3=0,AC2=0,AC1=0,AC0=0 */
-  CAN1IDAR4 = 0U;                                      
-  /* CAN1IDAR5: AC7=0,AC6=0,AC5=0,AC4=0,AC3=0,AC2=0,AC1=0,AC0=0 */
-  CAN1IDAR5 = 0U;                                      
-  /* CAN1IDAR6: AC7=0,AC6=0,AC5=0,AC4=0,AC3=0,AC2=0,AC1=0,AC0=0 */
-  CAN1IDAR6 = 0U;                                      
-  /* CAN1IDAR7: AC7=0,AC6=0,AC5=0,AC4=0,AC3=0,AC2=0,AC1=0,AC0=0 */
-  CAN1IDAR7 = 0U;                                      
   /* CAN1IDMR0: AM7=1,AM6=1,AM5=1,AM4=1,AM3=1,AM2=1,AM1=1,AM0=1 */
   CAN1IDMR0 = 255U;                                      
   /* CAN1IDMR1: AM7=1,AM6=1,AM5=1,AM4=1,AM3=1,AM2=1,AM1=1,AM0=1 */
@@ -624,20 +443,23 @@ void MCU_init(void)
   CAN1CTL0 = 0U;                                      
   /* CAN1RIER: WUPIE=0,CSCIE=0,RSTATE1=0,RSTATE0=0,TSTATE1=0,TSTATE0=0,OVRIE=0,RXFIE=1 */
   CAN1RIER = 1U;                                      
-  /* CAN1TIER: TXEIE2=0,TXEIE1=0,TXEIE0=0 */
-  CAN1TIER = 0U;                                      
   /* ### Init_GPIO init code */
-  /* DDRA: DDRA7=1,DDRA6=1,DDRA5=1,DDRA4=1,DDRA3=1,DDRA2=1,DDRA1=1,DDRA0=1 */
-  DDRA = 255U;                                      
+  /* DDRA: DDRA4=1,DDRA3=1,DDRA2=1,DDRA1=1,DDRA0=1 */
+  DDRA |= (unsigned char)31U;                      
   /* ### Init_GPIO init code */
   /* PPSM: PPSM7=1 */
   PPSM |= (unsigned char)128U;                      
-  /* WOMM: WOMM7=0 */
-  WOMM &= (unsigned char)~(unsigned char)128U;                     
   /* PERM: PERM7=1 */
   PERM |= (unsigned char)128U;                      
   /* DDRM: DDRM7=1 */
   DDRM |= (unsigned char)128U;                      
+  /* ### Init_GPIO init code */
+  /* PPSS: PPSS6=1,PPSS5=1 */
+  PPSS |= (unsigned char)96U;                      
+  /* PERS: PERS7=0 */
+  PERS &= (unsigned char)~(unsigned char)128U;                     
+  /* DDRS: DDRS7=1 */
+  DDRS |= (unsigned char)128U;                      
   /* ### */
   /* Initial interrupt priority */
   /*lint -save  -e950 Disable MISRA rule (1.1) checking. */
@@ -697,7 +519,7 @@ __interrupt void isrVatd0compare(void)
 #pragma CODE_SEG __NEAR_SEG NON_BANKED
 /*
 ** ===================================================================
-**     Interrupt handler : iPIT4_10Hz
+**     Interrupt handler : iPIT4_4Hz
 **
 **     Description :
 **         User interrupt service routine. 
@@ -705,32 +527,57 @@ __interrupt void isrVatd0compare(void)
 **     Returns     : Nothing
 ** ===================================================================
 */
-__interrupt void iPIT4_10Hz(void)
+__interrupt void iPIT4_4Hz(void)
 {
-
-   //TODO: il manque la définition de ID_618 et gi
-    /*
-    CAN0SendCommand(COMMAND_BAL,0x3F,0xFFF,glowestV);//3F = broadcast
-    if(gi == 0)
-      {
+    static uint8 i = 0;
+    const uint16 alwaysOn = 0b1111111111111111;
+    const uint16 allFlash = 0b0101010101010101;
+    const uint16 sixFlash = 0b0000010101010101;
+    const uint16 fiveFlash = 0b0000000101010101;
+    const uint16 fourFlash = 0b0000000001010101;
+    const uint16 threeFlash = 0b0000000000010101;
+    const uint16 twoFlash = 0b0000000000000101;
+    const uint16 slowFlash = 0b0000000100000001;
+    uint16 flashSequence;
+    
+    uint16 anyError = *((uint16*) &gError);
+    
+    //TODO: ajouter un laps de temps avec la led qui clignote avant d'ouvrir les relais?
+    
+    if(anyError != 0) {
+        flashSequence = alwaysOn;
+    } else 
+    if(!gFlags.allCellsKnown || !gFlags.currentKnown || !gFlags.interlockStateKnown) {  //On a pas recu toutes les info (initialisation)
+        flashSequence = slowFlash;       
+    } else if(gFlags.cellHighTemp) {   //6 x (flash/non_flash) + 4 x non_flash
+        flashSequence = allFlash;
+    } else if(gFlags.highPeakCurrent) {//5 x (flash/non_flash) + 6 x non_flash
+        flashSequence = fiveFlash;
+    } else if(gFlags.cellLowVolt) {    //4 x (flash/non_flash) + 8 x non_flash
+        flashSequence = fourFlash;
+    } else if(gFlags.cellHighVolt) {   //3 x (flash/non_flash) + 10 x non_flash
+        flashSequence = threeFlash;
+    } else if(gFlags.cellLowTemp) {    //2 x (flash/non_flash) + 12 x non_flash
+        flashSequence = twoFlash;
+    } else {
+        flashSequence = 0;
+    }
+    
+    WARNING_LED = (flashSequence & (1<<i)) >> i;
+    i++;
+    if(i > 15)
+        i=0;
         
-        CAN1SendChar(ID_618,0x3,7,gbrusa1); //(unsigned long id, unsigned char priority, unsigned char length, unsigned char *txdata )
-        gi = 1;      
-      }
-    else
-      {
-        CAN1SendChar(ID_618,0x3,7,gbrusa2); //(unsigned long id, unsigned char priority, unsigned char length, unsigned char *txdata ) 
-      }
-     */
+    PITTF_PTF4 = 1;
 }
-/* end of iPIT4_10Hz */
+/* end of iPIT4_4Hz */
 #pragma CODE_SEG DEFAULT
 
 
 #pragma CODE_SEG __NEAR_SEG NON_BANKED
 /*
 ** ===================================================================
-**     Interrupt handler : iPIT3_sci_cont_mode
+**     Interrupt handler : iPIT3_sci_continuous
 **
 **     Description :
 **         User interrupt service routine. 
@@ -738,31 +585,36 @@ __interrupt void iPIT4_10Hz(void)
 **     Returns     : Nothing
 ** ===================================================================
 */
-__interrupt void iPIT3_sci_cont_mode(void)
+__interrupt void iPIT3_sci_continuous(void)
 {
-
-   //SCIcontinuous();
-
+   char buf[80];
    
+   //Interrupt for the user interface continuous refresh mode
+  
    SCIprintStatus();
-   SCITx(status_menu_3, 0 ,1);   //"Affichage des données en mode continu pour le module " 
-   print_string(num_module,0);	 //numero de module				
-   skip_lines(1);	
-   				
-   get_cells_data(gCellVolt, gCellTemp, num_module - 1 ,gMesuresParams.N_CELL );
-   skip_lines(2);  
+   SCIprintString("-------------------------------------------------------\n\r");
+   sprintf(buf, "Affichage des données en mode continu pour le module %d\n\r", num_module);
+   SCIprintString(buf);
+   SCIprintString("-------------------------------------------------------\n\r");
 
-   
-   PITTF_PTF3 = 1; //clear le interrupt flag	 	 
+   sprintf(buf, "Nombre d'initialisations = %u\n\r", gSlaveReset[num_module - 1]);
+   SCIprintString(buf);
+
+   sprintf(buf, "Révision du firmware = %u\n\r", gSlaveRev[num_module - 1]);
+   SCIprintString(buf);   
+   get_cells_data(gCellVolt, gCellTemp, num_module-1);
+   SCIprintString("\n\n\r");   
+
+   PITTF_PTF3 = 1; //clear le interrupt flag	
 }
-/* end of iPIT3_sci_cont_mode */
+/* end of iPIT3_sci_continuous */
 #pragma CODE_SEG DEFAULT
 
 
 #pragma CODE_SEG __NEAR_SEG NON_BANKED
 /*
 ** ===================================================================
-**     Interrupt handler : iPIT2_adc_timeout
+**     Interrupt handler : iPIT2_10Hz
 **
 **     Description :
 **         User interrupt service routine. 
@@ -770,22 +622,56 @@ __interrupt void iPIT3_sci_cont_mode(void)
 **     Returns     : Nothing
 ** ===================================================================
 */
-__interrupt void iPIT2_adc_timeout(void)
+__interrupt void iPIT2_10Hz(void)
 {
-   //Clearing the PIT2 interrupt flag
-   PITTF = (PITTF | 0x4);
+    static uint16 ignitionHistory = 0;
+    static uint16 interlockStateHistory = 0;
+    uint16 curIgnition;
+    uint16 curInterlockState;
 
-   //Starting the AN2 to AN15 conversion sequence (ADC0)
-   ATD0CTL5_CB = 1;
+
+    ATD0CTL5_CB = 1;     //Starting the AN7 to AN15 conversion sequence (ADC0)
+                         //Pour la emsure du courant.
+
+                    
+    //On détermine l'état de l'entrée ignition. On attend d'avoir reçu 10 valeurs (1 seconde pour changer)
+    //identiques avant de changer le drapeau.
+    curIgnition = (uint16) IGNITION;
+    ignitionHistory = ignitionHistory<<1;
+    ignitionHistory = ignitionHistory | (curIgnition & 0x1);
+    
+    if((ignitionHistory & 0x3FF) == 0x3FF)      //On assume la logique normale, i.e. 1 = ignition ON
+        gFlags.ignition = 1;
+    else if((ignitionHistory & 0x3FF) == 0)
+        gFlags.ignition = 0;
+
+        
+    //On détermine l'état de l'entrée interlock state. On attend d'avoir reçu 10 valeurs (1 seconde pour changer)
+    //identiques avant de changer le drapeau.
+    curInterlockState = (uint16) INTERLOCK_STATE;
+    interlockStateHistory = interlockStateHistory<<1;
+    interlockStateHistory = interlockStateHistory | (curInterlockState & 0x1);
+    
+    if((interlockStateHistory & 0x3FF) == 0x3FF)      //On assume la logique normale, i.e. 1 = interlock fermé
+        gFlags.interlockClosed = 1;
+    else if((interlockStateHistory & 0x3FF) == 0) 
+        gFlags.interlockClosed = 0;
+    
+    
+    //On indique qu'on a au moins une lecture de interlock state
+    gFlags.interlockStateKnown = 1;
+      
+    //On met à 0 le flag d'interruption du PIT2
+    PITTF_PTF2 = 1;      
 }
-/* end of iPIT2_adc_timeout */
+/* end of iPIT2_10Hz */
 #pragma CODE_SEG DEFAULT
 
 
 #pragma CODE_SEG __NEAR_SEG NON_BANKED
 /*
 ** ===================================================================
-**     Interrupt handler : iPIT1_slave_comm_timeout
+**     Interrupt handler : iPIT1_1Hz
 **
 **     Description :
 **         User interrupt service routine. 
@@ -793,14 +679,14 @@ __interrupt void iPIT2_adc_timeout(void)
 **     Returns     : Nothing
 ** ===================================================================
 */
-__interrupt void iPIT1_slave_comm_timeout(void)
+__interrupt void iPIT1_1Hz(void)
 {
   unsigned char i = 0;
   unsigned int tmp=0;
 
   PITTF_PTF1 = 1; //raz du flag
   
-  for(i=0; i < gMesuresParams.N_MOD; ++i) {
+  for(i=0; i<N_MOD; ++i) {
 
     tmp = (1<<i);
 
@@ -810,14 +696,18 @@ __interrupt void iPIT1_slave_comm_timeout(void)
     
     if(idleCount[i] > COM_IDLE_COUNT_MAX) {
       gSlaveComState = gSlaveComState | tmp;    // Il y a un slave de déconnecté
-      gErrorBits = (gErrorBits | ERROR_SLV_COM_TO);
-      
-    } else {
-      gSlaveComState = gSlaveComState & ~tmp;
+      gError.slaveTimeout = 1; 
+    } else if(!gFlags.ignition) {
+            gSlaveComState = gSlaveComState & ~tmp;
     }
   }
+  
+  if(!gSlaveComState && !gFlags.ignition) {
+    gError.slaveTimeout = 0;       //On peut réinitialiser l'erreur si l'ignition est à off.
+  }
+
 }
-/* end of iPIT1_slave_comm_timeout */
+/* end of iPIT1_1Hz */
 #pragma CODE_SEG DEFAULT
 
 
@@ -854,7 +744,6 @@ __interrupt void isrVpit0(void)
 */
 __interrupt void SCIIsr(void)
 {
-
    unsigned char i;
    unsigned char termchar;                         // byte reçu du terminal 
 
@@ -876,7 +765,6 @@ __interrupt void SCIIsr(void)
 	{		
 		niveau_1 = 0;                 // 1 = configuration, 2 = status, 3 = commandes
 		niveau_2 = 0;
-		niveau_3 = 0;
 		SCIshowMenu(0);               // input = 0 -> show the menu for the actual levels
 		sci_interrupt_mode = 0;
 		for(i=0; i<20; i++)
@@ -889,7 +777,7 @@ __interrupt void SCIIsr(void)
 // Lorsque l'usager appuie sur BS, la saisie de donné est interrompu.
 // Le menu de niveau supérieur est réaffiché
 //**************************************************	
-	else if(termchar == 0x08) //BS Back Space == 0x08	 
+	else if(termchar == 0x7F || termchar == 0x08) 
 	{			   
       if((niveau_1 == 2) && (niveau_2 == 3))        //Désactivation du mode continu
          PITCE_PCE3 = 0;
@@ -918,31 +806,27 @@ __interrupt void SCIIsr(void)
 // Assignation de la valeur lorsque l'usager appuie sur "enter"
 //**************************************************
 	else if (termchar == 0xD && sci_interrupt_mode == 1)  // CR == enter key		
-	{
+    {
 
-	   if(sscanf(inputBuf, "%f", &inputParam) > 0)
-      {
-          SCIassignation(inputParam);
-          
-      } else {
-         
-          SCIprintString("Error reading the entered value.\n");
-      }
+        if(sscanf(inputBuf, "%f", &inputParam) > 0) {
+            SCIassignation(inputParam);
+        } else {
+            SCIprintString("Error reading the entered value.\n");
+        }
 
-
-      if(sci_interrupt_mode != 2) {
-          sci_interrupt_mode = 0;
-   	    SCIupAlevel();
-          SCIshowMenu(0);
-   	}
-   	
-	    inputParam = 0;
-	    bufPos = 0;
-	    point = 0;
-	    for(i=0; i<20; i++)
-	    inputBuf[i] = 0;
-    
-	}
+        if(sci_interrupt_mode != 2) {
+            sci_interrupt_mode = 0;
+            SCIupAlevel();
+            SCIshowMenu(0);
+        }
+        
+        inputParam = 0;
+        bufPos = 0;
+        point = 0;
+        
+        for(i=0; i<20; i++)
+            inputBuf[i] = 0;
+    }
 	
 //**************************************************
 // MODE USER_INPUT	
@@ -1029,17 +913,17 @@ __interrupt void isrVcan1tx(void)
 */
 __interrupt void iCAN1RX_reception(void)
 {
-    uchar length, indexRx,i=0;
-    unsigned char rxdata[8] = {0,0,0,0,0,0,0,0};
+   uint8 length, indexRx, rxId, i=0;
+   uint8 rxData[8];
      
-    RXID = CAN1RXIDR0 <<3 | CAN1RXIDR1 >> 5;
+   rxId = ((uint16) CAN1RXIDR0) << 3 | ((uint16) CAN1RXIDR1) >> 5;	//Récupération de l'id du packet
     
-    //on récupère la longueur du message (8 octets max) 
-    length = (CAN1RXDLR & 0x0F);
+   //on récupère la longueur du message (8 octets max) 
+	length = CAN1RXDLR;
       
     //le buffer de réception est de type FIFO et est long de 15 octets
-	 for (indexRx=0; indexRx<length; indexRx++)
-  	    rxdata[indexRx] = *(&CAN1RXDSR0 + indexRx); //on récupère les données	  
+	 for(indexRx=0; indexRx<length; indexRx++)
+  	    rxData[indexRx] = *(&CAN1RXDSR0 + indexRx); //on récupère les données	  
       
 	 //pour lever l'interruption et relâcher le buffer de réception foregroung
     CAN1RFLG_RXF = 1; 
@@ -1121,149 +1005,210 @@ __interrupt void isrVcan0tx(void)
 */
 __interrupt void iCANRX_reception(void)
 {
-    
-    uchar length, indexRx,i=0,thisSlave;
-    unsigned char rxdata[8] = {0,0,0,0,0,0,0,0};
-    unsigned int rcvVolt;
-    int rcvTemp;
-    unsigned int cellNb;
-    unsigned int errorCode = 0;
-    unsigned int command = 0;
-    unsigned int param1 = 0;
-    unsigned int param2 = 0;
-    unsigned int tmp;
-     
-    RXID = CAN0RXIDR0 <<3 | CAN0RXIDR1 >> 5;
-    
-    //on récupère la longueur du message (8 octets max) 
-    length = (CAN0RXDLR & 0x0F);
-      
-    //le buffer de réception est de type FIFO et est long de 15 octets
-	 for (indexRx=0; indexRx<length; indexRx++)
-  	    rxdata[indexRx] = *(&CAN0RXDSR0 + indexRx); //on récupère les données
-	 
-	 //Open connection measurement received
-    //TODO: en temps normal, on devrait recevoir un message indiquant l'esclave et la cellule
-    //      avec une connection ouverte.
-    //      durant init, on devrait recevoir un message nous assurant qu'aucune cellule n'est
-    //      débranchée.
-  
+   uint16 rxId; 
+   uint8 length, slaveId, msgId;
+   uint8 indexJump, i;
+   uint8 rxData[8];
+   uint16 rcvVolt;
+   int rcvTemp, lowTemp, minTemp, highTemp, maxTemp;
+   uint16 balVector, balThres, tmp;
+   static uint16 knownSlavesVolt1to4 = 0;
+   static uint16 knownSlavesVolt5to8 = 0;
+   static uint16 knownSlavesVolt9to10 = 0;
+   static uint16 knownSlavesTemp1to4 = 0;
+   static uint16 knownSlavesTemp5to8 = 0;
+   static uint16 knownSlavesTemp9to10 = 0;
+   
+   
+   rxId = ((uint16) CAN0RXIDR0) << 3 | ((uint16) CAN0RXIDR1) >> 5;	//Récupération de l'id du packet
+   slaveId = (rxId & 0x3C0)>>6;			//Récupérer le ID de l'esclave source du message
+   length = CAN0RXDLR; 					//on récupère la longueur du message (8 octets max)
+   msgId = (rxId & 0x3F);           //Récupération de l'identificateur des données du message
 
-	 
-	 //Voltages measurements received
-	  
-	  if(RXID>=0x580 && RXID<0x680)
-	  {
-        thisSlave = (unsigned char) ((RXID-0x580-RXID%4)>>2);
-        
-        if(idleCount[thisSlave] > 0)
-           idleCount[thisSlave]--;
-        
-        //Received 1 to 4 voltages (unsigned integers)
-        for(i=0; i < (length>>1); i++) {
-        
-           cellNb = RXID%4*4+i;
-           rcvVolt = ((unsigned int) rxdata[2*i] << 8 ) | rxdata[2*i+1];
-	        gCellVolt[thisSlave][cellNb] = rcvVolt;
-	        
-	        //Verifiy for too large or low measurements
-	        if(rcvVolt < gSecurityParams.V_MIN) {            //TODO: Check for the threshold first
-	          
-	           //if(rcvVolt < gSecurityParams.V_MIN_LIM) {
-	              gErrorBits = (gErrorBits | ERROR_MIN_VOLT);
-	           //}
-	           
-	        } else if(rcvVolt > gSecurityParams.V_MAX) {     //TODO: Check for the threshold first
-	        
-	           //if(rcvVolt > gSecurityParams.V_MAX_LIM) {
-	              gErrorBits = (gErrorBits | ERROR_MAX_VOLT);
-	           //}
-	        }
-	     }
-	  }
-	    
+   
+    //le buffer de réception est de type FIFO et est long de 15 octets
+   for (i=0; i<length; i++)
+      rxData[i] = *(&CAN0RXDSR0 + i); //on récupère les données
 	
-   //Temperature measurements received	    
-   else if(RXID>=0x680 && RXID<0x780)
-   {
-      thisSlave = (unsigned char) ((RXID-0x680-RXID%4)>>2);
+    
+   //Il y a de la vie dans ce module esclave
+   if(idleCount[slaveId-1] > 0)
+      idleCount[slaveId-1]--;
+
       
-      if(idleCount[thisSlave] > 0)
-         idleCount[thisSlave]--;
-      
-      //Received 1 to 4 temperatures (unsigned integers)
-      for(i=0; i < (length>>1); i++) {
-      
-         cellNb = RXID%4*4+i;
-         rcvTemp = ((unsigned int) rxdata[2*i] << 8) |  rxdata[2*i+1];
-         
-         //MATH: patch pour contrer les 4 canaux de l'ADC esclave 0 brisés
-         if((thisSlave == 0) && (cellNb < 4)){
-            rcvTemp = 200;
-            gCellTemp[thisSlave][cellNb] = 200;
-         }
-         
-         gCellTemp[thisSlave][cellNb] = rcvTemp;
-         
-         //Verifiy for too large or low measurements
-         if((gMode == NORMAL_MODE) || (gMode == STAND_BY_MODE)) {
-         
-            if(rcvTemp < gSecurityParams.TD_MIN) {
-   	                         
-               //TODO: set threshold flag or something
-               //if(rcvTemp < gSecurityParams.TD_MIN_LIM) {
-                  gErrorBits = (gErrorBits | ERROR_MIN_TEMP);
-               //}
-                 
-            } else if(rcvTemp > gSecurityParams.TD_MAX) {
-              
-               //TODO: set threshold flag or something
-               //if(rcvTemp > gSecurityParams.TD_MAX_LIM) {
-                  gErrorBits = (gErrorBits | ERROR_MAX_TEMP);
-               //}
-            }
-            
-         } else if(gMode == CHARGE_MODE) {
-         
-            if(rcvTemp < gSecurityParams.TC_MIN) {
-   	          
-               //TODO: set threshold flag or something
-               //if(rcvTemp < gSecurityParams.TC_MIN_LIM) {
-                  gErrorBits = (gErrorBits | ERROR_MIN_TEMP);
-               //}
-                 
-            } else if(rcvTemp > gSecurityParams.TC_MAX) {
-              
-               //TODO: set threshold flag or something
-               //if(rcvTemp > gSecurityParams.TC_MAX_LIM) {
-                  gErrorBits = (gErrorBits | ERROR_MAX_TEMP);
-               //}
-            }
-         }
+   //Réception des mesures de tensions
+   if(msgId == CAN_VOLTAGES_1TO4_ID ||
+      msgId == CAN_VOLTAGES_5TO8_ID ||
+      msgId == CAN_VOLTAGES_9TO10_ID)
+   {  
+      if(msgId == CAN_VOLTAGES_1TO4_ID) {
+         indexJump = 0;
+		 if(!gFlags.allCellsKnown)  knownSlavesVolt1to4 = knownSlavesVolt1to4 | ((uint16) 1<<(slaveId-1));
+      } else if(msgId == CAN_VOLTAGES_5TO8_ID) {
+         indexJump = 4;
+		 if(!gFlags.allCellsKnown)  knownSlavesVolt5to8 = knownSlavesVolt5to8 | ((uint16) 1<<(slaveId-1));
+      } else {
+         indexJump = 8;
+		 if(!gFlags.allCellsKnown)  knownSlavesVolt9to10 = knownSlavesVolt9to10 | ((uint16) 1<<(slaveId-1));
+      }
+      for(i=0; i<(length>>1); i++) {
+         rcvVolt = (((unsigned int) rxData[2*i]) << 8) | rxData[2*i+1];
+         gCellVolt[slaveId-1][i+indexJump] = rcvVolt;
+
+         //Mettre à jour les pointeurs vers les tensions extrêmes
+         if(rcvVolt < *gLowestCellVoltage)
+            gLowestCellVoltage = &gCellVolt[slaveId-1][i+indexJump];
+         else if(rcvVolt > *gHighestCellVoltage) 
+            gHighestCellVoltage = &gCellVolt[slaveId-1][i+indexJump];
       }
       
-   //Message received from a slave     
-   } else if(RXID>=0x780 && RXID<0x78A) {
+ 
+         //Vérifier si les tensions sont trop basses
+         if(*gLowestCellVoltage < gParams.lowCellVoltage) {
+            gFlags.cellLowVolt = 1;
+            if(*gLowestCellVoltage < gParams.minCellVoltage)
+                gError.cellMinVolt = 1;
+            else if(!gFlags.ignition)
+                gError.cellMinVolt = 0;
+         } else {
+            gFlags.cellLowVolt = 0;
+            if(!gFlags.ignition)
+                gError.cellMinVolt = 0;
+         }
+         
+         //Vérifier si les tensions sont trop grandes
+         if(*gHighestCellVoltage > gParams.highCellVoltage) {
+            gFlags.cellHighVolt = 1;
+            if(*gHighestCellVoltage > gParams.maxCellVoltage)
+                gError.cellMaxVolt = 1;
+            else if(!gFlags.ignition)
+                gError.cellMaxVolt = 0;
+         } else {
+            gFlags.cellHighVolt = 0;
+            if(!gFlags.ignition)
+                gError.cellMaxVolt = 0;
+         }
+      
+   } //end of received voltage measurements msg
+   
+   
+   //Réception des mesures de température   
+   else if(  msgId == CAN_TEMP_1TO4_ID ||
+             msgId == CAN_TEMP_5TO8_ID || 
+             msgId == CAN_TEMP_9TO10_ID) 
+   {    
+      if(msgId == CAN_TEMP_1TO4_ID) {
+         indexJump = 0;
+         if(!gFlags.allCellsKnown)  knownSlavesTemp1to4 = knownSlavesTemp1to4 | ((uint16) 1<<(slaveId-1));
+      } else if(msgId == CAN_TEMP_5TO8_ID) {
+         indexJump = 4;
+         if(!gFlags.allCellsKnown)  knownSlavesTemp5to8 = knownSlavesTemp5to8 | ((uint16) 1<<(slaveId-1));
+      } else {
+         indexJump = 8;
+         if(!gFlags.allCellsKnown)  knownSlavesTemp9to10 = knownSlavesTemp9to10 | ((uint16) 1<<(slaveId-1));
+      }
+
+      for(i=0; i<(length>>1); i++) {
+         rcvTemp = (((unsigned int) rxData[2*i]) << 8) | rxData[2*i+1];
+
+         if(slaveId == 1 && (i+indexJump) == 9)     
+            gCellTemp[slaveId-1][i+indexJump] = 210;        //PATCH pour cellule 10 de l'esclave 1 (thermistor brûlé)
+         else if(slaveId == 6 && (i+indexJump) == 9)
+            gCellTemp[slaveId-1][i+indexJump] = 210;        //PATCH pour cellule 10 de l'esclave 6 (entrée ADC non fonctionnelle)
+         else
+            gCellTemp[slaveId-1][i+indexJump] = rcvTemp;
+         
+         //Mettre à jour les pointeurs vers les températures extrêmes
+         if(rcvTemp < *gLowestCellTemp)
+            gLowestCellTemp = &gCellTemp[slaveId-1][i+indexJump];
+         else if(rcvTemp > *gHighestCellTemp) 
+            gHighestCellTemp = &gCellTemp[slaveId-1][i+indexJump];
+      }
+      
+        
+         //Déterminer les températures limites selon si la cellules est en charge ou non
+         if(!gFlags.charging) {
+            minTemp = gParams.minDischargeCellTemp;
+            lowTemp = gParams.lowDischargeCellTemp;
+            maxTemp = gParams.maxDischargeCellTemp;
+            highTemp = gParams.highDischargeCellTemp;
+         } else {
+            minTemp = gParams.minChargeCellTemp;
+            lowTemp = gParams.lowChargeCellTemp;
+            maxTemp = gParams.maxChargeCellTemp;
+            highTemp = gParams.highChargeCellTemp;
+         }
+         
+         //Vérifier si les températures sont trop basses
+         if(*gLowestCellTemp < lowTemp) {
+            gFlags.cellLowTemp = 1;
+            if(*gLowestCellTemp < minTemp)
+                gError.cellMinTemp = 1;
+            else if(!gFlags.ignition)
+                gError.cellMinTemp = 0;
+         } else {
+            gFlags.cellLowTemp = 0;
+            if(!gFlags.ignition)
+                gError.cellMinTemp = 0;
+         }
+
+         //Vérifier si les températures sont trop hautes
+         if(*gHighestCellTemp > highTemp) {
+            gFlags.cellHighTemp = 1;
+            if(*gHighestCellTemp > maxTemp)
+                gError.cellMaxTemp = 1;
+            else if(!gFlags.ignition)
+                gError.cellMaxTemp = 0;
+         } else {
+            gFlags.cellHighTemp = 0;
+            if(!gFlags.ignition)
+                gError.cellMaxTemp = 0;
+         }
+   
+   } //fin de message de réception de températures
+ 
+ 
+ 
+ 
+   //Réception d'un rapport d'équilibration  
+   else if(msgId == CAN_EQUI_REPORT_ID) {
 	 
-	   thisSlave = (unsigned char) (RXID-0x780);
-	   command = ((unsigned int)rxdata[0])<<8 | rxdata[1];
-      errorCode = ((unsigned int)rxdata[6])<<8 | rxdata[7]; 
+      balVector = ((unsigned int) rxData[0])<<8 | ((unsigned int) rxData[1]);
+      balThres = ((unsigned int) rxData[2])<<8 | ((unsigned int) rxData[3]);
       
-      if(idleCount[thisSlave] > 0)
-         idleCount[thisSlave]--;
-      
-      if ((command == COMMAND_BAL_DONE) && (errorCode == 0xFFFF)) {
-         tmp = 1<<thisSlave;
+      if(balVector == 0) {
+         tmp = 1<<(slaveId-1);
          gSlaveEquiStatus = (gSlaveEquiStatus & ~tmp);
          
-         if((gSlaveEquiStatus == 0) && gActivEqui)
-            gActivEqui = 0;
+         if((gSlaveEquiStatus == 0) && gFlags.equilibrating)
+            gFlags.equilibrating = 0;
       }
    }
-      
-	 //pour lever l'interruption et relâcher le buffer de réception foregroung
+   
+   //Réception d'un rapport d'initialisation
+   else if (msgId == CAN_INIT_REPORT_ID) {
+       gSlaveReset[slaveId-1]++;
+   }
+   
+   //Réception d'un rapport de numéro de firmware
+   else if(msgId == CAN_FIRMWARE_REVISION_ID) {
+       gSlaveRev[slaveId-1] = rxData[0];
+   }
+   
+   
+   //Si on a reçu les premières valeurs de toutes les cellules, on l'indique en mettant le drapeau à 1.
+   //On suppose 10 modules esclaves.
+   if(!gFlags.allCellsKnown) {
+       if(  knownSlavesTemp1to4 == 0x3FF && knownSlavesTemp5to8 == 0x3FF && knownSlavesTemp9to10 == 0x3FF &&
+            knownSlavesVolt1to4 == 0x3FF && knownSlavesVolt5to8 == 0x3FF && knownSlavesVolt9to10 == 0x3FF)
+       {
+            gFlags.allCellsKnown = 1;
+       }
+    }
+   
+   
+	//pour lever l'interruption et relâcher le buffer de réception foreground
     CAN0RFLG_RXF = 1; 
-
 }
 /* end of iCANRX_reception */
 #pragma CODE_SEG DEFAULT
@@ -1282,86 +1227,78 @@ __interrupt void iCANRX_reception(void)
 */
 __interrupt void iADC_sequence_complete(void)
 {
+    long int highCurrent, maxCurrent, lastCurrent;
 
-  static unsigned int iCurrent = 0;                 //index of the current position in the table 
-  static long int currConv = 0;                     //Conversion register for the current    
-  static long int* currTable = gCurrentMsr1;        //Pointer to the table that is being filled                                        
-  unsigned long int variable = 0;                   // Use in the adc_Interrupt
-  long int temp=0;
-
-  //If the gnd fault reading is superior to 2.5V, set an error
-  gFaultMeasure = ATD0DR0; 
-  if(gFaultMeasure > 2048)
-      gErrorBits = (gErrorBits | ERROR_GND_FAULT);
-  
-  
-  //If the ignition reading is superior to 2.5V, ignition is on
-  if(ATD0DR1 > 2048)
-      gIgnition = 1;
-  else
-      gIgnition = 0;    
-   
-      
-  //If the CH1 reading is superior to 4.75V or inferior to 0.25V,
-  //take the ch2 current measurement
- if((ATD0DR13 < 205) || (ATD0DR13 > 3891)){
-     
-           
-       if(ATD0DR5 > O_HALL2){
-                    
-          variable = ATD0DR5-O_HALL2;
-          currConv = variable * K_HALL2;         // CH2: 210 mA par division sur 12 bits (4096 div)
-                                             //      pour une tension moyenne de référence de 4,9 V
-       }else{                
-        
-        variable = O_HALL2 - ATD0DR5;
-        currConv = -1*variable * K_HALL2;
-       }
-   
-  } else {
     
-       if(ATD0DR13 > O_HALL1){
-                    
-          variable = ATD0DR13-O_HALL1;
-          currConv = variable * K_HALL1;         // CH2: 18 mA par division sur 12 bits (4096 div)
-       }else{                               //      pour une tension moyenne de référence de 4,9 V
-        
-        variable = O_HALL1 - ATD0DR13;
-        currConv = -1*variable * K_HALL1;
-       }
-  }
+    //***************************************************************************
+    //                    LISTE DES SIGNAUX ANALOGIQUES CONVERTIS
+    // Signal du CAPTEUR DE COURANT CHANNEL 1 (-30 à 30 A) sur le channel AN15 de
+    // l'ADC0. La mesure se retrouve dans le registre ATD0DR8.
+    //
+    // Signal du CAPTEUR DE COURANT CHANNEL 2 (-350 à 350 A) sur le channel AN7 de
+    // l'ADC0. La mesure se retrouve dans le registre ATD0DR0.
+    //***************************************************************************
+ 
+
+    ///////////////////////////////////////////////////////////////////////////////
+    // CALCUL DU COURANT
+    //
+    // La formule pour convertir le résultat numérique N de l'ADC en courant I (mA)
+    // est la suivante:
+    //                      I = (5x10^6/4096/G) * (N-2048) = K_HALL * (N-2048)
+    //
+    // où G est la sensibilité du capteur en mV/A. Pour le channel 1, G = 66.7 mV/A.
+    // Pour le channel 2, G = 5.7 mV/A. Ces valeurs sont précises pour VCC = 5V.
+    //
+    // Les valeurs de K_HALL sont multipliées par 128 pour garder plus de précision
+    // et éviter une multiplication en point flottant.
+    ///////////////////////////////////////////////////////////////////////////////
   
-  gLastCurrent = currConv;
+    // Si le résultat du channel 1 est supérieur à 4.5V, ou inférieur à 0.5V, on considère
+    // qu'il est saturé, et on prend la mesure sur le channel 2. Le capteur ne peut nous
+    // retourner une tension inférieure à 0.25V ou supérieur à 4.75V. On garde une marge
+    // de 0.25V.
+    if((ATD0DR8 < 410) || (ATD0DR8 > 3686))
+        lastCurrent = ((long int)ATD0DR0 - (long int)2048)*K_HALL2;
+    else  
+        lastCurrent = ((long int)ATD0DR8 - (long int)2048)*K_HALL1;
+
+    lastCurrent >>= 7;           //On divise le résultat par 128 parce qu'on a multiplié K_HALL par 128
   
-  temp = 1000*(long int)gSecurityParams.IDP_MAX;
   
-  if((gLastCurrent > temp) || (gLastCurrent < -temp)) {
-      gErrorBits = gErrorBits | ERROR_MAX_PEAK_CURR;    
-  }
-  
-  currTable[iCurrent++] = currConv;
-  
-  
-  //If the current measurement buffer is full, reset index to 0, switch buffers and
-  //set the SOCready flag so a SOC calculation will eventually start
-  if(iCurrent == N_CURR_MSR){
-      iCurrent = 0;
-      gSOCready = 1;
-      
-      if(currTable == gCurrentMsr1){
-         currTable = gCurrentMsr2;
-         gCurrentMsr = gCurrentMsr1;    // Hugues Temporary
-      } else {
-         currTable = gCurrentMsr1;
-         gCurrentMsr = gCurrentMsr2;    // Hugues Temporary
-      }
-  }
-  
-  //gFirstADCdone = 1;
-  
-   //raz du flag (pas le choix si on veut sortir de l'interrupt)
-  ATD0STAT0_SCF = 1;
-       
+     //On tient une moyenne mobile exponentielle sur le courant
+     //xt_moy = alpha*xt + (1-alpha)*xt-1_moy,  alpha = 2/(N+1)
+     //Le coefficient de lissage alpha est égal à 0.02 ce qui veut dire
+     //que les 99 dernières mesures portent 86% du poids de la moyenne.
+     //À 100 ms, c'est une moyenne sur 9.9 secondes.
+     gMeanCurrent = 5*lastCurrent + (256-5)*gMeanCurrent;
+     gMeanCurrent >>= 8;
+
+    //Erreurs et avertissements de courant maximal
+    if(!gFlags.charging) {
+        highCurrent = 1000*(long int)gParams.highPeakDischargeCurrent;   //TODO: c'est long une multiplication long dans un interrupt...
+              
+        if((gMeanCurrent > highCurrent) || (gMeanCurrent < -highCurrent)) {
+            gFlags.highPeakCurrent = 1;
+            maxCurrent = 1000*(long int)gParams.maxPeakDischargeCurrent;
+            if((gMeanCurrent > maxCurrent) || (gMeanCurrent < -maxCurrent))
+                gError.maxPeakCurrent = 1;
+            else if(!gFlags.ignition)
+                gError.maxPeakCurrent = 0;      //Réinitialisation du drapeau d'erreur permise si ignition à off
+        } else {
+            gFlags.highPeakCurrent = 0;
+            if(!gFlags.ignition)
+                gError.maxPeakCurrent = 0;
+        }  
+    }
+    
+    //TODO: Erreurs et avertissements de courant moyen
+    
+    //On indique qu'on a mesuré au moins une fois les lignes analogiques
+    gFlags.currentKnown = 1;
+    
+    //raz du flag (pas le choix si on veut sortir de l'interrupt)
+    ATD0STAT0_SCF = 1;
 }
 /* end of iADC_sequence_complete */
 #pragma CODE_SEG DEFAULT
@@ -1428,7 +1365,7 @@ static const tIsrFunc _InterruptVectorTable[] @0xFF10U = { /* Interrupt vector t
   &UNASSIGNED_ISR,                      /* 0x2C  0xFF58   1   no   ivVpit7         unused by PE */
   &UNASSIGNED_ISR,                      /* 0x2D  0xFF5A   1   no   ivVpit6         unused by PE */
   &UNASSIGNED_ISR,                      /* 0x2E  0xFF5C   1   no   ivVpit5         unused by PE */
-  &iPIT4_10Hz,                          /* 0x2F  0xFF5E   1   no   ivVpit4         used by PE */
+  &iPIT4_4Hz,                           /* 0x2F  0xFF5E   1   no   ivVpit4         used by PE */
   &UNASSIGNED_ISR,                      /* 0x30  0xFF60   1   no   ivVReserved79   unused by PE */
   &UNASSIGNED_ISR,                      /* 0x31  0xFF62   1   no   ivVReserved78   unused by PE */
   &UNASSIGNED_ISR,                      /* 0x32  0xFF64   1   no   ivVxst7         unused by PE */
@@ -1439,9 +1376,9 @@ static const tIsrFunc _InterruptVectorTable[] @0xFF10U = { /* Interrupt vector t
   &UNASSIGNED_ISR,                      /* 0x37  0xFF6E   1   no   ivVxst2         unused by PE */
   &UNASSIGNED_ISR,                      /* 0x38  0xFF70   1   no   ivVxst1         unused by PE */
   &UNASSIGNED_ISR,                      /* 0x39  0xFF72   1   no   ivVxst0         unused by PE */
-  &iPIT3_sci_cont_mode,                 /* 0x3A  0xFF74   1   no   ivVpit3         used by PE */
-  &iPIT2_adc_timeout,                   /* 0x3B  0xFF76   1   no   ivVpit2         used by PE */
-  &iPIT1_slave_comm_timeout,            /* 0x3C  0xFF78   1   no   ivVpit1         used by PE */
+  &iPIT3_sci_continuous,                /* 0x3A  0xFF74   1   no   ivVpit3         used by PE */
+  &iPIT2_10Hz,                          /* 0x3B  0xFF76   1   no   ivVpit2         used by PE */
+  &iPIT1_1Hz,                           /* 0x3C  0xFF78   1   no   ivVpit1         used by PE */
   &isrVpit0,                            /* 0x3D  0xFF7A   1   no   ivVpit0         used by PE */
   &UNASSIGNED_ISR,                      /* 0x3E  0xFF7C   1   -    ivVhti          unused by PE */
   &UNASSIGNED_ISR,                      /* 0x3F  0xFF7E   1   no   ivVapi          unused by PE */
@@ -1523,7 +1460,7 @@ static const tIsrFunc _ResetVectorTable[] @0xFFFAU = { /* Reset vector table */
 /*
 ** ###################################################################
 **
-**     This file was created by Processor Expert 3.03 [04.46]
+**     This file was created by Processor Expert 3.02 [04.44]
 **     for the Freescale HCS12X series of microcontrollers.
 **
 ** ###################################################################

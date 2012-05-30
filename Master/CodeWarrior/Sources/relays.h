@@ -1,13 +1,27 @@
 #ifndef RELAYS_H
 #define RELAYS_H
 
- void OpenRelays(unsigned int delay);
- void CloseRelays(unsigned int delay);
- void SingleCloseRelays(int relay);
- void Precharge(unsigned int time);
- void PeriphInit(void);
- void DontDischarge(void);
- void Discharge(unsigned int time);
+//Nom des relais
+#define MCR1_HVN    PORTA_PA2
+#define MCR2_P2P    PORTA_PA4
+#define MCR3_P1N    PORTA_PA3
+#define MCR4_HVP    PORTA_PA1
+#define MCR5_PRE    PORTA_PA0
+#define DISCH_RLY   PTM_PTM7
 
+//États des relais
+#define RLY_OPEN    0
+#define RLY_CLOSED  1
+#define DISCH_RLY_OPEN    1
+#define DISCH_RLY_CLOSED  0
+
+//Temps
+#define RELAY_DELAY         100            //[ms] Time between the opening or closing of 2 relays
+#define PRECHARGE_DELAY     8000           //[ms] Time of precharge
+#define DISCHARGE_DELAY     15000          //[ms] Time of discharge. Le circuit de décharge ne devrait pas être actif
+
+//Déclaration de fonctions
+void OpenRelays(void);
+void CloseRelays(void);
      
 #endif RELAYS_H
