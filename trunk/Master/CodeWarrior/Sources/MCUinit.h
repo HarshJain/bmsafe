@@ -6,16 +6,16 @@
 **
 **     Project   : Master
 **     Processor : MC9S12XEP100MAL
-**     Version   : Component 01.003, Driver 01.05, CPU db: 3.00.035
+**     Version   : Component 01.003, Driver 01.05, CPU db: 3.00.033
 **     Datasheet : MC9S12XEP100 Rev. 1.19 12/2008
-**     Date/Time : 17/04/2012, 12:15 AM
+**     Date/Time : 2012-05-24, 18:38
 **     Abstract  :
 **         This module contains device initialization code 
 **         for selected on-chip peripherals.
 **     Contents  :
 **         Function "MCU_init" initializes selected peripherals
 **
-**     Copyright : 1997 - 2011 Freescale Semiconductor, Inc. All Rights Reserved.
+**     Copyright : 1997 - 2010 Freescale Semiconductor, Inc. All Rights Reserved.
 **     
 **     http      : www.freescale.com
 **     mail      : support@freescale.com
@@ -79,10 +79,10 @@ __interrupt void isrVatd0compare(void);
 
 
 #pragma CODE_SEG __NEAR_SEG NON_BANKED
-__interrupt void iPIT4_10Hz(void);
+__interrupt void iPIT4_4Hz(void);
 /*
 ** ===================================================================
-**     Interrupt handler : iPIT4_10Hz
+**     Interrupt handler : iPIT4_4Hz
 **
 **     Description :
 **         User interrupt service routine. 
@@ -95,10 +95,10 @@ __interrupt void iPIT4_10Hz(void);
 
 
 #pragma CODE_SEG __NEAR_SEG NON_BANKED
-__interrupt void iPIT3_sci_cont_mode(void);
+__interrupt void iPIT3_sci_continuous(void);
 /*
 ** ===================================================================
-**     Interrupt handler : iPIT3_sci_cont_mode
+**     Interrupt handler : iPIT3_sci_continuous
 **
 **     Description :
 **         User interrupt service routine. 
@@ -111,10 +111,10 @@ __interrupt void iPIT3_sci_cont_mode(void);
 
 
 #pragma CODE_SEG __NEAR_SEG NON_BANKED
-__interrupt void iPIT2_adc_timeout(void);
+__interrupt void iPIT2_10Hz(void);
 /*
 ** ===================================================================
-**     Interrupt handler : iPIT2_adc_timeout
+**     Interrupt handler : iPIT2_10Hz
 **
 **     Description :
 **         User interrupt service routine. 
@@ -127,10 +127,10 @@ __interrupt void iPIT2_adc_timeout(void);
 
 
 #pragma CODE_SEG __NEAR_SEG NON_BANKED
-__interrupt void iPIT1_slave_comm_timeout(void);
+__interrupt void iPIT1_1Hz(void);
 /*
 ** ===================================================================
-**     Interrupt handler : iPIT1_slave_comm_timeout
+**     Interrupt handler : iPIT1_1Hz
 **
 **     Description :
 **         User interrupt service routine. 
@@ -312,7 +312,7 @@ __interrupt void iADC_sequence_complete(void);
 /*
 ** ###################################################################
 **
-**     This file was created by Processor Expert 3.03 [04.46]
+**     This file was created by Processor Expert 3.02 [04.44]
 **     for the Freescale HCS12X series of microcontrollers.
 **
 ** ###################################################################

@@ -1,32 +1,7 @@
 #include "relays.h"
 #include "derivative.h"
 #include "common.h"
-
-
- //*****************************************************************************
-// OpenRelays
-//
-// Description:    
-//
-//*****************************************************************************
-
-  void PeriphInit(void){
-    
-  // PWME_PWME0 = 1;        // PWM0 ENABLED
-  // PWMPOL_PPOL0 = 0;      // LE PWM COMMENCE SUR UN ZERO
-  // PWMCLK_PCLK0 = 0;      // CLOCK A FOR PWN CLOCK SOURCE
-  // PWMPRCLK_PCKA2 = 1;    // PRESCALER : BUS CLOCK (16/2 MHZ) DIVIDED BY 128 (62,5 KHZ)
-  // PWMPRCLK_PCKA1 = 1; 
-  // PWMPRCLK_PCKA0 = 1; 
-  // PWMCAE_CAE0 = 0;       // LEFT ALLIGNEMENT
-  // PWMPER0 = 0xFF;        // PERIODE DE 256 PERIODES DE CLOCK A (245 Hz) 
-  // PWMDTY0 = 0x7F;        // DUTY CYCLE 50 %
-  
-  
-  // DDRA = 0xFF;              // LES PINS DU PORT A EN SORTIE
-  
-  
-  }
+#include "defines.h"
 
 
 //*****************************************************************************
@@ -35,48 +10,36 @@
 // Description:    
 //
 //*****************************************************************************
-void CloseRelays(unsigned int num) {
+void CloseRelays(void) {
 
-   PORTA_PA0 = 1;
-   delayMs(num);
-   PORTA_PA1 = 1;
-   delayMs(num);
-   PORTA_PA2 = 1;
-   delayMs(num);
-   PORTA_PA3 = 1;
-   delayMs(num);
+    //Ouverture du circuit de décharge
+    DISCH_RLY = DISCH_RLY_OPEN;
 
+   //Fermeture des relais du circuit principal
+   MCR1_HVN = RLY_CLOSED;
+   delayMs(RELAY_DELAY);
+   MCR2_P2P = RLY_CLOSED;
+   delayMs(RELAY_DELAY);
+   MCR4_HVP = RLY_CLOSED;
+   delayMs(RELAY_DELAY);
+   
+   //Fermeture relais du circuit de précharge
+   MCR5_PRE = RLY_CLOSED;  
+   delayMs(PRECHARGE_DELAY);
+   
+   //Fermeture dernier relais circuit principal
+   MCR3_P1N = RLY_CLOSED;
+   delayMs(RELAY_DELAY);
+   
+   //Ouverture relais précharge
+   MCR5_PRE = RLY_OPEN;
 }
 
 
-void OpenRelays(unsigned int num) {
-
-   PORTA_PA0 = 0;
-   PORTA_PA1 = 0;
-   PORTA_PA2 = 0;
-   PORTA_PA3 = 0;
-   delayMs(num);
-   
+void OpenRelays(void) {
+    MCR1_HVN = RLY_OPEN;
+    MCR2_P2P = RLY_OPEN;
+    MCR3_P1N = RLY_OPEN;
+    MCR4_HVP = RLY_OPEN;  
+    DISCH_RLY = DISCH_RLY_CLOSED;
 }
-
-void Precharge(unsigned int time) {
-
-   PORTA_PA4 = 1;     
-   delayMs(time);
-   PORTA_PA4 = 0;
-   
-}
-
-void DontDischarge(void) {
-
-   PTM_PTM7 = 1;     
-   
-}
-
-void Discharge(unsigned int time) {
-
-   PTM_PTM7 = 0;
-   delayMs(time);
-   PTM_PTM7 = 0;     
-   
-}   
