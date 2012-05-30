@@ -9,7 +9,7 @@
 **     Processor : MC9S12XDP512BMPV
 **     Version   : Component 02.003, Driver 01.05, CPU db: 2.87.229
 **     Datasheet : MC9S12XDP512RMV2 Rev. 2.18 May 2008
-**     Date/Time : 2012-05-05, 22:49
+**     Date/Time : 2012-05-20, 17:16
 **     Abstract  :
 **         This module contains device initialization code 
 **         for selected on-chip peripherals.
@@ -175,7 +175,7 @@ void MCU_init(void)
   INT_CFDATA1 = 1U;                    /*  0x39  0xFF72   1   no   ivVxst0       unused by PE */
   INT_CFDATA2 = 1U;                    /*  0x3A  0xFF74   1   no   ivVpit3       unused by PE */
   INT_CFDATA3 = 1U;                    /*  0x3B  0xFF76   1   no   ivVpit2       unused by PE */
-  INT_CFDATA4 = 1U;                    /*  0x3C  0xFF78   1   no   ivVpit1       used by PE */
+  INT_CFDATA4 = 1U;                    /*  0x3C  0xFF78   1   no   ivVpit1       unused by PE */
   INT_CFDATA5 = 1U;                    /*  0x3D  0xFF7A   1   no   ivVpit0       used by PE */
   INT_CFDATA6 = 1U;                    /*  0x3E  0xFF7C   1   no   ivVReserved65 unused by PE */
   INT_CFDATA7 = 1U;                    /*  0x3F  0xFF7E   1   no   ivVapi        unused by PE */
@@ -187,7 +187,7 @@ void MCU_init(void)
   INT_CFDATA4 = 1U;                    /*  0x44  0xFF88   1   no   ivVsci3       unused by PE */
   INT_CFDATA5 = 1U;                    /*  0x45  0xFF8A   1   no   ivVsci2       unused by PE */
   INT_CFDATA6 = 1U;                    /*  0x46  0xFF8C   1   no   ivVpwmesdn    unused by PE */
-  INT_CFDATA7 = 1U;                    /*  0x47  0xFF8E   1   no   ivVportp      used by PE */
+  INT_CFDATA7 = 1U;                    /*  0x47  0xFF8E   1   no   ivVportp      unused by PE */
   INT_CFADDR = 144U;                                      
   INT_CFDATA0 = 1U;                    /*  0x48  0xFF90   1   no   ivVcan4tx     unused by PE */
   INT_CFDATA1 = 1U;                    /*  0x49  0xFF92   1   no   ivVcan4rx     unused by PE */
@@ -223,7 +223,7 @@ void MCU_init(void)
   INT_CFDATA4 = 1U;                    /*  0x64  0xFFC8   1   no   ivVtimpabovf  unused by PE */
   INT_CFDATA5 = 1U;                    /*  0x65  0xFFCA   1   no   ivVtimmdcu    unused by PE */
   INT_CFDATA6 = 1U;                    /*  0x66  0xFFCC   1   no   ivVporth      used by PE */
-  INT_CFDATA7 = 1U;                    /*  0x67  0xFFCE   1   no   ivVportj      used by PE */
+  INT_CFDATA7 = 1U;                    /*  0x67  0xFFCE   1   no   ivVportj      unused by PE */
   INT_CFADDR = 208U;                                      
   INT_CFDATA0 = 1U;                    /*  0x68  0xFFD0   1   no   ivVatd1       used by PE */
   INT_CFDATA1 = 1U;                    /*  0x69  0xFFD2   1   no   ivVatd0       used by PE */
@@ -250,17 +250,23 @@ void MCU_init(void)
   MODRR |= (unsigned char)35U;                      
   /* RDRH: RDRH7=0,RDRH6=0,RDRH5=0,RDRH4=0,RDRH3=0,RDRH2=1,RDRH1=1,RDRH0=1 */
   RDRH = 7U;                                      
-  /* PERH: PERH0=1 */
-  PERH |= (unsigned char)1U;                      
+  /* PERH: PERH7=1,PERH6=1,PERH5=1,PERH4=1,PERH0=1 */
+  PERH |= (unsigned char)241U;                      
   /* COPCTL: WCOP=0,RSBCK=0,WRTMASK=0,CR2=0,CR1=0,CR0=0 */
   COPCTL = 0U;                                      
+  /* PERP: PERP7=1,PERP6=1,PERP5=1,PERP4=1,PERP3=1,PERP2=1,PERP1=1,PERP0=1 */
+  PERP = 255U;                                      
+  /* PERT: PERT7=1,PERT6=1,PERT5=1,PERT4=1,PERT3=1,PERT2=1,PERT1=1,PERT0=1 */
+  PERT = 255U;                                      
+  /* PER1AD1: PER1AD115=1,PER1AD114=1,PER1AD113=1,PER1AD112=1,PER1AD111=1,PER1AD110=1 */
+  PER1AD1 |= (unsigned char)252U;                      
+  /* PERM: PERM7=1,PERM6=1,PERM5=1,PERM4=1,PERM3=1,PERM2=1,PERM1=1,PERM0=1 */
+  PERM = 255U;                                      
   /* IRQCR: IRQEN=0 */
   IRQCR &= (unsigned char)~(unsigned char)64U;                     
   /* ### Init_GPIO init code */
   /* PTH: PTH3=1 */
   PTH |= (unsigned char)8U;                      
-  /* PERH: PERH7=1,PERH6=1,PERH5=1,PERH4=1 */
-  PERH |= (unsigned char)240U;                      
   /* DDRH: DDRH3=1 */
   DDRH |= (unsigned char)8U;                      
   /* ### Init_SPI init code */
@@ -275,10 +281,8 @@ void MCU_init(void)
   PITMTLD0 = 255U;                                      
   /* PITLD0: PLD15=0,PLD14=1,PLD13=1,PLD12=1,PLD11=1,PLD10=0,PLD9=0,PLD8=1,PLD7=1,PLD6=1,PLD5=1,PLD4=1,PLD3=0,PLD2=1,PLD1=0,PLD0=0 */
   PITLD0 = 31220U;                            
-  /* PITLD1: PLD15=1,PLD14=1,PLD13=1,PLD12=1,PLD11=0,PLD10=1,PLD9=0,PLD8=0,PLD7=0,PLD6=0,PLD5=1,PLD4=0,PLD3=0,PLD2=0,PLD1=1,PLD0=1 */
-  PITLD1 = 62499U;                            
-  /* PITINTE: PINTE3=0,PINTE2=0,PINTE1=1,PINTE0=1 */
-  PITINTE = 3U;                                      
+  /* PITINTE: PINTE3=0,PINTE2=0,PINTE1=0,PINTE0=1 */
+  PITINTE = 1U;                                      
   /* ### Init_MSCAN init code */
   /* CAN0CTL1: CANE=1,CLKSRC=1,LOOPB=0,LISTEN=0,BORM=0,WUPM=0,SLPAK=0,INITAK=1 */
   CAN0CTL1 = 193U;                                      
@@ -290,8 +294,8 @@ void MCU_init(void)
   CAN0IDAC = 16U;                                      
   /* CAN0IDAR0: AC7=1,AC6=0,AC5=1,AC4=0,AC3=0,AC2=0,AC1=0,AC0=0 */
   CAN0IDAR0 = 160U;                                      
-  /* CAN0IDMR0: AM7=1,AM6=1,AM5=1,AM4=1,AM3=1,AM2=1,AM1=1,AM0=1 */
-  CAN0IDMR0 = 255U;                                      
+  /* CAN0IDMR0: AM7=0,AM6=1,AM5=1,AM4=1,AM3=1,AM2=1,AM1=1,AM0=1 */
+  CAN0IDMR0 = 127U;                                      
   /* CAN0IDMR1: AM7=1,AM6=1,AM5=1,AM4=1,AM3=1,AM2=1,AM1=1,AM0=1 */
   CAN0IDMR1 = 255U;                                      
   /* CAN0IDMR2: AM7=1,AM6=1,AM5=1,AM4=1,AM3=1,AM2=1,AM1=1,AM0=1 */
@@ -310,58 +314,18 @@ void MCU_init(void)
   /* Initialization of the ADC0 module */
   /* ATD0CTL3: S8C=1,S4C=0,S2C=0,S1C=0,FIFO=0,FRZ1=0,FRZ0=0 */
   ATD0CTL3 = 64U;                                      
-  /* ATD0CTL2: ADPU=1,AFFC=0,AWAI=0,ETRIGLE=0,ETRIGP=0,ETRIGE=0,ASCIE=1,ASCIF=0 */
-  ATD0CTL2 = 130U;                                      
   /* ATD0CTL5: DJM=1,DSGN=0,SCAN=0,MULT=1,CC=0,CB=0,CA=0 */
   ATD0CTL5 = 144U;                                      
+  /* ATD0CTL2: ADPU=0,AFFC=0,AWAI=0,ETRIGLE=0,ETRIGP=0,ETRIGE=0,ASCIE=1,ASCIF=0 */
+  ATD0CTL2 = 2U;                                      
   /* ### Init_ADC init code */
   /* Initialization of the ADC1 module */
   /* ATD1CTL3: S8C=0,S4C=0,S2C=1,S1C=0,FIFO=0,FRZ1=0,FRZ0=0 */
   ATD1CTL3 = 16U;                                      
-  /* ATD1CTL2: ADPU=1,AFFC=0,AWAI=0,ETRIGLE=0,ETRIGP=0,ETRIGE=0,ASCIE=1,ASCIF=0 */
-  ATD1CTL2 = 130U;                                      
-  /*
-     The following delay loop generates a delay of approx. 20us, which is needed for
-     the module to recover from power down state.
-  */
-  asm {
-    /*
-     * Delay
-     *   - requested                  : 20 us @ 8MHz,
-     *   - possible                   : 160 c, 20000 ns
-     */
-    pshd                               /* (2 c: 250 ns) backup D */
-    ldd #51                            /* (2 c: 250 ns) number of iterations */
-    label0:
-    dbne d, label0                     /* (3 c: 375 ns) repeat 51x */
-    puld                               /* (3 c: 375 ns) restore D */
-  };
   /* ATD1CTL5: DJM=1,DSGN=0,SCAN=0,MULT=1,CD=0,CC=0,CB=0,CA=0 */
   ATD1CTL5 = 144U;                                      
-  /* ### Init_GPIO init code */
-  /* ### Init_GPIO init code */
-  /* PUCR: PUPAE=1 */
-  PUCR |= (unsigned char)1U;                      
-  /* ### Init_GPIO init code */
-  /* PUCR: PUPBE=1 */
-  PUCR |= (unsigned char)2U;                      
-  /* ### Init_GPIO init code */
-  /* ### Init_GPIO init code */
-  /* PERM: PERM7=1,PERM6=1,PERM5=1,PERM4=1,PERM3=1,PERM2=1,PERM1=1,PERM0=1 */
-  PERM = 255U;                                      
-  /* ### Init_GPIO init code */
-  /* PERP: PERP7=1,PERP6=1,PERP5=1,PERP4=1,PERP3=1,PERP2=1,PERP1=1,PERP0=1 */
-  PERP = 255U;                                      
-  /* ### Init_GPIO init code */
-  /* ### Init_GPIO init code */
-  /* PERT: PERT7=1,PERT6=1,PERT5=1,PERT4=1,PERT3=1,PERT2=1,PERT1=1,PERT0=1 */
-  PERT = 255U;                                      
-  /* ### Init_GPIO init code */
-  /* ### Init_GPIO init code */
-  /* ATD1DIEN1: IEN7=1,IEN6=1,IEN5=1,IEN4=1,IEN3=1,IEN2=1 */
-  ATD1DIEN1 |= (unsigned char)252U;                      
-  /* PER1AD1: PER1AD115=1,PER1AD114=1,PER1AD113=1,PER1AD112=1,PER1AD111=1,PER1AD110=1 */
-  PER1AD1 |= (unsigned char)252U;                      
+  /* ATD1CTL2: ADPU=0,AFFC=0,AWAI=0,ETRIGLE=0,ETRIGP=0,ETRIGE=0,ASCIE=1,ASCIF=0 */
+  ATD1CTL2 = 2U;                                      
   /* ### */
   /* Initial interrupt priority */
   /*lint -save  -e950 Disable MISRA rule (1.1) checking. */
@@ -399,7 +363,7 @@ __interrupt void isr_default(void)
 #pragma CODE_SEG __NEAR_SEG NON_BANKED
 /*
 ** ===================================================================
-**     Interrupt handler : iPIT1_mesure_temp
+**     Interrupt handler : iPIT0_1Hz
 **
 **     Description :
 **         User interrupt service routine. 
@@ -407,54 +371,42 @@ __interrupt void isr_default(void)
 **     Returns     : Nothing
 ** ===================================================================
 */
-__interrupt void iPIT1_mesure_temp(void)
+__interrupt void iPIT0_1Hz(void)
 {
-   PITTF_PTF1 = 1;   //reset the interrupt bit
-   ATD0CTL5_CA = 0;  //start ADC0 conversion (from AN0 to AN7)
-   ATD1CTL5_CA = 0;  //start ADC1 conversion (from AN8 to AN9)
+    static uint8 voltCount = 0;
+    static uint8 tempCount = 0;
+    
+    gElapsedTime++;      //On compte le nombre de secondes ecoulees depuis le dernier init,
+    voltCount++;         //la dernière mesure de tensions,
+    tempCount++;         //et la dernière mesure de température
+    
+    if(voltCount == VOLT_MEASURE_PERIOD) {
+       gFlags.voltTimeout = 1;        //Drapeau qui indique qu'on doit prendre des mesures de tension.
+       voltCount = 0;       
+    }
+    
+    if(tempCount == TEMP_MEASURE_PERIOD) {
+        ATD0CTL2_ADPU = 1;  //On démarre l'ADC;
+        ATD1CTL2_ADPU = 1;  
+        
+        //On attend approximativement 20 us (160 c @8 MHz) pour que l'ADC soit prêt à être utilisé
+        //Référence: code généré par device initialization
+          asm {
+            pshd                               /* (2 c: 250 ns) backup D */
+            ldd #51                            /* (2 c: 250 ns) number of iterations */
+            label0:
+            dbne d, label0                     /* (3 c: 375 ns) repeat 51x */
+            puld                               /* (3 c: 375 ns) restore D */
+          };
+    
+       ATD0CTL5_CA = 0;  //start ADC0 conversion (from AN0 to AN7)
+       ATD1CTL5_CA = 0;  //start ADC1 conversion (from AN8 to AN9)
+       tempCount = 0;       
+    }
+
+    PITTF_PTF0 = 1;      //reset the interrupt bit
 }
-/* end of iPIT1_mesure_temp */
-#pragma CODE_SEG DEFAULT
-
-
-#pragma CODE_SEG __NEAR_SEG NON_BANKED
-/*
-** ===================================================================
-**     Interrupt handler : iPIT0_mesure_volt
-**
-**     Description :
-**         User interrupt service routine. 
-**     Parameters  : None
-**     Returns     : Nothing
-** ===================================================================
-*/
-__interrupt void iPIT0_mesure_volt(void)
-{
-   gVoltTimeout = 1;
-   gElapsedTime++;
-   PITTF_PTF0 = 1; //reset the interrupt bit
-}
-/* end of iPIT0_mesure_volt */
-#pragma CODE_SEG DEFAULT
-
-
-#pragma CODE_SEG __NEAR_SEG NON_BANKED
-/*
-** ===================================================================
-**     Interrupt handler : isrVportp
-**
-**     Description :
-**         User interrupt service routine. 
-**     Parameters  : None
-**     Returns     : Nothing
-** ===================================================================
-*/
-__interrupt void isrVportp(void)
-{
-  /* Write your interrupt code here ... */
-
-}
-/* end of isrVportp */
+/* end of iPIT0_1Hz */
 #pragma CODE_SEG DEFAULT
 
 
@@ -481,7 +433,7 @@ __interrupt void isrVcan0tx(void)
 #pragma CODE_SEG __NEAR_SEG NON_BANKED
 /*
 ** ===================================================================
-**     Interrupt handler : iCAN0RxISR
+**     Interrupt handler : iCAN0_RX
 **
 **     Description :
 **         User interrupt service routine. 
@@ -489,21 +441,24 @@ __interrupt void isrVcan0tx(void)
 **     Returns     : Nothing
 ** ===================================================================
 */
-__interrupt void iCAN0RxISR(void)
+__interrupt void iCAN0_RX(void)
 {
    uint16 rxId; 
    uint8 length, slaveId, msgId, i;
    uint8 rxData[8];
-   uint16 balVector, balThres;
-   
-   
+ 
+   //Cet interrupt n'est appellé que lorsqu'un message valide,
+   //c'est à dire dont le ID a passé les filtres, est reçu.
+   //Le filtre est défini pour ne laisser passer que les
+   //messages du maître (bit le plus significatif = 0)
+ 
    rxId = ((uint16) CAN0RXIDR0) << 3 | ((uint16) CAN0RXIDR1) >> 5;	//Récupération de l'id du packet
    slaveId = (rxId & 0x3C0)>>6;			//Récupérer le ID de l'esclave destinataire
    length = CAN0RXDLR; 					//on récupère la longueur du message (8 octets max)
    msgId = (rxId & 0x3F);           	//Récupération de l'identificateur des données du message
 
    
-    if(slaveId == gSlaveID || slaveId == BROADCAST_ID) {		//Si le message nous est destiné
+    if(slaveId == gSlaveID || slaveId == CAN_BROADCAST_ID) {		//Si le message nous est destiné
         for (i=0; i<length; i++)
             rxData[i] = *(&CAN0RXDSR0 + i); //on récupère les données
 
@@ -513,12 +468,17 @@ __interrupt void iCAN0RxISR(void)
             //Si on recoit une commande d'equilibrage
             //on definie la nouvelle config selon le vecteur d'équilibration reçu
             //et le seuil de tension
-            balVector = (((unsigned int) rxData[0]) << 8) | (unsigned int) rxData[1];
-            balThres = (((unsigned int) rxData[2]) << 8) | (unsigned int) rxData[3];
-            gBalanceFlag = 1;
-            gEquiStatusChange = 1;
+            gBalanceVector = (((unsigned int) rxData[0]) << 8) | (unsigned int) rxData[1];
+            gBalThres = (((unsigned int) rxData[2]) << 8) | (unsigned int) rxData[3];
+            gFlags.balancingActive = 1;
+            gFlags.equiStatusChange = 1;
             break;
 
+            case CAN_REQUEST_FIRMWARE_REV_ID:
+            gFlags.firmwareRequest = 1;
+            break;
+            
+            
             default:
             break;
         }
@@ -526,8 +486,9 @@ __interrupt void iCAN0RxISR(void)
    
     //pour lever l'interruption et relâcher le buffer de réception foreground
     CAN0RFLG_RXF = 1;
+
 }
-/* end of iCAN0RxISR */
+/* end of iCAN0_RX */
 #pragma CODE_SEG DEFAULT
 
 
@@ -614,26 +575,6 @@ __interrupt void isrVporth(void)
 #pragma CODE_SEG __NEAR_SEG NON_BANKED
 /*
 ** ===================================================================
-**     Interrupt handler : isrVportj
-**
-**     Description :
-**         User interrupt service routine. 
-**     Parameters  : None
-**     Returns     : Nothing
-** ===================================================================
-*/
-__interrupt void isrVportj(void)
-{
-  /* Write your interrupt code here ... */
-
-}
-/* end of isrVportj */
-#pragma CODE_SEG DEFAULT
-
-
-#pragma CODE_SEG __NEAR_SEG NON_BANKED
-/*
-** ===================================================================
 **     Interrupt handler : iADC1_seq_complete
 **
 **     Description :
@@ -647,7 +588,7 @@ __interrupt void iADC1_seq_complete(void)
    ATD1STAT0_SCF = 1;
    gTemp[0] = ATD1DR1;
    gTemp[1] = ATD1DR0;
-   gADC1done = 1;
+   gFlags.ADC1done = 1;
 }
 /* end of iADC1_seq_complete */
 #pragma CODE_SEG DEFAULT
@@ -669,14 +610,14 @@ __interrupt void iADC0_seq_complete(void)
    uint8 i;
    uint16 *result = (uint16*) &ATD0DR0H;
 
-   ATD0STAT0_SCF = 1;   //Clear the Sequence Compelte Flag
+   ATD0STAT0_SCF = 1;   //Clear the Sequence Complete Flag
 
    for(i=0; i<(NB_CELL-2); i++){
       gTemp[NB_CELL-i-1] = *result;
       result++;   
    }
    
-   gADC0done = 1;
+   gFlags.ADC0done = 1;
 }
 /* end of iADC0_seq_complete */
 #pragma CODE_SEG DEFAULT
@@ -756,8 +697,8 @@ static const tIsrFunc _InterruptVectorTable[] @0xFF10U = { /* Interrupt vector t
   &UNASSIGNED_ISR,                      /* 0x39  0xFF72   1   no   ivVxst0       unused by PE */
   &UNASSIGNED_ISR,                      /* 0x3A  0xFF74   1   no   ivVpit3       unused by PE */
   &UNASSIGNED_ISR,                      /* 0x3B  0xFF76   1   no   ivVpit2       unused by PE */
-  &iPIT1_mesure_temp,                   /* 0x3C  0xFF78   1   no   ivVpit1       used by PE */
-  &iPIT0_mesure_volt,                   /* 0x3D  0xFF7A   1   no   ivVpit0       used by PE */
+  &UNASSIGNED_ISR,                      /* 0x3C  0xFF78   1   no   ivVpit1       unused by PE */
+  &iPIT0_1Hz,                           /* 0x3D  0xFF7A   1   no   ivVpit0       used by PE */
   &UNASSIGNED_ISR,                      /* 0x3E  0xFF7C   1   no   ivVReserved65 unused by PE */
   &UNASSIGNED_ISR,                      /* 0x3F  0xFF7E   1   no   ivVapi        unused by PE */
   &UNASSIGNED_ISR,                      /* 0x40  0xFF80   1   no   ivVlvi        unused by PE */
@@ -767,7 +708,7 @@ static const tIsrFunc _InterruptVectorTable[] @0xFF10U = { /* Interrupt vector t
   &UNASSIGNED_ISR,                      /* 0x44  0xFF88   1   no   ivVsci3       unused by PE */
   &UNASSIGNED_ISR,                      /* 0x45  0xFF8A   1   no   ivVsci2       unused by PE */
   &UNASSIGNED_ISR,                      /* 0x46  0xFF8C   1   no   ivVpwmesdn    unused by PE */
-  &isrVportp,                           /* 0x47  0xFF8E   1   no   ivVportp      used by PE */
+  &UNASSIGNED_ISR,                      /* 0x47  0xFF8E   1   no   ivVportp      unused by PE */
   &UNASSIGNED_ISR,                      /* 0x48  0xFF90   1   no   ivVcan4tx     unused by PE */
   &UNASSIGNED_ISR,                      /* 0x49  0xFF92   1   no   ivVcan4rx     unused by PE */
   &UNASSIGNED_ISR,                      /* 0x4A  0xFF94   1   no   ivVcan4err    unused by PE */
@@ -785,7 +726,7 @@ static const tIsrFunc _InterruptVectorTable[] @0xFF10U = { /* Interrupt vector t
   &UNASSIGNED_ISR,                      /* 0x56  0xFFAC   1   no   ivVcan1err    unused by PE */
   &UNASSIGNED_ISR,                      /* 0x57  0xFFAE   1   no   ivVcan1wkup   unused by PE */
   &isrVcan0tx,                          /* 0x58  0xFFB0   1   no   ivVcan0tx     used by PE */
-  &iCAN0RxISR,                          /* 0x59  0xFFB2   1   no   ivVcan0rx     used by PE */
+  &iCAN0_RX,                            /* 0x59  0xFFB2   1   no   ivVcan0rx     used by PE */
   &isrVcan0err,                         /* 0x5A  0xFFB4   1   no   ivVcan0err    used by PE */
   &isrVcan0wkup,                        /* 0x5B  0xFFB6   1   no   ivVcan0wkup   used by PE */
   &UNASSIGNED_ISR,                      /* 0x5C  0xFFB8   1   no   ivVflash      unused by PE */
@@ -799,7 +740,7 @@ static const tIsrFunc _InterruptVectorTable[] @0xFF10U = { /* Interrupt vector t
   &UNASSIGNED_ISR,                      /* 0x64  0xFFC8   1   no   ivVtimpabovf  unused by PE */
   &UNASSIGNED_ISR,                      /* 0x65  0xFFCA   1   no   ivVtimmdcu    unused by PE */
   &isrVporth,                           /* 0x66  0xFFCC   1   no   ivVporth      used by PE */
-  &isrVportj,                           /* 0x67  0xFFCE   1   no   ivVportj      used by PE */
+  &UNASSIGNED_ISR,                      /* 0x67  0xFFCE   1   no   ivVportj      unused by PE */
   &iADC1_seq_complete,                  /* 0x68  0xFFD0   1   no   ivVatd1       used by PE */
   &iADC0_seq_complete,                  /* 0x69  0xFFD2   1   no   ivVatd0       used by PE */
   &UNASSIGNED_ISR,                      /* 0x6A  0xFFD4   1   no   ivVsci1       unused by PE */
@@ -832,6 +773,44 @@ static const tIsrFunc _ResetVectorTable[] @0xFFFAU = { /* Reset vector table */
   &MCU_init_reset                       /* 0xFFFE  ivVreset       used by PE */
 };
 
+
+
+#pragma CODE_SEG __NEAR_SEG NON_BANKED
+/*
+** ===================================================================
+**     Interrupt handler : isrVportp
+**
+**     Description :
+**         User interrupt service routine. 
+**     Parameters  : None
+**     Returns     : Nothing
+** ===================================================================
+*/
+__interrupt void isrVportp(void)
+{
+  /* Write your interrupt code here ... */
+
+}
+/* end of isrVportp */
+
+
+#pragma CODE_SEG __NEAR_SEG NON_BANKED
+/*
+** ===================================================================
+**     Interrupt handler : isrVportj
+**
+**     Description :
+**         User interrupt service routine. 
+**     Parameters  : None
+**     Returns     : Nothing
+** ===================================================================
+*/
+__interrupt void isrVportj(void)
+{
+  /* Write your interrupt code here ... */
+
+}
+/* end of isrVportj */
 
 /* END MCUinit */
 

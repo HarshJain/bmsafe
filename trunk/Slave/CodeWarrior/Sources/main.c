@@ -21,28 +21,18 @@
    Global variables
 *********************/
 
-//---------------
-//  Flags
-//---------------
-
-uint8 gBalanceFlag = 0;	       // 0 = Normal mode ; 1 = Discharge Cell mode
-uint8 gEquiStatusChange = 0;   // 1 = les registres de config. du mon. de batteries ont changes et doivent etre réenvoyés
-uint16 gBalanceVector = 0;     // The n-th bit indicates the balancing status of the n-th cell. 1 = discharge enable.
-uint8 gVoltTimeout = 0;        // 1 = les mesures de voltages doivent etre prises par le moniteur de batterie
-uint8 gADC0done = 0;           // 1 = les mesures de l'ADC0 sont pretes a etre recuperees
-uint8 gADC1done = 0;           // 1 = les mesures de l'ADC1 sont pretes a etre recuperees
-errors_t gErrorFlags = {0, 0, 0};   //TODO MAT: tester nouvelle structure + init    
-uint8 gSPItimeout = 0;
 
 //-----------
 // Variables
 //-----------
 
-uint32  gElapsedTime = 0;	      // le temps en secondes ecoule depuis l'activation du timer PIT0				
-uint8   gSlaveID = 0;            // le numéro d'identification du module, lu sur le port E.
-uint16  gVoltages[NB_CELL];	   // table containing the Cell Voltages in mV
-int     gTemp[NB_CELL];         	// table contenant les temperatures des cellules (300 = 30.0 oC)
-uint16  gBalThres = 0;          	// Balancing target voltage
+uint32  gElapsedTime = 0;	            // le temps en secondes ecoule depuis l'activation du timer PIT0				
+uint8   gSlaveID = 0;                   // le numéro d'identification du module, lu sur le port E.
+uint16  gVoltages[NB_CELL];	            // table containing the Cell Voltages in mV
+int     gTemp[NB_CELL];         	    // table contenant les temperatures des cellules (300 = 30.0 oC)
+uint16  gBalThres = 0;          	    // Balancing target voltage
+uint16  gBalanceVector = 0;             // The n-th bit indicates the balancing status of the n-th cell. 1 = discharge enable.
+flags_t gFlags = {0,0,0,0,0,0,0,0,0};    // Les drapeaux globaux utilisés //TODO: tester l'initialisation
 
  
 /*************************
@@ -75,7 +65,7 @@ void main(void)
    //Initialization of the uC peripherals
    //--------------------------------------------------------
    //Timers initiazed for
-   //    cell temperature measurements every 2 seconds (with uC ADC)
+   //    cell temperature measurements every 5 seconds (with uC ADC)
    //    cell voltage measurements every 1 second (with external battery monitor)
    //    we have a precision of 10 bits on the temperature measurements
    //    we have a precision of 12 bits on the voltage measurements
@@ -85,20 +75,24 @@ void main(void)
    //Slave ID reading on port E
    gSlaveID = PORTE & 0x0F;   //Only the 4 lower bits are meaningful
    if(gSlaveID == 0 || (gSlaveID > 10)) {
-      gErrorFlags.badSlaveId = 1;     //TODO: we do nothing with this so far
+      gFlags.badSlaveId = 1;     //TODO: we do nothing with this so far
    }
    
    
    //CAN synchronization
    #ifdef CAN_ENABLE
    while(!CAN0CTL0_SYNCH);   // Wait for Synchronization 
+   
+   //Envoyer un message au maître pour indiquer que notre initialisation est complétée
+   //Envoyer le numéro de révision également
+   gFlags.canTxError = CAN0SendInitStatus(gSlaveID); 
+   gFlags.canTxError = CAN0SendFirmwareRevision(gSlaveID);  
    #endif
     
     
 	//Timers activation
-   PITCE_PCE0 = 1;           //Activation of the voltage measurement timer and
-                             //TX CAN timeout timer (PIT0)
-   PITCE_PCE1 = 1;           //Activation of the temperature measurement timer (PIT1)
+   PITCE_PCE0 = 1;           //Activation du timer PIT0. Ce timer a une fréquence de 1 Hz.
+                             //Dans l'interruption, on gère la prise de mesures.
    PITCFLMT_PITE = 1;        //Activation of the timer module
    
    //Program the LTC6802-2 configuration registers   
@@ -106,34 +100,45 @@ void main(void)
       
 	while(1) {
   
-      //Temp measurements are ready to be sent to the master (every 2 seconds)
-      if(gADC0done && gADC1done){
+      #ifdef CAN_ENABLE
+      if(gFlags.firmwareRequest) { 
+          gFlags.canTxError = CAN0SendFirmwareRevision(gSlaveID);
+          gFlags.firmwareRequest = 0;
+      }
+      #endif
+  
+      //Temp measurements are ready to be sent to the master (every 5 seconds)
+      if(gFlags.ADC0done && gFlags.ADC1done){
 
+         //On ferme le ADC pour l'économie d'énergie
+         ATD0CTL2_ADPU = 0;
+         ATD1CTL2_ADPU = 0;
+      
          //Conversion of temperatures to a readable form (ex: 295 = 29.5 oC)
          for(i=0; i<NB_CELL; i++)
             gTemp[i] = convertTemp(gTemp[i]);         
 
          #ifdef CAN_ENABLE
          //send temp to master via CAN
-         gErrorFlags.canTxError = CAN0SendTemp(gTemp, gSlaveID);    //TODO: we do nothing with this flag so far...
+         gFlags.canTxError = CAN0SendTemp(gTemp, gSlaveID);    //TODO: we do nothing with this flag so far...
          #endif
 
-         gADC0done = 0;
-         gADC1done = 0;
+         gFlags.ADC0done = 0;
+         gFlags.ADC1done = 0;
       }
       
       
       //Voltages measurements need to be acquired and sent (every second)
       //Open-wire connection detection is done
       //And configuration register verification too
-      if(gVoltTimeout){
+      if(gFlags.voltTimeout){
       
          #ifdef SPI_ENABLE  
          //Send the configuration register if needed.
          while(ltcReadConfig(rcvConfig) != 0);  //Read the current config, without errors.
 
          if((rcvConfig[0] & 0x01) == 0x00) {//This means that the LTC6802 config register
-            gSPItimeout = 0;                //was reset after its watchdog timed out
+            gFlags.spiTimeout = 0;                //was reset after its watchdog timed out
             ltcWriteConfig(&ltcConfig);     //We do not use the WTD bit (doesnt work). We use
          }                                  //the CDC bits instead because the default value (0)
                                             //is different than the one we use (1). When the watch dog
@@ -152,36 +157,54 @@ void main(void)
          #ifdef CAN_ENABLE
          //send voltages to the master via CAN, if received without error from LTC6802
          if(!txError)
-            gErrorFlags.canTxError = CAN0SendVoltages(gVoltages, gSlaveID);  //TODO: we do nothing with this flag so far...
+            gFlags.canTxError = CAN0SendVoltages(gVoltages, gSlaveID);  //TODO: we do nothing with this flag so far...
          #endif
 
-         gVoltTimeout = 0;
+         gFlags.voltTimeout = 0;
          txError = 0;
       }
       
       //If the config registers have been modified by the equilibration routine,
       //send it to the LTC6802
-      if(gEquiStatusChange){
+      if(gFlags.equiStatusChange){
          #ifdef SPI_ENABLE  
          ltcMakeConfigRegister(&ltcConfig, gBalanceVector);
          ltcWriteConfig(&ltcConfig);
          #endif SPI_ENABLE  
-         gEquiStatusChange = 0; 
+         gFlags.equiStatusChange = 0; 
       }
       
 
-      if(gBalanceFlag) {          //if in balancing mode
+      if(gFlags.balancingActive) {          //if in balancing mode
         checkForBalancedCells(&gBalanceVector, gVoltages, gBalThres, BAL_DELTA_VOLT);
         if(!gBalanceVector) {      //all cells are balanced, send the status change to the master
           #ifdef CAN_ENABLE
-          gErrorFlags.canTxError = CAN0SendEquiStatus(gBalanceVector, gBalThres, gSlaveID);
+          gFlags.canTxError = CAN0SendEquiStatus(gBalanceVector, gBalThres, gSlaveID);
           #endif
-          gBalanceFlag = 0;           
+          gFlags.balancingActive = 0;           
         }
       }
       
+      //On entre en mode veille, en attendant le prochain interrupt.
+      //Ce sera un timer qui indique le moment de prendre des mesures ou la
+      //réception d'un message sur le port CAN.
+      
+      //Le module SPI entrera lui aussi en mode veille puisque SPI1CR2_SPISWAI = 1
+      //On envoie l'ADC en stop mode quand il a terminé de prendre ses mesures.
+      //Le périphérique CAN n'entre pas en mode wait car dans ce cas on perd le msg
+      //qui a réveillé l'interface CAN.
+      
+      //TODO: mettre le module CAN en wait mode et tjrs envoyer un msg bidon à partir du maître
+      //quand il envoie une commande. Cependant, les mesg des autres esclaves vont constamment
+      //réveiller l'interface, sauf si on utilise le Twup...
+      
+      asm {
+        WAI
+      };    
+      
 	} //end while(1)
-}
+    
+} //end main
 
 // Functions implementation.
 void checkForBalancedCells(uint16* curBalanceArray, uint16 voltages[],
@@ -191,7 +214,7 @@ void checkForBalancedCells(uint16* curBalanceArray, uint16 voltages[],
     if ((*curBalanceArray & (1 << i)) &&  // If this cell is currently discharging
         (voltages[i] < (targetVoltage + fuzzFactor))) {  // And it is equilibrated
       *curBalanceArray &= ~(1 << i);  // Remove it's equilibration bit.
-      gEquiStatusChange = 1;  // Ask to update register.
+      gFlags.equiStatusChange = 1;  // Ask to update register.
     }
   }
 }

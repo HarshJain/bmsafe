@@ -8,7 +8,7 @@
 **     Processor : MC9S12XDP512BMPV
 **     Version   : Component 02.003, Driver 01.05, CPU db: 2.87.229
 **     Datasheet : MC9S12XDP512RMV2 Rev. 2.18 May 2008
-**     Date/Time : 2012-05-05, 22:49
+**     Date/Time : 2012-05-20, 17:16
 **     Abstract  :
 **         This module contains device initialization code 
 **         for selected on-chip peripherals.
@@ -63,42 +63,10 @@ __interrupt void isr_default(void);
 
 
 #pragma CODE_SEG __NEAR_SEG NON_BANKED
-__interrupt void iPIT1_mesure_temp(void);
+__interrupt void iPIT0_1Hz(void);
 /*
 ** ===================================================================
-**     Interrupt handler : iPIT1_mesure_temp
-**
-**     Description :
-**         User interrupt service routine. 
-**     Parameters  : None
-**     Returns     : Nothing
-** ===================================================================
-*/
-#pragma CODE_SEG DEFAULT
-
-
-
-#pragma CODE_SEG __NEAR_SEG NON_BANKED
-__interrupt void iPIT0_mesure_volt(void);
-/*
-** ===================================================================
-**     Interrupt handler : iPIT0_mesure_volt
-**
-**     Description :
-**         User interrupt service routine. 
-**     Parameters  : None
-**     Returns     : Nothing
-** ===================================================================
-*/
-#pragma CODE_SEG DEFAULT
-
-
-
-#pragma CODE_SEG __NEAR_SEG NON_BANKED
-__interrupt void isrVportp(void);
-/*
-** ===================================================================
-**     Interrupt handler : isrVportp
+**     Interrupt handler : iPIT0_1Hz
 **
 **     Description :
 **         User interrupt service routine. 
@@ -127,10 +95,10 @@ __interrupt void isrVcan0tx(void);
 
 
 #pragma CODE_SEG __NEAR_SEG NON_BANKED
-__interrupt void iCAN0RxISR(void);
+__interrupt void iCAN0_RX(void);
 /*
 ** ===================================================================
-**     Interrupt handler : iCAN0RxISR
+**     Interrupt handler : iCAN0_RX
 **
 **     Description :
 **         User interrupt service routine. 
@@ -195,22 +163,6 @@ __interrupt void isrVporth(void);
 /*
 ** ===================================================================
 **     Interrupt handler : isrVporth
-**
-**     Description :
-**         User interrupt service routine. 
-**     Parameters  : None
-**     Returns     : Nothing
-** ===================================================================
-*/
-#pragma CODE_SEG DEFAULT
-
-
-
-#pragma CODE_SEG __NEAR_SEG NON_BANKED
-__interrupt void isrVportj(void);
-/*
-** ===================================================================
-**     Interrupt handler : isrVportj
 **
 **     Description :
 **         User interrupt service routine. 

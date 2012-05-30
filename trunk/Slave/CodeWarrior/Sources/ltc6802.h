@@ -13,7 +13,7 @@
 * Command codes
 *****************/
 #define WRCFG	0x01	//Write Config
-#define RDCFG  0x02  //Read config
+#define RDCFG   0x02  //Read config
 #define RDCV	0x04	//Read Cell Voltage
 #define STCVAD	0x10	//Cell Volatge A/D Conversion (on all cells)
 #define STOWAD	0x20	//Open_Wire_AD_Conversion (on all cells)

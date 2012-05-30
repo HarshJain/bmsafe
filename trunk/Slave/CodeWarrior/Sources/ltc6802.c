@@ -17,7 +17,7 @@ unsigned char SPI_send(unsigned char sendByte)
    startTime = gElapsedTime;
    while (!SPI1SR_SPIF) {
       if((gElapsedTime-startTime) > SPI_SEND_TIMEOUT) {
-         gSPItimeout = 1;
+         gFlags.spiTimeout = 1;
          break;
       }
    }
@@ -140,7 +140,7 @@ unsigned char ltcReadCellVoltage(unsigned int *voltagesInt)
 	
    crc = ltcComputeCRC(voltagesByte, 15);   
  
-   if(!gSPItimeout)     //We prevent changes to the voltages table while the LTC6802 chip is in standby mode.
+   if(!gFlags.spiTimeout)     //We prevent changes to the voltages table while the LTC6802 chip is in standby mode.
       convertVoltages(voltagesByte, voltagesInt);  //to avoid erroneous data sent to the master.
       
    if(crc == pec)
