@@ -8,7 +8,7 @@
 **     Processor : MC9S12XEP100MAL
 **     Version   : Component 01.003, Driver 01.05, CPU db: 3.00.033
 **     Datasheet : MC9S12XEP100 Rev. 1.19 12/2008
-**     Date/Time : 2012-05-24, 18:38
+**     Date/Time : 7/28/2012, 8:27 PM
 **     Abstract  :
 **         This module contains device initialization code 
 **         for selected on-chip peripherals.
@@ -79,6 +79,22 @@ __interrupt void isrVatd0compare(void);
 
 
 #pragma CODE_SEG __NEAR_SEG NON_BANKED
+__interrupt void iPIT5_safety_check(void);
+/*
+** ===================================================================
+**     Interrupt handler : iPIT5_safety_check
+**
+**     Description :
+**         User interrupt service routine. 
+**     Parameters  : None
+**     Returns     : Nothing
+** ===================================================================
+*/
+#pragma CODE_SEG DEFAULT
+
+
+
+#pragma CODE_SEG __NEAR_SEG NON_BANKED
 __interrupt void iPIT4_4Hz(void);
 /*
 ** ===================================================================
@@ -111,10 +127,10 @@ __interrupt void iPIT3_sci_continuous(void);
 
 
 #pragma CODE_SEG __NEAR_SEG NON_BANKED
-__interrupt void iPIT2_10Hz(void);
+__interrupt void iPIT2_100Hz(void);
 /*
 ** ===================================================================
-**     Interrupt handler : iPIT2_10Hz
+**     Interrupt handler : iPIT2_100Hz
 **
 **     Description :
 **         User interrupt service routine. 
@@ -143,10 +159,10 @@ __interrupt void iPIT1_1Hz(void);
 
 
 #pragma CODE_SEG __NEAR_SEG NON_BANKED
-__interrupt void isrVpit0(void);
+__interrupt void iPIT0_timer_relais(void);
 /*
 ** ===================================================================
-**     Interrupt handler : isrVpit0
+**     Interrupt handler : iPIT0_timer_relais
 **
 **     Description :
 **         User interrupt service routine. 

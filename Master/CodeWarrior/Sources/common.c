@@ -74,31 +74,6 @@ int findMinInt(int *table, unsigned char numElements, unsigned char *index)
 	return min;
 }
 
-
-//*****************************************************************************
-// delayMs
-//
-// Description: Function that waits a number of milliseconds.
-//
-//*****************************************************************************
-void delayMs(unsigned int numMs)
-{
-   unsigned int count = 0;
-   
-   PITCE = (PITCE | 0x1);           //PIT0 (1 ms timeout) activated
-   
-   while(count < numMs) {
-      
-      while(!(PITTF & 0x1)) {}      //Wait for the timer to reach 0
-      
-      PITTF = (PITTF | 0x1);        //Clear the flag
-      count++;
-   }
-   
-   PITCE = (PITCE & 0xFE);          //PIT0 disabled
-}
-
-
 //******************************************************************************
 // Finds min & max temperature
 //******************************************************************************

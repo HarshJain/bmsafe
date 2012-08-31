@@ -2,7 +2,7 @@
 ;The file contains internal information about the Processor Expert project generation
 [Options]
 ProjectName=Master
-ProjectDirectory=C:\Users\mathieu\BMS\Maitre\Codewarrior\
+ProjectDirectory=C:\Users\Guillaume Provencher\Documents\Felec\BMS\Maitre\CodeWarrior\
 DestEventsDirectory=Sources\
 DestDriversSubDirectory=
 DestDocumentationDirectory=
@@ -21,7 +21,7 @@ GenExternModules=0
 GenBeanModules=0
 SignalListFile=
 DestinationCompiler=MetrowerksHC12XCC
-ProjectModificationStamp=70
+ProjectModificationStamp=87
 
 [2]
 Generated=Yes
@@ -136,11 +136,12 @@ GenNumMethods=1
 Init=No
 GenNumEvents=0
 ISR_ISRHandleTrigg=
-ISR_ISRHandleOut0=isrVpit0
+ISR_ISRHandleOut0=iPIT0_timer_relais
 ISR_ISRHandleOut1=iPIT1_1Hz
-ISR_ISRHandleOut2=iPIT2_10Hz
+ISR_ISRHandleOut2=iPIT2_100Hz
 ISR_ISRHandleOut3=iPIT3_sci_continuous
 ISR_ISRHandleOut4=iPIT4_4Hz
+ISR_ISRHandleOut5=iPIT5_safety_check
 GenSmartUserChangesDetected_Header=No
 GenSmartUserChangesDetected_Code=No
 GenSmartUserChangesDetected_Asembl=No
@@ -252,6 +253,22 @@ GenMethodPos=0
 [25]
 Generated=Yes
 GenCompName=S
+GenEventModule=
+HeaderAge=-1
+CodeAge=-1
+AsemblAge=-1
+GenNumMethods=1
+Init=No
+GenNumEvents=0
+ISR_ISRHandleKWI=
+GenSmartUserChangesDetected_Header=No
+GenSmartUserChangesDetected_Code=No
+GenSmartUserChangesDetected_Asembl=No
+GenMethodPos=0
+
+[26]
+Generated=Yes
+GenCompName=T
 GenEventModule=
 HeaderAge=-1
 CodeAge=-1
