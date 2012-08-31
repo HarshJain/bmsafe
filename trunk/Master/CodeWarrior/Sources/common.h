@@ -14,7 +14,7 @@ int findMaxInt(int *table, unsigned char numElements, uchar *index);
 int findMinInt(int *table, unsigned char numElements, uchar *index);
 void temperatureCompare(int cellTemp[][N_CELL], int *lowestT, int *maxT);
 void voltageCompare(unsigned int cellVolt[][N_CELL], unsigned int *lowestV, unsigned int *maxV);
-void delayMs(unsigned int numMs);
+
 
 
 #endif

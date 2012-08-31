@@ -9,7 +9,7 @@
 **     Processor : MC9S12XEP100MAL
 **     Version   : Component 01.003, Driver 01.05, CPU db: 3.00.033
 **     Datasheet : MC9S12XEP100 Rev. 1.19 12/2008
-**     Date/Time : 2012-05-24, 18:38
+**     Date/Time : 7/28/2012, 8:27 PM
 **     Abstract  :
 **         This module contains device initialization code 
 **         for selected on-chip peripherals.
@@ -227,8 +227,8 @@ void MCU_init(void)
   INT_CFDATA3 = 1U;                    /*  0x2B  0xFF56   1   no   ivVsci7         unused by PE */
   INT_CFDATA4 = 1U;                    /*  0x2C  0xFF58   1   no   ivVpit7         unused by PE */
   INT_CFDATA5 = 1U;                    /*  0x2D  0xFF5A   1   no   ivVpit6         unused by PE */
-  INT_CFDATA6 = 1U;                    /*  0x2E  0xFF5C   1   no   ivVpit5         unused by PE */
-  INT_CFDATA7 = 1U;                    /*  0x2F  0xFF5E   1   no   ivVpit4         used by PE */
+  INT_CFDATA6 = 1U;                    /*  0x2E  0xFF5C   1   no   ivVpit5         used by PE */
+  INT_CFDATA7 = 3U;                    /*  0x2F  0xFF5E   3   no   ivVpit4         used by PE */
   INT_CFADDR = 96U;                                      
   INT_CFDATA0 = 1U;                    /*  0x30  0xFF60   1   no   ivVReserved79   unused by PE */
   INT_CFDATA1 = 1U;                    /*  0x31  0xFF62   1   no   ivVReserved78   unused by PE */
@@ -241,10 +241,10 @@ void MCU_init(void)
   INT_CFADDR = 112U;                                      
   INT_CFDATA0 = 1U;                    /*  0x38  0xFF70   1   no   ivVxst1         unused by PE */
   INT_CFDATA1 = 1U;                    /*  0x39  0xFF72   1   no   ivVxst0         unused by PE */
-  INT_CFDATA2 = 1U;                    /*  0x3A  0xFF74   1   no   ivVpit3         used by PE */
-  INT_CFDATA3 = 1U;                    /*  0x3B  0xFF76   1   no   ivVpit2         used by PE */
-  INT_CFDATA4 = 1U;                    /*  0x3C  0xFF78   1   no   ivVpit1         used by PE */
-  INT_CFDATA5 = 1U;                    /*  0x3D  0xFF7A   1   no   ivVpit0         used by PE */
+  INT_CFDATA2 = 4U;                    /*  0x3A  0xFF74   4   no   ivVpit3         used by PE */
+  INT_CFDATA3 = 2U;                    /*  0x3B  0xFF76   2   no   ivVpit2         used by PE */
+  INT_CFDATA4 = 3U;                    /*  0x3C  0xFF78   3   no   ivVpit1         used by PE */
+  INT_CFDATA5 = 2U;                    /*  0x3D  0xFF7A   2   no   ivVpit0         used by PE */
   INT_CFDATA6 = 1U;                    /*  0x3E  0xFF7C   1   -    ivVhti          unused by PE */
   INT_CFDATA7 = 1U;                    /*  0x3F  0xFF7E   1   no   ivVapi          unused by PE */
   INT_CFADDR = 128U;                                      
@@ -276,7 +276,7 @@ void MCU_init(void)
   INT_CFDATA7 = 1U;                    /*  0x57  0xFFAE   1   no   ivVcan1wkup     used by PE */
   INT_CFADDR = 176U;                                      
   INT_CFDATA0 = 1U;                    /*  0x58  0xFFB0   1   no   ivVcan0tx       used by PE */
-  INT_CFDATA1 = 1U;                    /*  0x59  0xFFB2   1   no   ivVcan0rx       used by PE */
+  INT_CFDATA1 = 2U;                    /*  0x59  0xFFB2   2   no   ivVcan0rx       used by PE */
   INT_CFDATA2 = 1U;                    /*  0x5A  0xFFB4   1   no   ivVcan0err      used by PE */
   INT_CFDATA3 = 1U;                    /*  0x5B  0xFFB6   1   no   ivVcan0wkup     used by PE */
   INT_CFDATA4 = 1U;                    /*  0x5C  0xFFB8   1   no   ivVflash        unused by PE */
@@ -294,7 +294,7 @@ void MCU_init(void)
   INT_CFDATA7 = 1U;                    /*  0x67  0xFFCE   1   no   ivVportj        unused by PE */
   INT_CFADDR = 208U;                                      
   INT_CFDATA0 = 1U;                    /*  0x68  0xFFD0   1   no   ivVatd1         unused by PE */
-  INT_CFDATA1 = 1U;                    /*  0x69  0xFFD2   1   no   ivVatd0         used by PE */
+  INT_CFDATA1 = 2U;                    /*  0x69  0xFFD2   2   no   ivVatd0         used by PE */
   INT_CFDATA2 = 1U;                    /*  0x6A  0xFFD4   1   no   ivVsci1         unused by PE */
   INT_CFDATA3 = 1U;                    /*  0x6B  0xFFD6   1   no   ivVsci0         unused by PE */
   INT_CFDATA4 = 1U;                    /*  0x6C  0xFFD8   1   no   ivVspi0         unused by PE */
@@ -320,8 +320,8 @@ void MCU_init(void)
   COPCTL = 0U;                                      
   /* PERP: PERP7=1,PERP6=1,PERP5=1,PERP4=1,PERP3=1,PERP2=1,PERP1=1 */
   PERP |= (unsigned char)254U;                      
-  /* PERT: PERT7=1,PERT6=1,PERT5=1,PERT4=1,PERT3=1,PERT2=1,PERT1=1,PERT0=1 */
-  PERT = 255U;                                      
+  /* PERT: PERT7=1,PERT6=1,PERT5=1,PERT3=1,PERT2=1,PERT1=1,PERT0=1 */
+  PERT |= (unsigned char)239U;                      
   /* PERH: PERH5=1,PERH4=1,PERH3=1,PERH2=1,PERH1=1,PERH0=1 */
   PERH |= (unsigned char)63U;                      
   /* PER1AD0: PER1AD06=1,PER1AD05=1,PER1AD04=1,PER1AD03=1,PER1AD02=1,PER1AD01=1,PER1AD00=1 */
@@ -344,16 +344,20 @@ void MCU_init(void)
   PITLD0 = 7999U;                            
   /* PITLD1: PLD15=0,PLD14=1,PLD13=1,PLD12=1,PLD11=1,PLD10=0,PLD9=0,PLD8=1,PLD7=1,PLD6=1,PLD5=1,PLD4=1,PLD3=0,PLD2=1,PLD1=0,PLD0=0 */
   PITLD1 = 31220U;                            
-  /* PITLD2: PLD15=0,PLD14=0,PLD13=0,PLD12=0,PLD11=1,PLD10=1,PLD9=0,PLD8=0,PLD7=0,PLD6=0,PLD5=1,PLD4=1,PLD3=0,PLD2=1,PLD1=0,PLD0=0 */
-  PITLD2 = 3124U;                            
+  /* PITLD2: PLD15=0,PLD14=0,PLD13=0,PLD12=0,PLD11=0,PLD10=0,PLD9=0,PLD8=1,PLD7=0,PLD6=0,PLD5=1,PLD4=1,PLD3=1,PLD2=0,PLD1=0,PLD0=0 */
+  PITLD2 = 312U;                            
   /* PITLD3: PLD15=1,PLD14=1,PLD13=1,PLD12=1,PLD11=1,PLD10=1,PLD9=1,PLD8=1,PLD7=1,PLD6=1,PLD5=1,PLD4=1,PLD3=1,PLD2=1,PLD1=1,PLD0=1 */
   PITLD3 = 65535U;                            
   /* PITLD4: PLD15=0,PLD14=0,PLD13=0,PLD12=1,PLD11=1,PLD10=1,PLD9=1,PLD8=0,PLD7=1,PLD6=0,PLD5=0,PLD4=0,PLD3=0,PLD2=0,PLD1=1,PLD0=0 */
   PITLD4 = 7810U;                            
+  /* PITLD5: PLD15=0,PLD14=0,PLD13=0,PLD12=1,PLD11=1,PLD10=1,PLD9=1,PLD8=1,PLD7=0,PLD6=0,PLD5=1,PLD4=1,PLD3=1,PLD2=1,PLD1=1,PLD0=1 */
+  PITLD5 = 7999U;                            
   /* PITMUX: PMUX7=0,PMUX6=0,PMUX5=0,PMUX4=1,PMUX3=1,PMUX2=1,PMUX1=1,PMUX0=0 */
   PITMUX = 30U;                                      
-  /* PITINTE: PINTE7=0,PINTE6=0,PINTE5=0,PINTE4=1,PINTE3=1,PINTE2=1,PINTE1=1,PINTE0=0 */
-  PITINTE = 30U;                                      
+  /* PITCE: PCE7=0,PCE6=0,PCE5=1,PCE4=0,PCE3=0,PCE2=0,PCE1=0,PCE0=0 */
+  PITCE = 32U;                                      
+  /* PITINTE: PINTE7=0,PINTE6=0,PINTE5=1,PINTE4=1,PINTE3=1,PINTE2=1,PINTE1=1,PINTE0=1 */
+  PITINTE = 63U;                                      
   /* PITCFLMT: PITE=1,PITSWAI=0,PITFRZ=0,PFLMT1=0,PFLMT0=0 */
   PITCFLMT = 128U;                                      
   /* ### Init_ADC init code */
@@ -454,12 +458,19 @@ void MCU_init(void)
   /* DDRM: DDRM7=1 */
   DDRM |= (unsigned char)128U;                      
   /* ### Init_GPIO init code */
-  /* PPSS: PPSS6=1,PPSS5=1 */
-  PPSS |= (unsigned char)96U;                      
+  /* PTS: PTS3=1 */
+  PTS |= (unsigned char)8U;                      
+  /* PPSS: PPSS6=1,PPSS5=1,PPSS2=1,PPSS0=1 */
+  PPSS |= (unsigned char)101U;                      
   /* PERS: PERS7=0 */
   PERS &= (unsigned char)~(unsigned char)128U;                     
-  /* DDRS: DDRS7=1 */
-  DDRS |= (unsigned char)128U;                      
+  /* DDRS: DDRS7=1,DDRS0=1 */
+  DDRS |= (unsigned char)129U;                      
+  /* ### Init_GPIO init code */
+  /* PTT: PTT4=1 */
+  PTT |= (unsigned char)16U;                      
+  /* DDRT: DDRT4=1 */
+  DDRT |= (unsigned char)16U;                      
   /* ### */
   /* Initial interrupt priority */
   /*lint -save  -e950 Disable MISRA rule (1.1) checking. */
@@ -519,6 +530,113 @@ __interrupt void isrVatd0compare(void)
 #pragma CODE_SEG __NEAR_SEG NON_BANKED
 /*
 ** ===================================================================
+**     Interrupt handler : iPIT5_safety_check
+**
+**     Description :
+**         User interrupt service routine. 
+**     Parameters  : None
+**     Returns     : Nothing
+** ===================================================================
+*/
+__interrupt void iPIT5_safety_check(void)
+{
+   uint8 i;
+   uint16 anyError = 0;
+   uint16 tmp;
+   long int highCurrent, maxCurrent;
+    
+
+   PITTF_PTF5 = 1;     //remise à zéro du flag, pour redémarrer le compteur.
+   
+
+   //------------- INSPECTION DES TENSIONS EXTRÊMES ------------- 
+   
+   gFlags.cellLowVolt = *gLowestCellVoltage < gParams.lowCellVoltage;
+   gError.cellMinVolt = *gLowestCellVoltage < gParams.minCellVoltage;
+   gFlags.cellHighVolt = *gHighestCellVoltage > gParams.highCellVoltage;
+   gError.cellMaxVolt = *gHighestCellVoltage > gParams.maxCellVoltage;
+   
+   
+   
+   //------------- INSPECTION DES TEMPÉRATURES EXTRÊMES ------------- 
+   
+   if(!gFlags.charging) {
+      gError.cellMinTemp = *gLowestCellTemp < gParams.minDischargeCellTemp;
+      gFlags.cellLowTemp = *gLowestCellTemp < gParams.lowDischargeCellTemp;
+      gError.cellMaxTemp = *gHighestCellTemp > gParams.maxDischargeCellTemp;
+      gFlags.cellHighTemp = *gHighestCellTemp > gParams.highDischargeCellTemp;
+   } else {
+      gError.cellMinTemp = *gLowestCellTemp < gParams.minChargeCellTemp;
+      gFlags.cellLowTemp = *gLowestCellTemp < gParams.lowChargeCellTemp;
+      gError.cellMaxTemp = *gHighestCellTemp > gParams.maxChargeCellTemp;
+      gFlags.cellHighTemp = *gHighestCellTemp > gParams.highChargeCellTemp;
+   }
+
+   
+   //------------- VÉRIFICATION DES DÉLAIS DE COMMUNICATION ------------- 
+    
+   for(i=0; i<N_MOD; ++i) {
+      tmp = (1<<i);
+      if(idleCount[i] >= COM_IDLE_COUNT_MAX) {
+         gSlaveComState = gSlaveComState | tmp;    // Il y a un slave de déconnecté
+         gError.slaveTimeout = 1;
+      } else {
+         gSlaveComState = gSlaveComState & ~tmp;
+      }
+   }
+
+   if(!gSlaveComState)
+      gError.slaveTimeout = 0;   //Il n'y a plus de retard dans les comm.
+
+    
+   //---------------- INSPECTION DE LA MESURE DE COURANT ----------------
+    
+   if(!gFlags.charging) {
+      //En décharge
+      highCurrent = gParams.highPeakDischargeCurrent;
+      maxCurrent = gParams.maxPeakDischargeCurrent;
+      gFlags.highPeakCurrent = (gMeanCurrent > highCurrent) || (gMeanCurrent < -highCurrent);
+      gError.maxPeakCurrent = (gMeanCurrent > maxCurrent) || (gMeanCurrent < -maxCurrent);
+        
+   } else {
+      //En charge
+      maxCurrent = gParams.maxMeanChargeCurrent;
+      gError.maxPeakCurrent = (gMeanCurrent > maxCurrent) || (gMeanCurrent < -maxCurrent);
+   }
+
+    gError.maxMeanCurrent = 0;   //TODO: quoi faire avec le courant moyen?
+
+    
+    
+   //--------------- CAS: OUVERTURE DE L'INTERLOCK LORSQUE RELAIS FERMÉS ----------------
+   if(!gFlags.interlockClosed && gFlags.relaysClosed && !gParams.ignoreIntState)
+      OpenRelays();
+ 
+      //TODO: considérer interlock ouvert comme une erreur du BMS. Doit être resetté par switch.
+      
+   
+   //--------------- GESTION DES ERREURS ----------------
+   
+   anyError = *((uint16*) &gError);
+
+   if(anyError || gFlags.ImdError) {   //Erreurs qui requiert le signal errorReset pour être remises à zéro
+      gFlags.errorState = 1;
+      if(gFlags.relaysClosed && !gParams.ignoreErrors)
+         OpenRelays();
+      
+   } else {
+      if(gFlags.errorState && gFlags.errorReset)
+         gFlags.errorState = 0;
+   }
+
+}
+/* end of iPIT5_safety_check */
+#pragma CODE_SEG DEFAULT
+
+
+#pragma CODE_SEG __NEAR_SEG NON_BANKED
+/*
+** ===================================================================
 **     Interrupt handler : iPIT4_4Hz
 **
 **     Description :
@@ -540,15 +658,11 @@ __interrupt void iPIT4_4Hz(void)
     const uint16 slowFlash = 0b0000000100000001;
     uint16 flashSequence;
     
-    uint16 anyError = *((uint16*) &gError);
     
-    //TODO: ajouter un laps de temps avec la led qui clignote avant d'ouvrir les relais?
+    PITTF_PTF4 = 1;     //remise à zéro du flag, pour redémarrer le compteur.
     
-    if(anyError != 0) {
-        flashSequence = alwaysOn;
-    } else 
-    if(!gFlags.allCellsKnown || !gFlags.currentKnown || !gFlags.interlockStateKnown) {  //On a pas recu toutes les info (initialisation)
-        flashSequence = slowFlash;       
+    if(gFlags.errorState) {
+        flashSequence = alwaysOn;   
     } else if(gFlags.cellHighTemp) {   //6 x (flash/non_flash) + 4 x non_flash
         flashSequence = allFlash;
     } else if(gFlags.highPeakCurrent) {//5 x (flash/non_flash) + 6 x non_flash
@@ -559,16 +673,17 @@ __interrupt void iPIT4_4Hz(void)
         flashSequence = threeFlash;
     } else if(gFlags.cellLowTemp) {    //2 x (flash/non_flash) + 12 x non_flash
         flashSequence = twoFlash;
+    } else if(!gFlags.interlockClosed) {
+        flashSequence = slowFlash;
     } else {
         flashSequence = 0;
     }
     
-    WARNING_LED = (flashSequence & (1<<i)) >> i;
+    WARNING_DASH_LED = (flashSequence & (1<<i)) >> i;       //Led sur le tableau de bord
+    WARNING_LED = !((flashSequence & (1<<i)) >> i);       //Led sur le circuit imprimé maître
     i++;
     if(i > 15)
         i=0;
-        
-    PITTF_PTF4 = 1;
 }
 /* end of iPIT4_4Hz */
 #pragma CODE_SEG DEFAULT
@@ -589,23 +704,21 @@ __interrupt void iPIT3_sci_continuous(void)
 {
    char buf[80];
    
+   PITTF_PTF3 = 1; //clear le interrupt flag	
+   
    //Interrupt for the user interface continuous refresh mode
-  
-   SCIprintStatus();
-   SCIprintString("-------------------------------------------------------\n\r");
-   sprintf(buf, "Affichage des données en mode continu pour le module %d\n\r", num_module);
+   sprintf(buf, "Affichage des données en mode continu pour le module %d\n\r", gSciDisplayNumModule);
    SCIprintString(buf);
    SCIprintString("-------------------------------------------------------\n\r");
 
-   sprintf(buf, "Nombre d'initialisations = %u\n\r", gSlaveReset[num_module - 1]);
+   sprintf(buf, "Nombre d'initialisations = %u\n\r", gSlaveReset[gSciDisplayNumModule - 1]);
    SCIprintString(buf);
 
-   sprintf(buf, "Révision du firmware = %u\n\r", gSlaveRev[num_module - 1]);
+   sprintf(buf, "Révision du firmware = %u\n\r", gSlaveRev[gSciDisplayNumModule - 1]);
    SCIprintString(buf);   
-   get_cells_data(gCellVolt, gCellTemp, num_module-1);
+   sciGetCellsData(gCellVolt, gCellTemp, gSciDisplayNumModule-1);
    SCIprintString("\n\n\r");   
 
-   PITTF_PTF3 = 1; //clear le interrupt flag	
 }
 /* end of iPIT3_sci_continuous */
 #pragma CODE_SEG DEFAULT
@@ -614,7 +727,7 @@ __interrupt void iPIT3_sci_continuous(void)
 #pragma CODE_SEG __NEAR_SEG NON_BANKED
 /*
 ** ===================================================================
-**     Interrupt handler : iPIT2_10Hz
+**     Interrupt handler : iPIT2_100Hz
 **
 **     Description :
 **         User interrupt service routine. 
@@ -622,49 +735,79 @@ __interrupt void iPIT3_sci_continuous(void)
 **     Returns     : Nothing
 ** ===================================================================
 */
-__interrupt void iPIT2_10Hz(void)
+__interrupt void iPIT2_100Hz(void)
 {
     static uint16 ignitionHistory = 0;
     static uint16 interlockStateHistory = 0;
+    static uint16 errRstHistory = 0;
+    static uint16 imdStateHistory = 0;
+    static uint8 adcCount = 0;
     uint16 curIgnition;
     uint16 curInterlockState;
+    uint16 curErrRst;
+    uint16 curImdState;
 
+    //On met à 0 le flag d'interruption du PIT2
+    PITTF_PTF2 = 1;  
 
-    ATD0CTL5_CB = 1;     //Starting the AN7 to AN15 conversion sequence (ADC0)
-                         //Pour la emsure du courant.
-
-                    
-    //On détermine l'état de l'entrée ignition. On attend d'avoir reçu 10 valeurs (1 seconde pour changer)
+    
+    //Mesure du COURANT à 10 Hz
+    adcCount++;
+    if(adcCount == CURRENT_MEASURE_PERIOD) {     
+        ATD0CTL5_CB = 1;                        //Démarrage de la séquence de conversion AN7 a AN15 (ADC0)
+        adcCount = 0;
+    }
+    
+    
+    //On détermine l'état de l'entrée IGNITION. On attend d'avoir reçu 5 valeurs (50 ms pour changer)
     //identiques avant de changer le drapeau.
     curIgnition = (uint16) IGNITION;
     ignitionHistory = ignitionHistory<<1;
     ignitionHistory = ignitionHistory | (curIgnition & 0x1);
     
-    if((ignitionHistory & 0x3FF) == 0x3FF)      //On assume la logique normale, i.e. 1 = ignition ON
+    if((ignitionHistory & 0x1F) == 0x1F)      //On assume la logique normale, i.e. 1 = ignition ON
         gFlags.ignition = 1;
-    else if((ignitionHistory & 0x3FF) == 0)
+    else if((ignitionHistory & 0x1F) == 0)
         gFlags.ignition = 0;
 
-        
-    //On détermine l'état de l'entrée interlock state. On attend d'avoir reçu 10 valeurs (1 seconde pour changer)
+            
+    //On détermine l'état de l'entrée INTERLOCK STATE. On attend d'avoir reçu 5 valeurs (50 ms pour changer)
     //identiques avant de changer le drapeau.
     curInterlockState = (uint16) INTERLOCK_STATE;
     interlockStateHistory = interlockStateHistory<<1;
     interlockStateHistory = interlockStateHistory | (curInterlockState & 0x1);
     
-    if((interlockStateHistory & 0x3FF) == 0x3FF)      //On assume la logique normale, i.e. 1 = interlock fermé
+    if((interlockStateHistory & 0x1F) == 0x1F)    //logique normale, i.e. 1 = interlock fermé
         gFlags.interlockClosed = 1;
-    else if((interlockStateHistory & 0x3FF) == 0) 
+    else if((interlockStateHistory & 0x1F) == 0) 
         gFlags.interlockClosed = 0;
+        
     
+    //On détermine l'état de l'entrée ERROR RESET. On attend d'avoir reçu 5 valeurs (50 ms pour changer)
+    //identiques avant de changer le drapeau.
+    curErrRst = (uint16) ERROR_RESET;
+    errRstHistory = errRstHistory<<1;
+    errRstHistory = errRstHistory | (curErrRst & 0x1);
     
-    //On indique qu'on a au moins une lecture de interlock state
-    gFlags.interlockStateKnown = 1;
-      
-    //On met à 0 le flag d'interruption du PIT2
-    PITTF_PTF2 = 1;      
+    if((errRstHistory & 0x1F) == 0x1F)    //logique inverse, i.e. 0 = bouton pressé
+        gFlags.errorReset = 0;
+    else if((errRstHistory & 0x1F) == 0) 
+        gFlags.errorReset = 1;
+
+
+    //On détermine l'état de l'entrée IMD STATE. On attend d'avoir reçu 5 valeurs (50 ms pour changer)
+    //identiques avant de changer le drapeau.
+    curImdState = (uint16) IMD_STATE;
+    imdStateHistory = imdStateHistory<<1;
+    imdStateHistory = imdStateHistory | (curImdState & 0x1);
+    
+    if((imdStateHistory & 0x1F) == 0x1F)    //logique inverse, i.e. 0 = imd error
+        gFlags.ImdError = 0;
+    else if((imdStateHistory & 0x1F) == 0) 
+        gFlags.ImdError = 1;
+
 }
-/* end of iPIT2_10Hz */
+/* end of iPIT2_100Hz */
 #pragma CODE_SEG DEFAULT
 
 
@@ -681,31 +824,21 @@ __interrupt void iPIT2_10Hz(void)
 */
 __interrupt void iPIT1_1Hz(void)
 {
-  unsigned char i = 0;
-  unsigned int tmp=0;
+   uint8 i = 0;
+   static uint8 totPackCount = 0;
 
-  PITTF_PTF1 = 1; //raz du flag
-  
-  for(i=0; i<N_MOD; ++i) {
+   PITTF_PTF1 = 1; //remise à zéro du flag
 
-    tmp = (1<<i);
-
-    //Si on a pas déja perdu la connection, on augmente le compteur
-    if(!((gSlaveComState & tmp) == tmp))
-      idleCount[i]++;
-    
-    if(idleCount[i] > COM_IDLE_COUNT_MAX) {
-      gSlaveComState = gSlaveComState | tmp;    // Il y a un slave de déconnecté
-      gError.slaveTimeout = 1; 
-    } else if(!gFlags.ignition) {
-            gSlaveComState = gSlaveComState & ~tmp;
-    }
-  }
-  
-  if(!gSlaveComState && !gFlags.ignition) {
-    gError.slaveTimeout = 0;       //On peut réinitialiser l'erreur si l'ignition est à off.
-  }
-
+   for(i=0; i<N_MOD; ++i) {
+      if(idleCount[i] < COM_IDLE_COUNT_MAX)
+         idleCount[i]++;
+   }
+   
+   totPackCount++;
+   if(totPackCount >= PACK_VOLT_CALC_PERIOD ) {
+      gFlags.totalPackTime = 1;
+      totPackCount = 0;
+   }
 }
 /* end of iPIT1_1Hz */
 #pragma CODE_SEG DEFAULT
@@ -714,7 +847,7 @@ __interrupt void iPIT1_1Hz(void)
 #pragma CODE_SEG __NEAR_SEG NON_BANKED
 /*
 ** ===================================================================
-**     Interrupt handler : isrVpit0
+**     Interrupt handler : iPIT0_timer_relais
 **
 **     Description :
 **         User interrupt service routine. 
@@ -722,12 +855,23 @@ __interrupt void iPIT1_1Hz(void)
 **     Returns     : Nothing
 ** ===================================================================
 */
-__interrupt void isrVpit0(void)
+__interrupt void iPIT0_timer_relais(void)
 {
-  /* Write your interrupt code here ... */
+   static unsigned int timeoutCount = 0;
 
+   timeoutCount++;
+   if(timeoutCount >= gTimerLimit) {
+      PITCE_PCE0 = 0;   //désactivation du timer
+      timeoutCount = 0;
+      gTimerLimit = 0;
+      CloseRelays(CONTINUE_SEQUENCE);  //à la fin du délai, on rappelle CloseRelays().
+   }                                   //On ne reste pas dans cette fonction longtemps.
+                                       //Soit la séquence de fermeture est terminée
+                                       //soit on repart un nouveau délai.
+   
+   PITTF_PTF0 = 1;   //remise à zéro du flag
 }
-/* end of isrVpit0 */
+/* end of iPIT0_timer_relais */
 #pragma CODE_SEG DEFAULT
 
 
@@ -744,116 +888,20 @@ __interrupt void isrVpit0(void)
 */
 __interrupt void SCIIsr(void)
 {
-   unsigned char i;
-   unsigned char termchar;                         // byte reçu du terminal 
-
-   static char inputBuf[20] = "";
-   static unsigned char bufPos = 0;
-   float inputParam = 0;
-   static unsigned char point = 0;
-
-   if (!(SCI5SR1 & 0x20))  //If reception flag is not set
+   if (!(SCI5SR1 & 0x20))              //If reception flag is not set
       return;
- 
-   termchar = SCI5DRL; // enregistrement du byte reçu + clear le reception flag
-   
 
-//**************************************************
-// "m" KEY	  
-//**************************************************
-	if (termchar == 'm')
-	{		
-		niveau_1 = 0;                 // 1 = configuration, 2 = status, 3 = commandes
-		niveau_2 = 0;
-		SCIshowMenu(0);               // input = 0 -> show the menu for the actual levels
-		sci_interrupt_mode = 0;
-		for(i=0; i<20; i++)
-	      inputBuf[i] = 0;
-	}
-		
-//**************************************************
-// BS KEY
-//
-// Lorsque l'usager appuie sur BS, la saisie de donné est interrompu.
-// Le menu de niveau supérieur est réaffiché
-//**************************************************	
-	else if(termchar == 0x7F || termchar == 0x08) 
-	{			   
-      if((niveau_1 == 2) && (niveau_2 == 3))        //Désactivation du mode continu
-         PITCE_PCE3 = 0;
+   if(gGuiBufferFull)
+      return;
       
-      sci_interrupt_mode = 0;   
-      SCIupAlevel();
-      SCIshowMenu(0);
-      
-      for(i=0; i<20; i++)
-	      inputBuf[i] = 0;
-	}	
-		
-//**************************************************
-// MODE MENU
-//
-// Affiche le menu approprié selon les niveaux 1, 2 et 3 et la commande recu	  
-//**************************************************
-   else if  (sci_interrupt_mode == 0) 
-   {
-      SCIshowMenu(termchar);    
-   }
-   	
-//**************************************************
-// MODE ASSIGNATION
-//	
-// Assignation de la valeur lorsque l'usager appuie sur "enter"
-//**************************************************
-	else if (termchar == 0xD && sci_interrupt_mode == 1)  // CR == enter key		
-    {
-
-        if(sscanf(inputBuf, "%f", &inputParam) > 0) {
-            SCIassignation(inputParam);
-        } else {
-            SCIprintString("Error reading the entered value.\n");
-        }
-
-        if(sci_interrupt_mode != 2) {
-            sci_interrupt_mode = 0;
-            SCIupAlevel();
-            SCIshowMenu(0);
-        }
-        
-        inputParam = 0;
-        bufPos = 0;
-        point = 0;
-        
-        for(i=0; i<20; i++)
-            inputBuf[i] = 0;
-    }
-	
-//**************************************************
-// MODE USER_INPUT	
-//**************************************************
-	else if (sci_interrupt_mode == 1) 
-   { 
+   gGuiBuffer[gGuiWriteIndex] = SCI5DRL;  //enregistrement du byte reçu + clear le reception flag
    
-      if(termchar == '-'){
-         if(bufPos == 0){
-           inputBuf[bufPos++] = termchar;
-           SCIPutChar(termchar);
-         }
-      } else if(termchar == '.'){
-         if((bufPos != 0) && (bufPos < 19) && !point){
-            inputBuf[bufPos++] = termchar;
-            point = 1;
-            SCIPutChar(termchar);
-         }
-      } else if((termchar >= '0') && (termchar <= '9')){
-         if(bufPos < 19){
-            inputBuf[bufPos++] = termchar; 
-            SCIPutChar(termchar);
-         }
-      } 
-   }		
-
-   return;
+   gGuiWriteIndex++;
+   if(gGuiWriteIndex > GUI_RX_BUFFER_SIZE)
+      gGuiWriteIndex = 0;
+   
+   if(gGuiWriteIndex == gGuiReadIndex)    //Le buffer circulaire est plein. On a rattrapé la lecture.
+      gGuiBufferFull = 1;
 } 
 
 /* end of SCIIsr */
@@ -1010,16 +1058,10 @@ __interrupt void iCANRX_reception(void)
    uint8 indexJump, i;
    uint8 rxData[8];
    uint16 rcvVolt;
-   int rcvTemp, lowTemp, minTemp, highTemp, maxTemp;
+   int rcvTemp;
    uint16 balVector, balThres, tmp;
-   static uint16 knownSlavesVolt1to4 = 0;
-   static uint16 knownSlavesVolt5to8 = 0;
-   static uint16 knownSlavesVolt9to10 = 0;
-   static uint16 knownSlavesTemp1to4 = 0;
-   static uint16 knownSlavesTemp5to8 = 0;
-   static uint16 knownSlavesTemp9to10 = 0;
-   
-   
+  
+     
    rxId = ((uint16) CAN0RXIDR0) << 3 | ((uint16) CAN0RXIDR1) >> 5;	//Récupération de l'id du packet
    slaveId = (rxId & 0x3C0)>>6;			//Récupérer le ID de l'esclave source du message
    length = CAN0RXDLR; 					//on récupère la longueur du message (8 octets max)
@@ -1036,141 +1078,74 @@ __interrupt void iCANRX_reception(void)
       idleCount[slaveId-1]--;
 
       
-   //Réception des mesures de tensions
-   if(msgId == CAN_VOLTAGES_1TO4_ID ||
-      msgId == CAN_VOLTAGES_5TO8_ID ||
-      msgId == CAN_VOLTAGES_9TO10_ID)
-   {  
-      if(msgId == CAN_VOLTAGES_1TO4_ID) {
+   //RÉCEPTION DES MESURES DE TENSIONS
+   if(msgId == CAN_VOLTAGES_1TO4_ID  ||  msgId == CAN_VOLTAGES_5TO8_ID  ||  msgId == CAN_VOLTAGES_9TO10_ID) {  
+   
+      //On détermine le décalage de l'index nécessaire selon les données reçues
+      if(msgId == CAN_VOLTAGES_1TO4_ID)
          indexJump = 0;
-		 if(!gFlags.allCellsKnown)  knownSlavesVolt1to4 = knownSlavesVolt1to4 | ((uint16) 1<<(slaveId-1));
-      } else if(msgId == CAN_VOLTAGES_5TO8_ID) {
+      else if(msgId == CAN_VOLTAGES_5TO8_ID)
          indexJump = 4;
-		 if(!gFlags.allCellsKnown)  knownSlavesVolt5to8 = knownSlavesVolt5to8 | ((uint16) 1<<(slaveId-1));
-      } else {
+      else
          indexJump = 8;
-		 if(!gFlags.allCellsKnown)  knownSlavesVolt9to10 = knownSlavesVolt9to10 | ((uint16) 1<<(slaveId-1));
-      }
+      
+      //Pour chaque mesure, on l'écrit dans le tableau des tensions et on vérifie si c'est un nouvel extrême
       for(i=0; i<(length>>1); i++) {
          rcvVolt = (((unsigned int) rxData[2*i]) << 8) | rxData[2*i+1];
          gCellVolt[slaveId-1][i+indexJump] = rcvVolt;
 
          //Mettre à jour les pointeurs vers les tensions extrêmes
-         if(rcvVolt < *gLowestCellVoltage)
+         if(rcvVolt < *gLowestCellVoltage) {
             gLowestCellVoltage = &gCellVolt[slaveId-1][i+indexJump];
-         else if(rcvVolt > *gHighestCellVoltage) 
+            gLowestVoltageCellSlaveId = slaveId;
+            gLowestVoltageCellNum = i+indexJump;
+         } else if(rcvVolt > *gHighestCellVoltage) {
             gHighestCellVoltage = &gCellVolt[slaveId-1][i+indexJump];
+            gHighestVoltageCellSlaveId = slaveId;
+            gHighestVoltageCellNum = i+indexJump;
+         }
       }
-      
- 
-         //Vérifier si les tensions sont trop basses
-         if(*gLowestCellVoltage < gParams.lowCellVoltage) {
-            gFlags.cellLowVolt = 1;
-            if(*gLowestCellVoltage < gParams.minCellVoltage)
-                gError.cellMinVolt = 1;
-            else if(!gFlags.ignition)
-                gError.cellMinVolt = 0;
-         } else {
-            gFlags.cellLowVolt = 0;
-            if(!gFlags.ignition)
-                gError.cellMinVolt = 0;
-         }
-         
-         //Vérifier si les tensions sont trop grandes
-         if(*gHighestCellVoltage > gParams.highCellVoltage) {
-            gFlags.cellHighVolt = 1;
-            if(*gHighestCellVoltage > gParams.maxCellVoltage)
-                gError.cellMaxVolt = 1;
-            else if(!gFlags.ignition)
-                gError.cellMaxVolt = 0;
-         } else {
-            gFlags.cellHighVolt = 0;
-            if(!gFlags.ignition)
-                gError.cellMaxVolt = 0;
-         }
-      
    } //end of received voltage measurements msg
    
+ 
+ 
+   //RÉCEPTION DES MESURES DE TEMPÉRATURE   
+   else if(  msgId == CAN_TEMP_1TO4_ID  ||  msgId == CAN_TEMP_5TO8_ID  ||  msgId == CAN_TEMP_9TO10_ID) {  
    
-   //Réception des mesures de température   
-   else if(  msgId == CAN_TEMP_1TO4_ID ||
-             msgId == CAN_TEMP_5TO8_ID || 
-             msgId == CAN_TEMP_9TO10_ID) 
-   {    
-      if(msgId == CAN_TEMP_1TO4_ID) {
+      //On détermine le décalage de l'index nécessaire selon les données reçues
+      if(msgId == CAN_TEMP_1TO4_ID)
          indexJump = 0;
-         if(!gFlags.allCellsKnown)  knownSlavesTemp1to4 = knownSlavesTemp1to4 | ((uint16) 1<<(slaveId-1));
-      } else if(msgId == CAN_TEMP_5TO8_ID) {
+      else if(msgId == CAN_TEMP_5TO8_ID)
          indexJump = 4;
-         if(!gFlags.allCellsKnown)  knownSlavesTemp5to8 = knownSlavesTemp5to8 | ((uint16) 1<<(slaveId-1));
-      } else {
+      else
          indexJump = 8;
-         if(!gFlags.allCellsKnown)  knownSlavesTemp9to10 = knownSlavesTemp9to10 | ((uint16) 1<<(slaveId-1));
-      }
 
+      //Pour chaque mesure, on l'écrit dans le tableau des temp. et on vérifie si c'est un nouvel extrême
       for(i=0; i<(length>>1); i++) {
          rcvTemp = (((unsigned int) rxData[2*i]) << 8) | rxData[2*i+1];
 
          if(slaveId == 1 && (i+indexJump) == 9)     
-            gCellTemp[slaveId-1][i+indexJump] = 210;        //PATCH pour cellule 10 de l'esclave 1 (thermistor brûlé)
+            rcvTemp = 210;        //PATCH pour cellule 10 de l'esclave 1 (thermistor brûlé)
          else if(slaveId == 6 && (i+indexJump) == 9)
-            gCellTemp[slaveId-1][i+indexJump] = 210;        //PATCH pour cellule 10 de l'esclave 6 (entrée ADC non fonctionnelle)
-         else
-            gCellTemp[slaveId-1][i+indexJump] = rcvTemp;
+            rcvTemp = 210;        //PATCH pour cellule 10 de l'esclave 6 (entrée ADC non fonctionnelle)
+   
+        gCellTemp[slaveId-1][i+indexJump] = rcvTemp;
          
          //Mettre à jour les pointeurs vers les températures extrêmes
-         if(rcvTemp < *gLowestCellTemp)
+         if(rcvTemp < *gLowestCellTemp) {
             gLowestCellTemp = &gCellTemp[slaveId-1][i+indexJump];
-         else if(rcvTemp > *gHighestCellTemp) 
+            gLowestTempCellSlaveId = slaveId;
+            gLowestTempCellNum = i+indexJump;
+         } else if(rcvTemp > *gHighestCellTemp) {
             gHighestCellTemp = &gCellTemp[slaveId-1][i+indexJump];
+            gHighestTempCellSlaveId = slaveId;
+            gHighestTempCellNum = i+indexJump;
+         }
       }
-      
-        
-         //Déterminer les températures limites selon si la cellules est en charge ou non
-         if(!gFlags.charging) {
-            minTemp = gParams.minDischargeCellTemp;
-            lowTemp = gParams.lowDischargeCellTemp;
-            maxTemp = gParams.maxDischargeCellTemp;
-            highTemp = gParams.highDischargeCellTemp;
-         } else {
-            minTemp = gParams.minChargeCellTemp;
-            lowTemp = gParams.lowChargeCellTemp;
-            maxTemp = gParams.maxChargeCellTemp;
-            highTemp = gParams.highChargeCellTemp;
-         }
-         
-         //Vérifier si les températures sont trop basses
-         if(*gLowestCellTemp < lowTemp) {
-            gFlags.cellLowTemp = 1;
-            if(*gLowestCellTemp < minTemp)
-                gError.cellMinTemp = 1;
-            else if(!gFlags.ignition)
-                gError.cellMinTemp = 0;
-         } else {
-            gFlags.cellLowTemp = 0;
-            if(!gFlags.ignition)
-                gError.cellMinTemp = 0;
-         }
-
-         //Vérifier si les températures sont trop hautes
-         if(*gHighestCellTemp > highTemp) {
-            gFlags.cellHighTemp = 1;
-            if(*gHighestCellTemp > maxTemp)
-                gError.cellMaxTemp = 1;
-            else if(!gFlags.ignition)
-                gError.cellMaxTemp = 0;
-         } else {
-            gFlags.cellHighTemp = 0;
-            if(!gFlags.ignition)
-                gError.cellMaxTemp = 0;
-         }
-   
    } //fin de message de réception de températures
  
  
- 
- 
-   //Réception d'un rapport d'équilibration  
+   //RÉCEPTION D'UN RAPPORT D'ÉQUILIBRATION  
    else if(msgId == CAN_EQUI_REPORT_ID) {
 	 
       balVector = ((unsigned int) rxData[0])<<8 | ((unsigned int) rxData[1]);
@@ -1185,27 +1160,16 @@ __interrupt void iCANRX_reception(void)
       }
    }
    
-   //Réception d'un rapport d'initialisation
+   //RÉCEPTION D'UN RAPPORT D'INITIALISATION
    else if (msgId == CAN_INIT_REPORT_ID) {
        gSlaveReset[slaveId-1]++;
    }
    
-   //Réception d'un rapport de numéro de firmware
+   //RÉCEPTION D'UN RAPPORT DE NUMÉRO DE FIRMWARE
    else if(msgId == CAN_FIRMWARE_REVISION_ID) {
        gSlaveRev[slaveId-1] = rxData[0];
    }
-   
-   
-   //Si on a reçu les premières valeurs de toutes les cellules, on l'indique en mettant le drapeau à 1.
-   //On suppose 10 modules esclaves.
-   if(!gFlags.allCellsKnown) {
-       if(  knownSlavesTemp1to4 == 0x3FF && knownSlavesTemp5to8 == 0x3FF && knownSlavesTemp9to10 == 0x3FF &&
-            knownSlavesVolt1to4 == 0x3FF && knownSlavesVolt5to8 == 0x3FF && knownSlavesVolt9to10 == 0x3FF)
-       {
-            gFlags.allCellsKnown = 1;
-       }
-    }
-   
+
    
 	//pour lever l'interruption et relâcher le buffer de réception foreground
     CAN0RFLG_RXF = 1; 
@@ -1227,21 +1191,21 @@ __interrupt void iCANRX_reception(void)
 */
 __interrupt void iADC_sequence_complete(void)
 {
-    long int highCurrent, maxCurrent, lastCurrent;
+	long int lastCurrent;
 
     
     //***************************************************************************
     //                    LISTE DES SIGNAUX ANALOGIQUES CONVERTIS
+    //
     // Signal du CAPTEUR DE COURANT CHANNEL 1 (-30 à 30 A) sur le channel AN15 de
     // l'ADC0. La mesure se retrouve dans le registre ATD0DR8.
     //
     // Signal du CAPTEUR DE COURANT CHANNEL 2 (-350 à 350 A) sur le channel AN7 de
     // l'ADC0. La mesure se retrouve dans le registre ATD0DR0.
     //***************************************************************************
- 
 
-    ///////////////////////////////////////////////////////////////////////////////
-    // CALCUL DU COURANT
+    //***************************************************************************
+    //                           CALCUL DU COURANT
     //
     // La formule pour convertir le résultat numérique N de l'ADC en courant I (mA)
     // est la suivante:
@@ -1252,7 +1216,8 @@ __interrupt void iADC_sequence_complete(void)
     //
     // Les valeurs de K_HALL sont multipliées par 128 pour garder plus de précision
     // et éviter une multiplication en point flottant.
-    ///////////////////////////////////////////////////////////////////////////////
+      //***************************************************************************
+  
   
     // Si le résultat du channel 1 est supérieur à 4.5V, ou inférieur à 0.5V, on considère
     // qu'il est saturé, et on prend la mesure sur le channel 2. Le capteur ne peut nous
@@ -1263,40 +1228,17 @@ __interrupt void iADC_sequence_complete(void)
     else  
         lastCurrent = ((long int)ATD0DR8 - (long int)2048)*K_HALL1;
 
-    lastCurrent >>= 7;           //On divise le résultat par 128 parce qu'on a multiplié K_HALL par 128
+    lastCurrent = lastCurrent>>7;           //On divise le résultat par 128 parce qu'on a multiplié K_HALL par 128
   
-  
-     //On tient une moyenne mobile exponentielle sur le courant
-     //xt_moy = alpha*xt + (1-alpha)*xt-1_moy,  alpha = 2/(N+1)
-     //Le coefficient de lissage alpha est égal à 0.02 ce qui veut dire
-     //que les 99 dernières mesures portent 86% du poids de la moyenne.
-     //À 100 ms, c'est une moyenne sur 9.9 secondes.
-     gMeanCurrent = 5*lastCurrent + (256-5)*gMeanCurrent;
-     gMeanCurrent >>= 8;
+    //On tient une moyenne mobile exponentielle sur le courant
+    //xt_moy = alpha*xt + (1-alpha)*xt-1_moy,  alpha = 2/(N+1)
+    //Le coefficient de lissage alpha est égal à 0.125 ce qui veut dire
+    //que les 15 dernières mesures portent 86% du poids de la moyenne.
+    //À 100 ms/mesure, c'est une moyenne sur 1.5 secondes.
+    gMeanCurrent = lastCurrent + (8-1)*gMeanCurrent;
+    gMeanCurrent = gMeanCurrent>>3;
 
-    //Erreurs et avertissements de courant maximal
-    if(!gFlags.charging) {
-        highCurrent = 1000*(long int)gParams.highPeakDischargeCurrent;   //TODO: c'est long une multiplication long dans un interrupt...
-              
-        if((gMeanCurrent > highCurrent) || (gMeanCurrent < -highCurrent)) {
-            gFlags.highPeakCurrent = 1;
-            maxCurrent = 1000*(long int)gParams.maxPeakDischargeCurrent;
-            if((gMeanCurrent > maxCurrent) || (gMeanCurrent < -maxCurrent))
-                gError.maxPeakCurrent = 1;
-            else if(!gFlags.ignition)
-                gError.maxPeakCurrent = 0;      //Réinitialisation du drapeau d'erreur permise si ignition à off
-        } else {
-            gFlags.highPeakCurrent = 0;
-            if(!gFlags.ignition)
-                gError.maxPeakCurrent = 0;
-        }  
-    }
-    
-    //TODO: Erreurs et avertissements de courant moyen
-    
-    //On indique qu'on a mesuré au moins une fois les lignes analogiques
-    gFlags.currentKnown = 1;
-    
+
     //raz du flag (pas le choix si on veut sortir de l'interrupt)
     ATD0STAT0_SCF = 1;
 }
@@ -1364,8 +1306,8 @@ static const tIsrFunc _InterruptVectorTable[] @0xFF10U = { /* Interrupt vector t
   &UNASSIGNED_ISR,                      /* 0x2B  0xFF56   1   no   ivVsci7         unused by PE */
   &UNASSIGNED_ISR,                      /* 0x2C  0xFF58   1   no   ivVpit7         unused by PE */
   &UNASSIGNED_ISR,                      /* 0x2D  0xFF5A   1   no   ivVpit6         unused by PE */
-  &UNASSIGNED_ISR,                      /* 0x2E  0xFF5C   1   no   ivVpit5         unused by PE */
-  &iPIT4_4Hz,                           /* 0x2F  0xFF5E   1   no   ivVpit4         used by PE */
+  &iPIT5_safety_check,                  /* 0x2E  0xFF5C   1   no   ivVpit5         used by PE */
+  &iPIT4_4Hz,                           /* 0x2F  0xFF5E   3   no   ivVpit4         used by PE */
   &UNASSIGNED_ISR,                      /* 0x30  0xFF60   1   no   ivVReserved79   unused by PE */
   &UNASSIGNED_ISR,                      /* 0x31  0xFF62   1   no   ivVReserved78   unused by PE */
   &UNASSIGNED_ISR,                      /* 0x32  0xFF64   1   no   ivVxst7         unused by PE */
@@ -1376,10 +1318,10 @@ static const tIsrFunc _InterruptVectorTable[] @0xFF10U = { /* Interrupt vector t
   &UNASSIGNED_ISR,                      /* 0x37  0xFF6E   1   no   ivVxst2         unused by PE */
   &UNASSIGNED_ISR,                      /* 0x38  0xFF70   1   no   ivVxst1         unused by PE */
   &UNASSIGNED_ISR,                      /* 0x39  0xFF72   1   no   ivVxst0         unused by PE */
-  &iPIT3_sci_continuous,                /* 0x3A  0xFF74   1   no   ivVpit3         used by PE */
-  &iPIT2_10Hz,                          /* 0x3B  0xFF76   1   no   ivVpit2         used by PE */
-  &iPIT1_1Hz,                           /* 0x3C  0xFF78   1   no   ivVpit1         used by PE */
-  &isrVpit0,                            /* 0x3D  0xFF7A   1   no   ivVpit0         used by PE */
+  &iPIT3_sci_continuous,                /* 0x3A  0xFF74   4   no   ivVpit3         used by PE */
+  &iPIT2_100Hz,                         /* 0x3B  0xFF76   2   no   ivVpit2         used by PE */
+  &iPIT1_1Hz,                           /* 0x3C  0xFF78   3   no   ivVpit1         used by PE */
+  &iPIT0_timer_relais,                  /* 0x3D  0xFF7A   2   no   ivVpit0         used by PE */
   &UNASSIGNED_ISR,                      /* 0x3E  0xFF7C   1   -    ivVhti          unused by PE */
   &UNASSIGNED_ISR,                      /* 0x3F  0xFF7E   1   no   ivVapi          unused by PE */
   &UNASSIGNED_ISR,                      /* 0x40  0xFF80   1   no   ivVlvi          unused by PE */
@@ -1407,7 +1349,7 @@ static const tIsrFunc _InterruptVectorTable[] @0xFF10U = { /* Interrupt vector t
   &isrVcan0err,                         /* 0x56  0xFFAC   1   no   ivVcan1err      used by PE */
   &isrVcan0wkup,                        /* 0x57  0xFFAE   1   no   ivVcan1wkup     used by PE */
   &isrVcan0tx,                          /* 0x58  0xFFB0   1   no   ivVcan0tx       used by PE */
-  &iCANRX_reception,                    /* 0x59  0xFFB2   1   no   ivVcan0rx       used by PE */
+  &iCANRX_reception,                    /* 0x59  0xFFB2   2   no   ivVcan0rx       used by PE */
   &isrVcan0err,                         /* 0x5A  0xFFB4   1   no   ivVcan0err      used by PE */
   &isrVcan0wkup,                        /* 0x5B  0xFFB6   1   no   ivVcan0wkup     used by PE */
   &UNASSIGNED_ISR,                      /* 0x5C  0xFFB8   1   no   ivVflash        unused by PE */
@@ -1423,7 +1365,7 @@ static const tIsrFunc _InterruptVectorTable[] @0xFF10U = { /* Interrupt vector t
   &UNASSIGNED_ISR,                      /* 0x66  0xFFCC   1   no   ivVporth        unused by PE */
   &UNASSIGNED_ISR,                      /* 0x67  0xFFCE   1   no   ivVportj        unused by PE */
   &UNASSIGNED_ISR,                      /* 0x68  0xFFD0   1   no   ivVatd1         unused by PE */
-  &iADC_sequence_complete,              /* 0x69  0xFFD2   1   no   ivVatd0         used by PE */
+  &iADC_sequence_complete,              /* 0x69  0xFFD2   2   no   ivVatd0         used by PE */
   &UNASSIGNED_ISR,                      /* 0x6A  0xFFD4   1   no   ivVsci1         unused by PE */
   &UNASSIGNED_ISR,                      /* 0x6B  0xFFD6   1   no   ivVsci0         unused by PE */
   &UNASSIGNED_ISR,                      /* 0x6C  0xFFD8   1   no   ivVspi0         unused by PE */
@@ -1454,6 +1396,25 @@ static const tIsrFunc _ResetVectorTable[] @0xFFFAU = { /* Reset vector table */
   &MCU_init_reset                       /* 0xFFFE  ivVreset         used by PE */
 };
 
+
+
+#pragma CODE_SEG __NEAR_SEG NON_BANKED
+/*
+** ===================================================================
+**     Interrupt handler : isrVpit0
+**
+**     Description :
+**         User interrupt service routine. 
+**     Parameters  : None
+**     Returns     : Nothing
+** ===================================================================
+*/
+__interrupt void isrVpit0(void)
+{
+  /* Write your interrupt code here ... */
+
+}
+/* end of isrVpit0 */
 
 /* END MCUinit */
 

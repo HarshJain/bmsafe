@@ -26,8 +26,9 @@
 // Flags
 //-------
                               
-errors_t gError = {0,0,0,0,0,0,0,0};
-flags_t gFlags = {0,0,0,0,0,0,0,0,0,0,0,0,0};                                    
+errors_t gError = {1,1,1,1,1,1,1};            //Les drapeaux d'erreurs sont 'activés' au début, et se rétabliront
+                                                //au fur et à mesure que les données requises seront recuillies.
+flags_t gFlags = {0,0,0,0,0,0,0,0,0,0,0,0,0,0};                                    
                                     
 unsigned int gSlaveEquiStatus = 0;      //Si le i-ème bit est à 1, le (i+1)-ème module est en équilibration
 unsigned int gSlaveComState = 0;        //Si le i-ème bit est à 1, le (i+1)-ème module est en erreur de communication                               
@@ -39,18 +40,29 @@ unsigned int gSlaveComState = 0;        //Si le i-ème bit est à 1, le (i+1)-ème 
 uint16 gCellVolt[N_MOD][N_CELL];                    // [mV] Cell voltages
 uint16 *gLowestCellVoltage = &gCellVolt[0][0];      // [mV] 
 uint16 *gHighestCellVoltage = &gCellVolt[0][0];     // [mV] 
-long int gMeanCurrent = 0;                          //[mA]
+long int gMeanCurrent = 0;                          // [mA]
+
+uint8 gLowestVoltageCellNum = 0;
+uint8 gLowestVoltageCellSlaveId = 1;
+uint8 gHighestVoltageCellNum = 0;
+uint8 gHighestVoltageCellSlaveId = 1;
+uint32 gTotalPackVoltage = 0;                       // [mV]
 
 int gCellTemp[N_MOD][N_CELL];                       // [dixieme oC] Cell temperatures  
 int *gLowestCellTemp = &gCellTemp[0][0];            // [dixieme oC]
-int *gHighestCellTemp = &gCellTemp[0][0];           // [dixieme oC]0;         
+int *gHighestCellTemp = &gCellTemp[0][0];           // [dixieme oC];
+
+uint8 gLowestTempCellNum = 0;
+uint8 gLowestTempCellSlaveId = 1;
+uint8 gHighestTempCellNum = 0;
+uint8 gHighestTempCellSlaveId = 1;
 
 uint8 gMode = STAND_BY_MODE;                       // Operating mode
-uint8 gLastMode = STAND_BY_MODE;                   // Last main cycle operating mode
 
-uint8 idleCount[N_MOD];
-uint8 gSlaveReset[N_MOD];
-uint8 gSlaveRev[N_MOD];
+uint8 idleCount[N_MOD];                             //Un tableau qui compte le nombre de secondes d'inactivité des esclaves
+uint8 gSlaveReset[N_MOD];                           //Le nombre d'initialisations des modules esclaves
+uint8 gSlaveRev[N_MOD];                             //Le numéro de révision du firmware de chacun des modules esclave
+
 
 params_t gParams =   {
                        -300,  //minDischargeCellTemp (oC / 10)
@@ -65,23 +77,23 @@ params_t gParams =   {
                        4300,  //maxCellVoltage  (mV)
                        3000,  //lowCellVoltage  (mV)
                        4250,  //highCellVoltage  (mV)
-                         93,  //maxMeanChargeCurrent  (A)
-                        250,  //maxMeanDischargeCurrent  (A)
-                        250,  //highPeakDischargeCurrent (A)        //TODO: vérifier avec Hugues
-                        340,   //maxPeakDischargeCurrent   (A) (moins de 10 secondes)
-                        0      //manualMode
+                      93000,  //maxMeanChargeCurrent  (mA)
+                     175000,  //maxMeanDischargeCurrent  (mA)
+                     175000,  //highPeakDischargeCurrent (mA)
+                     175000,  //maxPeakDischargeCurrent  (mA) (moins de 10 secondes)
+                          0,  //manualMode
+                          0,  //ignoreBMSerrors
+                          0   //ignoreIntState
                     };
 
+                    
 void MCU_init(void);
 void errorMode(void);
 void standbyMode(void);
 void normalMode(void);
 void modeSelection(void);
 void deviceInit(void);
-void resetVoltWarnings(void);
-void resetTempWarnings(void);
-void resetTempErrors(void);
-void resetVoltErrors(void);
+uint32 computePackVoltage(uint16 cellVolt[][N_CELL]);
 
 
 /***********************
@@ -90,44 +102,45 @@ void resetVoltErrors(void);
 
 void main(void)
 {          
-    deviceInit();
+   deviceInit();
+   CAN0RequestSlaveFirmware(CAN_BROADCAST_ID);
 
-    
-	//En mode automatique on attend d'avoir reçu
-	//les premières valeurs de tensions et de température de toutes les cellules
-    //et les premières mesures de faute de masse et de courant
-	//de façon à ne pas démarrer la voiture avant de savoir s'il y a un problème.
-    //TODO: flag 'ready'? reset du flag après 'résumation' du mode erreur?
-    while(!gFlags.allCellsKnown || !gFlags.currentKnown || !gFlags.interlockStateKnown) {
-        if(gParams.manualMode) break;
-    }    
-    
-    //Requête du numéro de révision des esclaves
-    CAN0RequestSlaveFirmware(CAN_BROADCAST_ID);
+   while(1) {
 
-	
-    while(1) {
-        
-        if(!gParams.manualMode) {        //Automatic mode
+      if(!gParams.manualMode) {        //Automatic mode
 
-            gLastMode = gMode;
-            modeSelection();
+         modeSelection();
 
-            switch(gMode) 
-            {
-                case NORMAL_MODE:    normalMode(); break;
-                case STAND_BY_MODE:  standbyMode(); break;
-                case ERROR_MODE:     errorMode(); break;
-                default:  errorMode();
-            } 
-        }
-    }
+         switch(gMode) 
+         {
+            case NORMAL_MODE:    normalMode(); break;
+            case STAND_BY_MODE:  standbyMode(); break;
+            case ERROR_MODE:     errorMode(); break;
+            default:             errorMode();
+         } 
+      }
+
+      //On calcule la tension totale du pack
+      if(gFlags.totalPackTime) {
+         gTotalPackVoltage = computePackVoltage(gCellVolt);
+         gFlags.totalPackTime = 0;
+      }
+      
+      //On traite les bytes reçus du lien avec l'usager
+      if(gGuiReadIndex != gGuiWriteIndex || gGuiBufferFull) {
+         sciByteReception(gGuiBuffer[gGuiReadIndex]);
+         gGuiBufferFull = 0;
+         gGuiReadIndex++;
+         if(gGuiReadIndex > GUI_RX_BUFFER_SIZE)
+            gGuiReadIndex = 0;
+      }
+      
+   }
 }
 
 
 //*****************************************************************************
 // deviceInit
-//
 // Description:   This function initializes the BMS. It uses the MCU_init
 //                function generated by the Device Initialization tool. 
 //
@@ -136,32 +149,39 @@ void deviceInit()
 {
     int i,j;
        
-    #ifdef DEBUG
-      TERMIO_PutString("deviceInit: device initialization\n");
-    #endif
-
-    //Initialization of the uC peripherals
+   //Initialisation des périphériques du uC
    //--------------------------------------------------------
-   //Timers initiazed for
+   //Timers initialisés:
    //    - Cell measurements refresh every 2 seconds using PIT3 (in user interface continuous mode)
-   //    - Mesure du couran chaque 100 ms (PIT2), avec une moyenne mobile exponentielle
-   //    de poids alpha = 0.125 donc 86% du poids des valeurs pris dans les 15 dernières mesures (1.5 sec).
-   //    - On détermine l'état de ignition et interlock state chaque 100 ms (PIT2).
+   //    - Mesure du courant chaque 100 ms. On compte 10 interruptions du timer. (PIT2)
+   //    - On détermine l'état de ignition, interlock state, error reset et imd state chaque 10 ms (PIT2).
    //    - Communication with the slave modules timeout tick every 1 second using PIT1
-   //    warning led flashes with help of PIT4 at 4Hz
-   
+   //    - Warning led flashes with help of PIT4 at 4Hz
+   //
+   //Relais
+   //    - Les relais du circuit haute tension sont initialisés ouverts.
+   //
+   //Alimentation 24V
+   //    - Le MOSFET de la barre d'alimentation 24V est initialisé ouvert aussi.
+   //
     MCU_init();
     
+    //These initialization values assure us that
+    //the system stays in the error state until all the
+    //real values are received. gSlaveReset and gSlaveRev
+    //are not critical.
     for(i=0; i<N_MOD; i++){
         for(j=0; j<N_CELL; j++){
             gCellVolt[i][j] = 0;
-            gCellTemp[i][j] = 0;
-        }
-        idleCount[i] = 0;
+            gCellTemp[i][j] = 0x8000;
+        } 
+        idleCount[i] = COM_IDLE_COUNT_MAX;      
         gSlaveReset[i] = 0;
-        gSlaveRev[i] = 0;   
+        gSlaveRev[i] = 0;
     }
-
+    gMeanCurrent = gParams.maxPeakDischargeCurrent + 1;    //Valeur pas trop grande parce que moyenne
+                                                           //mobile sur 10s quand même c'est long à réagir
+   
    //Sélection du channel AN7 comme channel de départ de l'ADC
    ATD0CTL5 = ATD0CTL5 | 0x07;
     
@@ -187,25 +207,14 @@ void deviceInit()
 //*****************************************************************************
 void modeSelection()
 {
-    uint16 anyError = *((uint16*) &gError);
-
-    if(anyError != 0) {
+   if(gFlags.errorState) {
       gMode = ERROR_MODE;
-      #ifdef DEBUG
-         if(gMode != gLastMode)   TERMIO_PutString("modeSelection: ERROR MODE selected\n"); 
-      #endif  
-  
+      
    } else if(gFlags.ignition && gFlags.interlockClosed) {
       gMode = NORMAL_MODE;
-      #ifdef DEBUG
-         if(gMode != gLastMode)   TERMIO_PutString("modeSelection: NORMAL MODE selected\n"); 
-      #endif
-      
+
    } else {
       gMode = STAND_BY_MODE;
-      #ifdef DEBUG
-         if(gMode != gLastMode)   TERMIO_PutString("modeSelection: STAND-BY MODE selected\n");
-      #endif          
    }
 }
 
@@ -220,18 +229,11 @@ void modeSelection()
 //*****************************************************************************
 void normalMode()
 {  
-    if(gMode != gLastMode){
-        if(!gFlags.relaysClosed){
-            #ifdef DEBUG
-            TERMIO_PutString("normalMode: closing the relays\n");
-            #endif
-            //Fermeture des relais du circuit principal avec précharge.
-            //Ouverture du circuit de décharge.
-            if(gFlags.interlockClosed)
-                CloseRelays();
-            gFlags.relaysClosed = 1;
-        }
-    }
+   if(!gFlags.relaysClosed && !gClosingRelays){
+      //Fermeture des relais du circuit principal avec précharge.
+      //Ouverture du circuit de décharge.
+      CloseRelays(START_SEQUENCE);
+   }
 }
 
 
@@ -245,18 +247,8 @@ void normalMode()
 //*****************************************************************************
 void standbyMode()
 {
-    if(gMode != gLastMode){
-        if(gFlags.relaysClosed){
-
-            #ifdef DEBUG
-            TERMIO_PutString("standbyMode: opening the relays\n");
-            #endif      
-
-            //Opening the relays
-            OpenRelays();        
-            gFlags.relaysClosed = 0;
-        }   
-    }
+    if(gFlags.relaysClosed || gClosingRelays)
+        OpenRelays();
 }
 
 
@@ -267,66 +259,23 @@ void standbyMode()
 //                BMS is in error mode i.e. any error was detected.
 //
 //*****************************************************************************
-void errorMode(){
+void errorMode()
+{
+    if(gFlags.relaysClosed && !gParams.ignoreErrors)
+        OpenRelays();        
+}
 
-   //Opening the relays
-   if(gFlags.relaysClosed){
-      
-      
-      #ifdef DEBUG
-         TERMIO_PutString("errorMode: opening the relays\n");
-      #endif
-   
-      OpenRelays();
-      gFlags.relaysClosed = 0;
-   }
-   
 
-   if(gError.slaveTimeout){
-      #ifdef DEBUG
-         if(gMode != gLastMode)   TERMIO_PutString("errorMode: slave communication timeout error\n");
-      #endif 
-   } 
-   
-   if(gError.cellOpenConnection){
-      #ifdef DEBUG
-         if(gMode != gLastMode)   TERMIO_PutString("errorMode: cell open connection error\n");
-      #endif
-   }
-   
-   if(gError.cellMaxVolt){
-      #ifdef DEBUG
-         if(gMode != gLastMode)   TERMIO_PutString("errorMode: cell overvoltage error\n");
-      #endif 
-   }
-   
-   if(gError.cellMinVolt){
-      #ifdef DEBUG
-         if(gMode != gLastMode)   TERMIO_PutString("errorMode: cell undervoltage error\n");
-      #endif
-   }
-   
-   if(gError.cellMaxTemp){
-      #ifdef DEBUG
-         if(gMode != gLastMode)   TERMIO_PutString("errorMode: temperature too hot error\n");
-      #endif
-   }
+uint32 computePackVoltage(uint16 cellVolt[][N_CELL])
+{
+    uint8 i, j;
+    uint32 packVoltage = 0;
     
-   if(gError.cellMinTemp){
-      #ifdef DEBUG
-         if(gMode != gLastMode)   TERMIO_PutString("errorMode: temperature too cold error\n");
-      #endif
-   }
-   
-   if(gError.maxMeanDischargeCurrent){
-      #ifdef DEBUG
-         if(gMode != gLastMode)   TERMIO_PutString("errorMode: maximum mean current error\n");
-      #endif
-   }
-   
-   if(gError.maxPeakCurrent){
-      #ifdef DEBUG
-         if(gMode != gLastMode)   TERMIO_PutString("errorMode: maximum peak current error\n");
-      #endif
-   }
+    for(i=0; i<N_MOD; i++){
+        for(j=0; j<N_CELL; j++) {
+            packVoltage = packVoltage + (uint32) cellVolt[i][j];
+        }
+    }
+    
+    return packVoltage;
 }
