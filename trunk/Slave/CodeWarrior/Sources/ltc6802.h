@@ -5,7 +5,7 @@
 
 
 #define CSBI	PTH_PTH3	            // PTH3 is the Chip Select bit of SPI bus
-#define SPI_SEND_TIMEOUT   3        // SPI timeout in seconds.
+#define SPI_SEND_TIMEOUT   30        // Le timeout du préiphérique SPI en dixièmes de secondes
 #define OPENWIRE_THRESHOLD	200      // 200 mV
 #define NB_CHAR_VOLTAGE    15       //Number of voltages 8-bit registers needed to transfer all 10 measurements
 

@@ -21,7 +21,7 @@ GenExternModules=0
 GenBeanModules=0
 SignalListFile=
 DestinationCompiler=MetrowerksHC12XCC
-ProjectModificationStamp=66
+ProjectModificationStamp=67
 
 [8]
 Generated=Yes
@@ -149,7 +149,7 @@ GenNumMethods=1
 Init=No
 GenNumEvents=0
 ISR_ISRHandleTrigg=
-ISR_ISRHandleOut0=iPIT0_1Hz
+ISR_ISRHandleOut0=iPIT0_10Hz
 GenSmartUserChangesDetected_Header=No
 GenSmartUserChangesDetected_Code=No
 GenSmartUserChangesDetected_Asembl=No

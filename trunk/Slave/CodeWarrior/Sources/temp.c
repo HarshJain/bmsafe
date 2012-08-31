@@ -377,17 +377,17 @@ const int convertTempTable[361][2]
 {121,1400}};
 
 
-int convertTemp(int ADC_Volt)
+int convertTemp(int rawTemp)
 {
    unsigned int i = 0;
 
-    if (ADC_Volt < convertTempTable[360][0]) {
+    if (rawTemp < convertTempTable[360][0]) {
 		return convertTempTable[360][1];
 	} else {
-		while (convertTempTable[i][0] > ADC_Volt)
+		while (convertTempTable[i][0] > rawTemp)
 			i++;
 		
-		if (convertTempTable[i][0] - ADC_Volt <= ADC_Volt - convertTempTable[i][0])  
+		if (convertTempTable[i][0] - rawTemp <= rawTemp - convertTempTable[i][0])  
 			return convertTempTable[i][1];
 		else
 			return convertTempTable[i-1][1];

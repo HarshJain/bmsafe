@@ -8,7 +8,7 @@
 **     Processor : MC9S12XDP512BMPV
 **     Version   : Component 02.003, Driver 01.05, CPU db: 2.87.229
 **     Datasheet : MC9S12XDP512RMV2 Rev. 2.18 May 2008
-**     Date/Time : 2012-05-20, 17:16
+**     Date/Time : 2012-06-12, 18:31
 **     Abstract  :
 **         This module contains device initialization code 
 **         for selected on-chip peripherals.
@@ -63,10 +63,10 @@ __interrupt void isr_default(void);
 
 
 #pragma CODE_SEG __NEAR_SEG NON_BANKED
-__interrupt void iPIT0_1Hz(void);
+__interrupt void iPIT0_10Hz(void);
 /*
 ** ===================================================================
-**     Interrupt handler : iPIT0_1Hz
+**     Interrupt handler : iPIT0_10Hz
 **
 **     Description :
 **         User interrupt service routine. 
