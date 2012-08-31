@@ -26,13 +26,14 @@
 // Variables
 //-----------
 
-uint32  gElapsedTime = 0;	            // le temps en secondes ecoule depuis l'activation du timer PIT0				
+uint32  gElapsedTime = 0;	             // le temps en dixièmes de secondes ecoule depuis l'activation du timer PIT0				
 uint8   gSlaveID = 0;                   // le numéro d'identification du module, lu sur le port E.
-uint16  gVoltages[NB_CELL];	            // table containing the Cell Voltages in mV
-int     gTemp[NB_CELL];         	    // table contenant les temperatures des cellules (300 = 30.0 oC)
-uint16  gBalThres = 0;          	    // Balancing target voltage
+uint16  gVoltages[NB_CELL];	          // table containing the Cell Voltages in mV
+int     gTemp[NB_CELL];         	       // table contenant les temperatures des cellules (300 = 30.0 oC)
+int     gTempRaw[NB_CELL];              // table contenant les lectures de l'ADC
+uint16  gBalThres = 0;          	       // Balancing target voltage
 uint16  gBalanceVector = 0;             // The n-th bit indicates the balancing status of the n-th cell. 1 = discharge enable.
-flags_t gFlags = {0,0,0,0,0,0,0,0,0};    // Les drapeaux globaux utilisés //TODO: tester l'initialisation
+flags_t gFlags = {0,0,0,0,0,0,0,0,0};   // Les drapeaux globaux utilisés
 
  
 /*************************
@@ -47,6 +48,7 @@ void main(void)
 {
    uint8 i, txError=0, openWireCell=0;
    uint8 rcvConfig[6];
+   static uint8 voltMeasureCount = 0, tempMeasureCount = 0;
 
    //LTC6802 configuration register initialisation
    //---------------------------------------------
@@ -65,23 +67,29 @@ void main(void)
    //Initialization of the uC peripherals
    //--------------------------------------------------------
    //Timers initiazed for
-   //    cell temperature measurements every 5 seconds (with uC ADC)
-   //    cell voltage measurements every 1 second (with external battery monitor)
+   //    cell temperature measurements every 1 seconds (with uC ADC)
+   //    cell voltage measurements every 0.1 second (with external battery monitor)
    //    we have a precision of 10 bits on the temperature measurements
    //    we have a precision of 12 bits on the voltage measurements
    
 	MCU_init();
 
-   //Slave ID reading on port E
-   gSlaveID = PORTE & 0x0F;   //Only the 4 lower bits are meaningful
+    
+    //Initialisation des tableaux de mesures
+    for(i=0; i<NB_CELL; i++) {
+        gTemp[i] = 210;
+        gVoltages[i] = 3700;
+    }
+    
+   //Lecture du slave ID sur le port E
+   gSlaveID = PORTE & 0x0F;   //Seuls les 4 bits les moins significatifs sont importants 
    if(gSlaveID == 0 || (gSlaveID > 10)) {
-      gFlags.badSlaveId = 1;     //TODO: we do nothing with this so far
+      gFlags.badSlaveId = 1;     //TODO: on ne fait rien avec ca...
    }
    
    
-   //CAN synchronization
    #ifdef CAN_ENABLE
-   while(!CAN0CTL0_SYNCH);   // Wait for Synchronization 
+   while(!CAN0CTL0_SYNCH);   //Attente de la synchro du bus CAN
    
    //Envoyer un message au maître pour indiquer que notre initialisation est complétée
    //Envoyer le numéro de révision également
@@ -90,12 +98,12 @@ void main(void)
    #endif
     
     
-	//Timers activation
-   PITCE_PCE0 = 1;           //Activation du timer PIT0. Ce timer a une fréquence de 1 Hz.
+	//Avtivation du timer
+   PITCE_PCE0 = 1;           //Activation du timer PIT0. Ce timer a une fréquence de 10 Hz.
                              //Dans l'interruption, on gère la prise de mesures.
    PITCFLMT_PITE = 1;        //Activation of the timer module
    
-   //Program the LTC6802-2 configuration registers   
+   //Programmation du registre de configuration du LTC6802-2
    ltcWriteConfig(&ltcConfig);
       
 	while(1) {
@@ -107,20 +115,29 @@ void main(void)
       }
       #endif
   
-      //Temp measurements are ready to be sent to the master (every 5 seconds)
+      //Les mesures de temperatures sont pretes a etre utilisees
       if(gFlags.ADC0done && gFlags.ADC1done){
 
+         tempMeasureCount++;
+      
          //On ferme le ADC pour l'économie d'énergie
          ATD0CTL2_ADPU = 0;
          ATD1CTL2_ADPU = 0;
       
          //Conversion of temperatures to a readable form (ex: 295 = 29.5 oC)
-         for(i=0; i<NB_CELL; i++)
-            gTemp[i] = convertTemp(gTemp[i]);         
+         //Moyenne mobile exponentielle avec alpha = 1/16, donc moyenne
+         //sur N=31 dernieres valeurs. alpha = 2/(N+1)
+         for(i=0; i<NB_CELL; i++) {
+            gTemp[i] = convertTemp(gTempRaw[i]) + (16-1)*gTemp[i];     
+            gTemp[i] = gTemp[i] >> 4;
+         }
 
          #ifdef CAN_ENABLE
          //send temp to master via CAN
-         gFlags.canTxError = CAN0SendTemp(gTemp, gSlaveID);    //TODO: we do nothing with this flag so far...
+         if(tempMeasureCount == TEMP_SEND_PERIOD) {
+            gFlags.canTxError = CAN0SendTemp(gTemp, gSlaveID);    //TODO: we do nothing with this flag so far...
+            tempMeasureCount = 0;
+         }
          #endif
 
          gFlags.ADC0done = 0;
@@ -128,36 +145,39 @@ void main(void)
       }
       
       
-      //Voltages measurements need to be acquired and sent (every second)
-      //Open-wire connection detection is done
-      //And configuration register verification too
+      //Les mesures de tensions sont pretes a etre prises.
+      //On verifie les connections ouvertes.
+      //On verifie l'integrite du registre de configuration du LTC6802-2
       if(gFlags.voltTimeout){
       
+         voltMeasureCount++;
+      
          #ifdef SPI_ENABLE  
-         //Send the configuration register if needed.
-         while(ltcReadConfig(rcvConfig) != 0);  //Read the current config, without errors.
+         //On envoie le registre de configuration si necessaire
+         while(ltcReadConfig(rcvConfig) != 0);  //Lecture de la configuration actuelle, sans erreur.
 
-         if((rcvConfig[0] & 0x01) == 0x00) {//This means that the LTC6802 config register
-            gFlags.spiTimeout = 0;                //was reset after its watchdog timed out
-            ltcWriteConfig(&ltcConfig);     //We do not use the WTD bit (doesnt work). We use
-         }                                  //the CDC bits instead because the default value (0)
-                                            //is different than the one we use (1). When the watch dog
-                                            //times out, the config registers are reset. The chip is then
-                                            //in standby mode, no new measures are taken. A read voltages
-                                            //command seems to return the last measured voltages, so no erroneous
-                                            //measures are sent to the master.   
+         if((rcvConfig[0] & 0x01) == 0x00) {//Une condition vrai signifie que le registre de configuration du LTC6802
+            gFlags.spiTimeout = 0;          //a ete reinitialise par le watchdog timer. On n'utilise pas le bit WTD pour
+            ltcWriteConfig(&ltcConfig);     //detecter une expiration du WTD (ne fonctionne pas). On utilise les bits CDC parce
+         }                                  //que la valeur utilisee (1) est differente de la valeur par defaut (0).
+                                            //Quand le WTD expire, les registres de configuration sont reinitialises.
+                                            //La puce est alors en mode standby, et aucune nouvelle mesure ne peut etre prise. 
+                                            //Une commande de lecture des tensions semble retourner la derniere mesure de tensions,
+                                            //donc aucune valeur erronnee n'est transmise au maitre. 
          ltcStartVoltageMeasure();
 	      txError = ltcReadCellVoltage(gVoltages);
          
-         //open-wire connection detection
-         openWireCell = ltcVerifyOpenWire();    //TODO: we do nothing with this so far..
+         //Detection des connexions ouvertes
+         //openWireCell = ltcVerifyOpenWire();    //TODO: on ne fait rien avec ca...
          #endif                              
          
          
          #ifdef CAN_ENABLE
-         //send voltages to the master via CAN, if received without error from LTC6802
-         if(!txError)
-            gFlags.canTxError = CAN0SendVoltages(gVoltages, gSlaveID);  //TODO: we do nothing with this flag so far...
+         //Envoie des tensions vers le maitre si recues sans erreur du LTC6802
+         if(!txError && voltMeasureCount == VOLT_SEND_PERIOD) {
+            gFlags.canTxError = CAN0SendVoltages(gVoltages, gSlaveID);  //TODO: on ne fait rien avec ca...
+            voltMeasureCount = 0;
+         }
          #endif
 
          gFlags.voltTimeout = 0;

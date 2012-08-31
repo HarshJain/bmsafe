@@ -1,6 +1,6 @@
 #ifndef TEMP_H
 #define TEMP_H
 
-int convertTemp(int ADC_Volt);
+int convertTemp(int rawTemp);
 
 #endif

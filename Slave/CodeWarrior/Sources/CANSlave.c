@@ -119,20 +119,19 @@ unsigned char CAN0SendTemp(int *temperatures, unsigned char slaveId)
 unsigned char CAN0SendInitStatus(unsigned char slaveId)
 {
    return CAN0SendChar(  MAKE_CAN_ID(slaveId, CAN_INIT_REPORT_ID),
-                              CAN_INIT_STATUS_PRIORITY,
-                              0,
-                              NULL);
+                         CAN_INIT_STATUS_PRIORITY,
+                         0,
+                         NULL);
 }
 
 unsigned char CAN0SendFirmwareRevision(unsigned char slaveId)
 {
-
    unsigned char firmRev = FIRMWARE_REVISION;
 
    return CAN0SendChar(  MAKE_CAN_ID(slaveId, CAN_FIRMWARE_REVISION_ID),
-                              CAN_FIRMWARE_REVISION_PRIORITY,
-                              1,
-                              &firmRev);
+                         CAN_FIRMWARE_REVISION_PRIORITY,
+                         1,
+                         &firmRev);
 }
 
 

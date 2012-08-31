@@ -25,6 +25,7 @@ unsigned char SPI_send(unsigned char sendByte)
    return SPI1DR;         // Return received byte and clear SPIF flag
 }
 
+
 /******************************************************************************
 * Use the equilibration vector to make the new ltc6802 config register .
 ******************************************************************************/
@@ -50,6 +51,7 @@ void ltcWriteConfig(Config_Reg_t *ltcConfig)
 	SPI_send(ltcConfig->CFGR5);
 	CSBI = 1;					      // Set CSBI to 1 to complete command sequence
 }
+
 
 /////////////////////////////////////////////////////////////////////////////
 unsigned char ltcReadConfig(unsigned char* rcvConfig)
@@ -103,19 +105,28 @@ void ltcStartOpenWireADC()
 /////////////////////////////////////////////////////////////////////////////// 
 void convertVoltages(unsigned char* voltagesByte, unsigned int *voltagesInt)
 {
-	int n = 0;
-	int Cell = 0;
-	
-	for(; n < NB_CHAR_VOLTAGE; n = n + 3)            
+	unsigned char n = 0;
+	unsigned char Cell = 0;
+    unsigned int curVolt[NB_CELL];
+    unsigned long tmpVolt;
+    
+	for(n=0; n < NB_CHAR_VOLTAGE; n+=3)            
 	{
-		voltagesInt[Cell] = ((unsigned int)(voltagesByte[n+1] & 0xF) << 8) + voltagesByte[n];
-		voltagesInt[Cell] = (voltagesInt[Cell]*3) >> 1;         //From binary ADC value to voltage : V = ADC x 1.5mV
-		voltagesInt[Cell+1] = ((unsigned int)voltagesByte[n+2]<<4) | ((voltagesByte[n+1])>>4);
-		voltagesInt[Cell+1] = (voltagesInt[Cell+1]*3) >> 1;     //From binary ADC value to voltage : V = ADC x 1.5mV
+		curVolt[Cell] = ((unsigned int)(voltagesByte[n+1] & 0xF) << 8) + voltagesByte[n];
+		curVolt[Cell] = (curVolt[Cell]*3) >> 1;         //From binary ADC value to voltage : V = ADC x 1.5mV
+		curVolt[Cell+1] = ((unsigned int)voltagesByte[n+2]<<4) | ((voltagesByte[n+1])>>4);
+		curVolt[Cell+1] = (curVolt[Cell+1]*3) >> 1;     //From binary ADC value to voltage : V = ADC x 1.5mV
 		if(Cell == 8)                       // hack to compensate the fact that the LTC6802-2 is underevaluating the top cell voltage
-	   	voltagesInt[Cell+1] += 92; // when uncommented: balancing doesn't work anymore                                      
+            curVolt[Cell+1] += 92; // when uncommented: balancing doesn't work anymore                                      
 		Cell = Cell + 2; 
 	}
+    
+    //TODO: eventuellement, sortir ca de cette fonction, ramener danc main
+    //Moyenne mobile exponentielle sur 31 mesures (N=31) 
+    for(n=0; n<NB_CELL; n++) {   
+        tmpVolt = curVolt[n] + (16-1)*((unsigned long) voltagesInt[n]);
+        voltagesInt[n] = (unsigned int) (tmpVolt >> 4);
+    }
 }
 
 
@@ -187,7 +198,7 @@ unsigned char ltcVerifyOpenWire(void)
 	return 0;
 }
 
- 
+
 // Reference: Computation of CRC (wikipedia)
 // Most significant bit first (big-endian)
 // x^8+x^2+x^1+1 = (1) 0000 0111 = 0x07

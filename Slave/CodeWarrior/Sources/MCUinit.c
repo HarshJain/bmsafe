@@ -9,7 +9,7 @@
 **     Processor : MC9S12XDP512BMPV
 **     Version   : Component 02.003, Driver 01.05, CPU db: 2.87.229
 **     Datasheet : MC9S12XDP512RMV2 Rev. 2.18 May 2008
-**     Date/Time : 2012-05-20, 17:16
+**     Date/Time : 2012-06-12, 18:31
 **     Abstract  :
 **         This module contains device initialization code 
 **         for selected on-chip peripherals.
@@ -279,8 +279,8 @@ void MCU_init(void)
   /* ### Init_PIT init code */
   /* PITMTLD0: PMTLD7=1,PMTLD6=1,PMTLD5=1,PMTLD4=1,PMTLD3=1,PMTLD2=1,PMTLD1=1,PMTLD0=1 */
   PITMTLD0 = 255U;                                      
-  /* PITLD0: PLD15=0,PLD14=1,PLD13=1,PLD12=1,PLD11=1,PLD10=0,PLD9=0,PLD8=1,PLD7=1,PLD6=1,PLD5=1,PLD4=1,PLD3=0,PLD2=1,PLD1=0,PLD0=0 */
-  PITLD0 = 31220U;                            
+  /* PITLD0: PLD15=0,PLD14=0,PLD13=0,PLD12=0,PLD11=1,PLD10=1,PLD9=0,PLD8=0,PLD7=0,PLD6=0,PLD5=1,PLD4=1,PLD3=0,PLD2=1,PLD1=0,PLD0=0 */
+  PITLD0 = 3124U;                            
   /* PITINTE: PINTE3=0,PINTE2=0,PINTE1=0,PINTE0=1 */
   PITINTE = 1U;                                      
   /* ### Init_MSCAN init code */
@@ -363,7 +363,7 @@ __interrupt void isr_default(void)
 #pragma CODE_SEG __NEAR_SEG NON_BANKED
 /*
 ** ===================================================================
-**     Interrupt handler : iPIT0_1Hz
+**     Interrupt handler : iPIT0_10Hz
 **
 **     Description :
 **         User interrupt service routine. 
@@ -371,12 +371,12 @@ __interrupt void isr_default(void)
 **     Returns     : Nothing
 ** ===================================================================
 */
-__interrupt void iPIT0_1Hz(void)
+__interrupt void iPIT0_10Hz(void)
 {
     static uint8 voltCount = 0;
     static uint8 tempCount = 0;
     
-    gElapsedTime++;      //On compte le nombre de secondes ecoulees depuis le dernier init,
+    gElapsedTime++;      //On compte le nombre de dixiemes de secondes ecoules depuis le dernier init,
     voltCount++;         //la dernière mesure de tensions,
     tempCount++;         //et la dernière mesure de température
     
@@ -405,8 +405,9 @@ __interrupt void iPIT0_1Hz(void)
     }
 
     PITTF_PTF0 = 1;      //reset the interrupt bit
+
 }
-/* end of iPIT0_1Hz */
+/* end of iPIT0_10Hz */
 #pragma CODE_SEG DEFAULT
 
 
@@ -586,8 +587,8 @@ __interrupt void isrVporth(void)
 __interrupt void iADC1_seq_complete(void)
 {
    ATD1STAT0_SCF = 1;
-   gTemp[0] = ATD1DR1;
-   gTemp[1] = ATD1DR0;
+   gTempRaw[0] = ATD1DR1; 
+   gTempRaw[1] = ATD1DR0;
    gFlags.ADC1done = 1;
 }
 /* end of iADC1_seq_complete */
@@ -613,7 +614,7 @@ __interrupt void iADC0_seq_complete(void)
    ATD0STAT0_SCF = 1;   //Clear the Sequence Complete Flag
 
    for(i=0; i<(NB_CELL-2); i++){
-      gTemp[NB_CELL-i-1] = *result;
+      gTempRaw[NB_CELL-i-1] = *result;
       result++;   
    }
    
@@ -698,7 +699,7 @@ static const tIsrFunc _InterruptVectorTable[] @0xFF10U = { /* Interrupt vector t
   &UNASSIGNED_ISR,                      /* 0x3A  0xFF74   1   no   ivVpit3       unused by PE */
   &UNASSIGNED_ISR,                      /* 0x3B  0xFF76   1   no   ivVpit2       unused by PE */
   &UNASSIGNED_ISR,                      /* 0x3C  0xFF78   1   no   ivVpit1       unused by PE */
-  &iPIT0_1Hz,                           /* 0x3D  0xFF7A   1   no   ivVpit0       used by PE */
+  &iPIT0_10Hz,                          /* 0x3D  0xFF7A   1   no   ivVpit0       used by PE */
   &UNASSIGNED_ISR,                      /* 0x3E  0xFF7C   1   no   ivVReserved65 unused by PE */
   &UNASSIGNED_ISR,                      /* 0x3F  0xFF7E   1   no   ivVapi        unused by PE */
   &UNASSIGNED_ISR,                      /* 0x40  0xFF80   1   no   ivVlvi        unused by PE */
@@ -778,6 +779,25 @@ static const tIsrFunc _ResetVectorTable[] @0xFFFAU = { /* Reset vector table */
 #pragma CODE_SEG __NEAR_SEG NON_BANKED
 /*
 ** ===================================================================
+**     Interrupt handler : isrVportj
+**
+**     Description :
+**         User interrupt service routine. 
+**     Parameters  : None
+**     Returns     : Nothing
+** ===================================================================
+*/
+__interrupt void isrVportj(void)
+{
+  /* Write your interrupt code here ... */
+
+}
+/* end of isrVportj */
+
+
+#pragma CODE_SEG __NEAR_SEG NON_BANKED
+/*
+** ===================================================================
 **     Interrupt handler : isrVportp
 **
 **     Description :
@@ -794,23 +814,6 @@ __interrupt void isrVportp(void)
 /* end of isrVportp */
 
 
-#pragma CODE_SEG __NEAR_SEG NON_BANKED
-/*
-** ===================================================================
-**     Interrupt handler : isrVportj
-**
-**     Description :
-**         User interrupt service routine. 
-**     Parameters  : None
-**     Returns     : Nothing
-** ===================================================================
-*/
-__interrupt void isrVportj(void)
-{
-  /* Write your interrupt code here ... */
-
-}
-/* end of isrVportj */
 
 /* END MCUinit */
 
