@@ -5,16 +5,19 @@
 #include "type.h"
 
 // Messages from slaves IDs
-#define CAN_VOLTAGES_1TO4_ID        0
-#define CAN_VOLTAGES_5TO8_ID        1
-#define CAN_VOLTAGES_9TO10_ID       2
-#define CAN_TEMP_1TO4_ID            3
-#define CAN_TEMP_5TO8_ID            4
-#define CAN_TEMP_9TO10_ID           5
-#define CAN_EQUI_REPORT_ID          6
-#define CAN_INIT_REPORT_ID          7
-#define CAN_FIRMWARE_REVISION_ID    8
-#define CAN_ERRORS_ID               9 
+#define CAN_VOLTAGES_1TO4_ID        1
+#define CAN_VOLTAGES_5TO8_ID        2
+#define CAN_VOLTAGES_9TO10_ID       3
+#define CAN_TEMP_1TO4_ID            4
+#define CAN_TEMP_5TO8_ID            5
+#define CAN_TEMP_9TO10_ID           6
+#define CAN_EQUI_REPORT_ID          7
+#define CAN_INIT_REPORT_ID          8
+#define CAN_FIRMWARE_REVISION_ID    9
+#define CAN_ERRORS_ID              10
+#define CAN_VOLTAGES_ID            11 
+#define CAN_TEMP_ID                12
+#define CAN_MAX_ID                 13
 
 // Master messages IDs
 #define CAN_EQUI_COMMAND_ID		        0
@@ -42,6 +45,15 @@ uint8 CAN0SendEquiStatus(uint16 gBalanceVector, uint16 gBalThres, uint8 slaveId)
 uint8 CAN0SendVoltages(uint16 *voltages, uint8 slaveId);
 uint8 CAN0SendTemp(int16 *temperatures, uint8 slaveId);
 uint8 CAN0SendInitStatus(uint8 slaveId);
-uint8 CAN0SendFirmwareRevision(uint8 slaveId); 
+uint8 CAN0SendFirmwareRevision(uint8 slaveId);
 
+void InitCan(uint8 slaveId, Can* can);
+uint8 InitMsg(Message* msg, uint8 type, void* data);
+
+// Define differently for debug
+void LoadForTransmit(uint8* start, uint8 length);
+uint8 ExistEmptyTransmitBuffer();
+void LoadTxParams(uint8 slaveId, uint8 msgId, uint8 length, uint8 priority);
+uint8 SelectTxBuffer();
+void StartTx(uint8 bufferId);
 #endif

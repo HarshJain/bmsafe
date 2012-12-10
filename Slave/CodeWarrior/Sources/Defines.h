@@ -21,6 +21,7 @@
 #define VOLT_SEND_PERIOD       10  // Le nombre de mesures de tension entre chaque envoie sur le bus CAN
 #define TEMP_SEND_PERIOD        5  // Le nombre de mesures de températures entre chaque envoie sur le bus CAN
 #define BAL_DELTA_VOLT          0  // Balancing margin. Reaching voltage_goal minus margin stops balancing
+#define MAX_TRANSMISSION_SIZE   8
 
 //------------------
 // Types
@@ -37,6 +38,19 @@ typedef struct {
   uint16 canTxError  : 1;         // La variable contient le numéro de l'erreur de transmission.
   uint16  : 7;
 } flags_t;
+
+typedef struct {
+  uint8 Type;
+  uint8 Priority;
+  uint8 Length;
+  uint8* Data;
+  uint8 offset;
+} Message;
+
+typedef struct {
+  uint8 SlaveID;
+  uint8 (*Send)(uint8, Message*);
+} Can;
 
 // Global variables declaration
 extern uint32 gElapsedTime;
