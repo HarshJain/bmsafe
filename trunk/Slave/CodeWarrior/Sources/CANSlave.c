@@ -1,8 +1,103 @@
-#include <hidef.h>      /* common defines and macros */
+#ifndef DEBUG
+#include <hidef.h>
 #include "derivative.h"
+#else
+#include "debugDefines.h"
+#endif
+
+#include "type.h"
 #include "CANSlave.h"
 #include "defines.h"
-#include "type.h"
+
+uint8 NextMsgLength(Message* msg) {
+  return ((msg->Length - msg->offset) > MAX_TRANSMISSION_SIZE) 
+    ? MAX_TRANSMISSION_SIZE 
+    : (msg->Length - msg->offset);
+}
+
+uint8 SendAndReturnBufferId(uint8 slaveId, Message* msg) {
+  uint8 txbuffer = SelectTxBuffer();
+  const uint8 msgLength = NextMsgLength(msg);
+
+  uint8 i = 0;
+  LoadForTransmit(msg->Data + msg->offset, msgLength);
+  msg->offset += msgLength;
+
+  LoadTxParams(slaveId, msg->Type, msgLength, msg->Priority);
+  StartTx(txbuffer);
+  return txbuffer;
+}
+
+void WaitUntilBufferCompletes(uint8 bufferId) {
+  // Wait for transmission completion.
+  // When the buffer is empty, the flag goes to 1.
+  while ((CAN0TFLG & bufferId) != bufferId) {};
+}
+
+uint8 SendMsg(uint8 slaveId, Message* msg) {
+  if (msg->Type >= CAN_MAX_ID)  return CAN_ERR_UNKNOWN_CMD;
+  if (!ExistEmptyTransmitBuffer())  return CAN_ERR_BUFFER_FULL;
+
+  if (msg->Type == CAN_FIRMWARE_REVISION_ID) {
+    uint8 firmRevId = FIRMWARE_REVISION;
+    msg->Data = &firmRevId;
+    msg->Length = sizeof(uint8);
+    WaitUntilBufferCompletes(SendAndReturnBufferId(slaveId, msg));
+    return CAN_NO_ERR;
+  }
+
+  uint8 IsComplete = 0;
+  while (!IsComplete) {
+    WaitUntilBufferCompletes(SendAndReturnBufferId(slaveId, msg));
+    IsComplete = (msg->offset == msg->Length) ? 1 : 0;
+  }
+   
+  msg->offset = 0;
+  return CAN_NO_ERR;
+}
+
+void InitCan(uint8 slaveId, Can* can) {
+  can->SlaveID = slaveId;
+  can->Send = &SendMsg;
+}
+
+uint8 InitMsg(Message* msg, uint8 type, void* data) {
+  if (type >= CAN_MAX_ID)  return CAN_ERR_UNKNOWN_CMD;
+
+  switch (type) {
+    case CAN_EQUI_REPORT_ID:
+      msg->Priority = CAN_EQUI_STATUS_PRIORITY;
+      msg->Data = data;
+      msg->Length = 3 * sizeof(uint16);
+      break;
+    case CAN_INIT_REPORT_ID:
+      msg->Priority = CAN_INIT_STATUS_PRIORITY;
+      msg->Data = NULL;
+      msg->Length = 0;
+      break;
+    case CAN_FIRMWARE_REVISION_ID:
+      msg->Priority = CAN_FIRMWARE_REVISION_PRIORITY;
+      msg->Data = NULL;
+      msg->Length = 0;
+      break;
+    case CAN_VOLTAGES_ID:
+      msg->Priority = CAN_VOLTAGES_PRIORITY;
+      msg->Data = data;
+      msg->Length = 10 * sizeof(uint16);
+      break;
+    case CAN_TEMP_ID: 
+      msg->Priority = CAN_TEMP_PRIORITY;
+      msg->Data = data;
+      msg->Length = 10 * sizeof(uint16);
+      break;
+    default:
+      return CAN_ERR_UNKNOWN_CMD;
+  }
+
+  msg->Type = type;
+  msg->offset = 0;
+  return CAN_NO_ERR;
+}
 
 /******************************************************************************
 * CAN0SendChar: Transmit an array of char by CAN0
@@ -39,7 +134,6 @@ uint8 CAN0SendChar(uint16 id, uint8 priority, uint8 length, uint8* txdata) {
   while ((CAN0TFLG & txbuffer) != txbuffer) {};
   return CAN_NO_ERR;
 }
-
 
 uint8 CAN0SendEquiStatus(uint16 balVector, uint16 balThres, uint8 slaveId) {
   uint16 txdata[3] = {
