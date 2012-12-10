@@ -13,8 +13,22 @@
 //
 // On précalcule les valeurs puisqu'on a pas de fonction pour calculer le logarithme
 
-const int convertTempTable[361][2]
-={{1011,-400},
+const int16 convertTempTable[361][2];
+
+int16 convertTemp(int16 rawTemp) {
+  uint16 i = 0;
+
+  if (rawTemp < convertTempTable[360][0])
+    return convertTempTable[360][1];
+  
+  while (convertTempTable[i][0] > rawTemp)  i++;
+
+  if (convertTempTable[i][0] - rawTemp <= rawTemp - convertTempTable[i][0])  
+    return convertTempTable[i][1];
+  return convertTempTable[i-1][1];
+}
+
+convertTempTable={{1011,-400},
 {1011,-395},
 {1011,-390},
 {1010,-385},
@@ -375,23 +389,3 @@ const int convertTempTable[361][2]
 {123,1390},
 {122,1395},
 {121,1400}};
-
-
-int convertTemp(int rawTemp)
-{
-   unsigned int i = 0;
-
-    if (rawTemp < convertTempTable[360][0]) {
-		return convertTempTable[360][1];
-	} else {
-		while (convertTempTable[i][0] > rawTemp)
-			i++;
-		
-		if (convertTempTable[i][0] - rawTemp <= rawTemp - convertTempTable[i][0])  
-			return convertTempTable[i][1];
-		else
-			return convertTempTable[i-1][1];
-	}
-}
-	
-	
