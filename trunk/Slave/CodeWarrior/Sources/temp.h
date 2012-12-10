@@ -1,6 +1,8 @@
 #ifndef TEMP_H
 #define TEMP_H
 
-int convertTemp(int rawTemp);
+#include "type.h"
 
-#endif
+int16 convertTemp(int16 rawTemp);
+
+#endif  // TEMP_H
