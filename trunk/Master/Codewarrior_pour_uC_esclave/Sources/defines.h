@@ -17,11 +17,15 @@
 // - limites courant stockées en mA au lieu de A pour éviter *1000
 // - Calcul de la tension totale jsute une fois par seconde
 
+#define N_MOD           7		// Nombre de modules esclaves / de paquets de batteries sur l'auto
+#define N_CELL          10		// Nombre de cellules dans un paquet de batteries
 
-#define N_MOD           10
-#define N_CELL          10
 
-#define N_CURR_MSR              32                   /Nombre de measures de courants utilisées pour calculer la moyenne mobile
+#define N_MAX_IGNORE_TEMP 	20 		// Nombre de sonde de température maximum que le master peut ignorer
+#define ECART_MIN_TEMP		10		// Écart absolu minimal entre les températures pour pouvoir ignorer celles-ci
+
+
+#define N_CURR_MSR              32                   //Nombre de measures de courants utilisées pour calculer la moyenne mobile
 #define K_HALL1                 2342                //Low range hall effet sensor gain. Égal à 18.30 * 128 
 #define K_HALL2                 27412               //High range hall effet sensor gain. Égal à 214.16 * 128
 #define CURRENT_MEASURE_PERIOD  10                  //Nombre de période de 10 ms entre chaque mesure de courant
@@ -29,6 +33,7 @@
 #define PACK_VOLT_CALC_PERIOD    100         //Nombre de secondes entre chaque calcul de la tension totale du pack
 #define FLASH_LED_PERIOD         25        //4 hZ
 #define IDLE_TIMER_COUNT_PERIOD  100       // 1 HZ
+#define DELAI_CELLMINVOLT		 1000 // (1 sec.) Délai avant le déclenchement d'une erreur cellMinVolt : ECART_MIN_TEMP = Temps en sec./1000
 
 #define COM_IDLE_COUNT_MAX     10       //Number of com timeout timer cycles (1 second) without
                                         //communication from a slave before the error flag is set
@@ -39,13 +44,29 @@
 #define STAND_BY_MODE   2
 #define ERROR_MODE      3
 
-#define WARNING_LED         PTT_PTT4
-#define WARNING_DASH_LED    PTS_PTS7
-#define INTERLOCK_STATE     PTS_PTS6
-#define ERROR_RESET         PTS_PTS3         //TODO: à tester
-#define IMD_STATE           PTS_PTS2  //PT1AD0_PT1AD02 (correspond à  AD0L pin 2)  //TODO: à tester
-#define IGNITION            PTS_PTS5
-#define SUPPLY_24V_RLY      PTS_PTS0      //Mosfet à la sortie du DC-DC
+
+// - Segments de l'afficheur 7 segments : 1 = éteint, 0 = allumé
+#define SEGMENT_A           PTJ_PTJ0
+#define SEGMENT_B           PORTK_PK4
+#define SEGMENT_C           PTT_PTT7                                
+#define SEGMENT_D           PTT_PTT5
+#define SEGMENT_E           PTT_PTT6
+#define SEGMENT_F           PTJ_PTJ1
+#define SEGMENT_G           PORTK_PK5                                                                                                     
+#define DOT         		PTT_PTT4
+
+#define WARNING_DASH_LED    PTS_PTS6	// 1 : allumée, 0 : éteinte (fonctionne en logique non-inversée)
+#define INTERLOCK_STATE     PTM_PTM6
+#define ERROR_RESET         PTS_PTS4         //TODO: à tester
+#define IMD_STATE           PTS_PTS1  //PT1AD0_PT1AD02 (correspond à  AD0L pin 2)  //TODO: à tester
+#define IGNITION            PTS_PTS0
+#define SUPPLY_24V_RLY      PTS_PTS5      //Mosfet à la sortie du DC-DC
+#define ERROR_RST_DASH		PTM_PTM7	//Plausibility Latch
+
+#define DEBUG_CAN
+//#define DEBUG_CAN_1 	// CAN data
+//#define DEBUG
+
 
 //----------------------
 // Types
@@ -72,7 +93,7 @@ typedef struct
 typedef struct
 {
     uint16 equilibrating : 1;               // 1: Indique la batterie est en équilibration
-    uint16 charging : 1;					     // 1: on est en mode charge, utilise les paramètres appropriés dans la détection d'erreurs.
+    uint16 charging : 1;					// 1: on est en mode charge, utilise les paramètres appropriés dans la détection d'erreurs.
     uint16 ignition : 1;                    // 1: L'ignition est à ON
     uint16 interlockClosed : 1;             // 1: le circuit d'interlock est fermé
     uint16 errorReset : 1;                  // 1: On a appuyé sur le bouton pour le reset des erreurs du BMS et du IMD.
@@ -85,6 +106,7 @@ typedef struct
     uint16 cellLowTemp : 1;                 // Une cellule a une température sous le seuil dangereux
     uint16 cellHighTemp : 1;                // Une cellule a une température au-dessus du seuil dangereux
     uint16 highPeakCurrent : 1;             // Le courant moyen sur 10 secondes est au-dessus d'un seuil dangereux
+	uint16 plausibilityLatch : 1;			// Plausibility Latch (erreur)
     uint16 : 2;
 } flags_t;
 
@@ -127,6 +149,7 @@ extern uint8 gHighestVoltageCellSlaveId;
 extern int gCellTemp[N_MOD][N_CELL];
 extern int *gHighestCellTemp;
 extern int *gLowestCellTemp;
+extern int gCellIgnoreTemp[N_MAX_IGNORE_TEMP][2];
 
 extern uint8 gLowestTempCellNum;
 extern uint8 gLowestTempCellSlaveId;
@@ -144,7 +167,7 @@ extern uint16 gSlaveComState;
 extern uint8 idleCount[N_MOD];
 extern uint8 gSlaveReset[N_MOD];
 extern uint8 gSlaveRev[N_MOD];
-
+extern uint8 idTable[N_MOD];
 
 
 #endif //DEFINES_H

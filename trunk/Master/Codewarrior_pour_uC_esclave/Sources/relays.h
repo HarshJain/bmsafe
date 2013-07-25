@@ -2,12 +2,12 @@
 #define RELAYS_H
 
 //Nom des relais
-#define MCR1_HVN        PORTA_PA2
-#define MCR2_P2P        PORTA_PA4
+#define MCR1_HVN        PORTA_PA0
+#define MCR2_P2P        PORTA_PA1
 #define MCR3_P1N        PORTA_PA3
-#define MCR4_HVP        PORTA_PA1
-#define MCR5_PRE        PORTA_PA0
-#define DISCH_RLY       PTM_PTM7
+#define MCR4_HVP        PORTA_PA4
+#define MCR5_PRE        PORTA_PA5
+#define DISCH_RLY       PORTA_PA2
 
 //États des relais
 #define RLY_OPEN    0

@@ -9,7 +9,7 @@
 **     Processor : MC9S12XDP512BMPV
 **     Version   : Component 02.003, Driver 01.05, CPU db: 2.87.229
 **     Datasheet : MC9S12XDP512RMV2 Rev. 2.18 May 2008
-**     Date/Time : 2012-08-31, 14:08
+**     Date/Time : 15/06/2013, 1:03 PM
 **     Abstract  :
 **         This module contains device initialization code 
 **         for selected on-chip peripherals.
@@ -228,7 +228,7 @@ void MCU_init(void)
   INT_CFDATA4 = 1U;                    /*  0x64  0xFFC8   1   no   ivVtimpabovf  unused by PE */
   INT_CFDATA5 = 1U;                    /*  0x65  0xFFCA   1   no   ivVtimmdcu    unused by PE */
   INT_CFDATA6 = 1U;                    /*  0x66  0xFFCC   1   no   ivVporth      unused by PE */
-  INT_CFDATA7 = 1U;                    /*  0x67  0xFFCE   1   no   ivVportj      unused by PE */
+  INT_CFDATA7 = 1U;                    /*  0x67  0xFFCE   1   no   ivVportj      used by PE */
   INT_CFADDR = 208U;                                      
   INT_CFDATA0 = 1U;                    /*  0x68  0xFFD0   1   no   ivVatd1       used by PE */
   INT_CFDATA1 = 2U;                    /*  0x69  0xFFD2   2   no   ivVatd0       used by PE */
@@ -255,18 +255,18 @@ void MCU_init(void)
   MODRR |= (unsigned char)3U;                      
   /* COPCTL: WCOP=0,RSBCK=0,WRTMASK=0,CR2=0,CR1=0,CR0=0 */
   COPCTL = 0U;                                      
-  /* PERP: PERP7=1,PERP6=1,PERP5=1,PERP4=1,PERP3=1,PERP2=1,PERP1=1 */
-  PERP |= (unsigned char)254U;                      
-  /* PERT: PERT7=1,PERT6=1,PERT5=1,PERT3=1,PERT2=1,PERT1=1,PERT0=1 */
-  PERT |= (unsigned char)239U;                      
+  /* PERP: PERP6=1,PERP5=1,PERP4=1,PERP3=1,PERP2=1,PERP1=1,PERP0=1 */
+  PERP |= (unsigned char)127U;                      
+  /* PERT: PERT3=1,PERT2=1,PERT1=1,PERT0=1 */
+  PERT |= (unsigned char)15U;                      
   /* PERH: PERH5=1,PERH4=1,PERH3=1,PERH2=1,PERH1=1,PERH0=1 */
   PERH |= (unsigned char)63U;                      
   /* PER1AD0: PER1AD06=1,PER1AD05=1,PER1AD04=1,PER1AD03=1,PER1AD02=1,PER1AD01=1,PER1AD00=1 */
   PER1AD0 |= (unsigned char)127U;                      
   /* PER1AD1: PER1AD114=1,PER1AD113=1,PER1AD112=1,PER1AD111=1,PER1AD110=1,PER1AD19=1,PER1AD18=1 */
   PER1AD1 |= (unsigned char)127U;                      
-  /* PERM: PERM6=1,PERM5=1,PERM4=1,PERM1=1,PERM0=1 */
-  PERM |= (unsigned char)115U;                      
+  /* PERM: PERM5=1,PERM4=1,PERM1=1,PERM0=1 */
+  PERM |= (unsigned char)51U;                      
   /* IRQCR: IRQEN=0 */
   IRQCR &= (unsigned char)~(unsigned char)64U;                     
   /* ### Init_SCI init code */
@@ -283,8 +283,8 @@ void MCU_init(void)
   PITLD1 = 7999U;                            
   /* PITLD2: PLD15=0,PLD14=0,PLD13=0,PLD12=0,PLD11=0,PLD10=0,PLD9=0,PLD8=1,PLD7=0,PLD6=0,PLD5=1,PLD4=1,PLD3=1,PLD2=0,PLD1=0,PLD0=0 */
   PITLD2 = 312U;                            
-  /* PITLD3: PLD15=1,PLD14=1,PLD13=1,PLD12=1,PLD11=1,PLD10=1,PLD9=1,PLD8=1,PLD7=1,PLD6=1,PLD5=1,PLD4=1,PLD3=1,PLD2=1,PLD1=1,PLD0=1 */
-  PITLD3 = 65535U;                            
+  /* PITLD3: PLD15=0,PLD14=0,PLD13=0,PLD12=0,PLD11=0,PLD10=0,PLD9=0,PLD8=1,PLD7=0,PLD6=0,PLD5=1,PLD4=1,PLD3=0,PLD2=1,PLD1=1,PLD0=1 */
+  PITLD3 = 311U;                            
   /* PITMUX: PMUX3=1,PMUX2=1,PMUX1=0,PMUX0=0 */
   PITMUX = 12U;                                      
   /* PITINTE: PINTE3=1,PINTE2=1,PINTE1=1,PINTE0=1 */
@@ -337,12 +337,12 @@ void MCU_init(void)
   /* CAN0RIER: WUPIE=0,CSCIE=0,RSTATE1=0,RSTATE0=0,TSTATE1=0,TSTATE0=0,OVRIE=0,RXFIE=1 */
   CAN0RIER = 1U;                                      
   /* ### Init_PWM init code */
-  /* PWMDTY0: BIT7=0,BIT6=1,BIT5=1,BIT4=1,BIT3=1,BIT2=1,BIT1=1,BIT0=1 */
-  PWMDTY0 = 127U;                                      
+  /* PWMDTY7: BIT7=0,BIT6=1,BIT5=1,BIT4=1,BIT3=1,BIT2=1,BIT1=1,BIT0=1 */
+  PWMDTY7 = 127U;                                      
   /* PWMPRCLK: PCKB2=0,PCKB1=0,PCKB0=0,PCKA2=1,PCKA1=1,PCKA0=1 */
   PWMPRCLK = 7U;                                      
-  /* PWME: PWME7=0,PWME6=0,PWME5=0,PWME4=0,PWME3=0,PWME2=0,PWME1=0,PWME0=1 */
-  PWME = 1U;                           /* Enable only configured PWM channels */
+  /* PWME: PWME7=1,PWME6=0,PWME5=0,PWME4=0,PWME3=0,PWME2=0,PWME1=0,PWME0=0 */
+  PWME = 128U;                         /* Enable only configured PWM channels */
   /* ### Init_MSCAN init code */
   /* CAN1CTL1: CANE=1,CLKSRC=1,LOOPB=0,LISTEN=0,BORM=0,WUPM=0,SLPAK=0,INITAK=1 */
   CAN1CTL1 = 193U;                                      
@@ -379,31 +379,39 @@ void MCU_init(void)
   /* CAN1RIER: WUPIE=0,CSCIE=0,RSTATE1=0,RSTATE0=0,TSTATE1=0,TSTATE0=0,OVRIE=0,RXFIE=1 */
   CAN1RIER = 1U;                                      
   /* ### Init_GPIO init code */
-  /* DDRA: DDRA4=1,DDRA3=1,DDRA2=1,DDRA1=1,DDRA0=1 */
-  DDRA |= (unsigned char)31U;                      
+  /* DDRA: DDRA5=1,DDRA4=1,DDRA3=1,DDRA2=1,DDRA1=1,DDRA0=1 */
+  DDRA |= (unsigned char)63U;                      
   /* ### Init_GPIO init code */
-  /* PPSM: PPSM7=1 */
-  PPSM |= (unsigned char)128U;                      
-  /* PERM: PERM7=1 */
-  PERM |= (unsigned char)128U;                      
-  /* DDRM: DDRM7=1 */
-  DDRM |= (unsigned char)128U;                      
+  /* PPSM: PPSM6=1 */
+  PPSM |= (unsigned char)64U;                      
+  /* PERM: PERM7=1,PERM6=1 */
+  PERM |= (unsigned char)192U;                      
   /* ### Init_GPIO init code */
-  /* PTS: PTS3=1 */
-  PTS |= (unsigned char)8U;                      
-  /* PPSS: PPSS6=1,PPSS5=1,PPSS2=1,PPSS0=1 */
-  PPSS |= (unsigned char)101U;                      
-  /* PERS: PERS7=0 */
-  PERS &= (unsigned char)~(unsigned char)128U;                     
-  /* DDRS: DDRS7=1,DDRS0=1 */
-  DDRS |= (unsigned char)129U;                      
+  /* PTS: PTS4=1,PTS3=1 */
+  PTS |= (unsigned char)24U;                      
+  /* PPSS: PPSS6=1,PPSS5=1,PPSS2=1,PPSS1=1,PPSS0=1 */
+  PPSS |= (unsigned char)103U;                      
+  /* PERS: PERS7=0,PERS6=1,PERS5=1,PERS4=1,PERS3=1,PERS2=1,PERS1=1,PERS0=1 */
+  PERS = 127U;                                      
+  /* DDRS: DDRS7=1,DDRS6=1,DDRS5=0,DDRS4=0,DDRS3=0,DDRS2=0,DDRS1=0,DDRS0=0 */
+  DDRS = 192U;                                      
   /* ### Init_GPIO init code */
-  /* PTT: PTT4=1 */
-  PTT |= (unsigned char)16U;                      
-  /* DDRT: DDRT4=1 */
-  DDRT |= (unsigned char)16U;                      
+  /* PTT: PTT7=1,PTT6=1,PTT5=1,PTT4=1 */
+  PTT |= (unsigned char)240U;                      
+  /* DDRT: DDRT7=1,DDRT6=1,DDRT5=1,DDRT4=1 */
+  DDRT |= (unsigned char)240U;                      
   /* ### Init_ADC init code */
   /* Initialization of the ADC1 module */
+  /* ### Init_GPIO init code */
+  /* PTJ: PTJ1=1,PTJ0=1 */
+  PTJ |= (unsigned char)3U;                      
+  /* DDRJ: DDRJ1=1,DDRJ0=1 */
+  DDRJ |= (unsigned char)3U;                      
+  /* ### Init_GPIO init code */
+  /* PORTK: PK5=1,PK4=1 */
+  PORTK |= (unsigned char)48U;                      
+  /* DDRK: DDRK5=1,DDRK4=1 */
+  DDRK |= (unsigned char)48U;                      
   /* ### */
   /* Initial interrupt priority */
   /*lint -save  -e950 Disable MISRA rule (1.1) checking. */
@@ -453,7 +461,16 @@ __interrupt void isr_default(void)
 */
 __interrupt void iPIT3_sci_continuous(void)
 {
+   // Permet d'afficher les données en continue dans la console
+   PITTF_PTF3 = 1;
+   SCIprintStatData(gCellVolt, gCellTemp);
+   /****************
+   / Obsolète : l'affichage a été modifié
+   /**********************
    char buf[80];
+   int index;
+   
+   index = indexOf(gSxiDisplayNumModule);
    
    PITTF_PTF3 = 1; //clear le interrupt flag	
    
@@ -462,14 +479,14 @@ __interrupt void iPIT3_sci_continuous(void)
    SCIprintString(buf);
    SCIprintString("-------------------------------------------------------\n\r");
 
-   sprintf(buf, "Nombre d'initialisations = %u\n\r", gSlaveReset[gSciDisplayNumModule - 1]);
+   sprintf(buf, "Nombre d'initialisations = %u\n\r", gSlaveReset[index]);
    SCIprintString(buf);
 
-   sprintf(buf, "Révision du firmware = %u\n\r", gSlaveRev[gSciDisplayNumModule - 1]);
+   sprintf(buf, "Révision du firmware = %u\n\r", gSlaveRev[index]);
    SCIprintString(buf);   
-   sciGetCellsData(gCellVolt, gCellTemp, gSciDisplayNumModule-1);
+   sciGetCellsData(gCellVolt, gCellTemp, index);
    SCIprintString("\n\n\r");   
-
+   //*/
 }
 /* end of iPIT3_sci_continuous */
 #pragma CODE_SEG DEFAULT
@@ -492,26 +509,21 @@ __interrupt void iPIT2_100Hz(void)
     static uint16 interlockStateHistory = 0;
     static uint16 errRstHistory = 0;
     static uint16 imdStateHistory = 0;
+	static uint16 errorRstDashHistory = 0;
     static uint8 adcCount = 0;
     uint16 curIgnition;
     uint16 curInterlockState;
     uint16 curErrRst;
     uint16 curImdState;
+	uint16 curErrorRstDash;
+
+
 
     uint8 i = 0;
     static uint8 index = 0;
-    const uint16 alwaysOn = 0b1111111111111111;
-    const uint16 allFlash = 0b0101010101010101;
-    const uint16 sixFlash = 0b0000010101010101;
-    const uint16 fiveFlash = 0b0000000101010101;
-    const uint16 fourFlash = 0b0000000001010101;
-    const uint16 threeFlash = 0b0000000000010101;
-    const uint16 twoFlash = 0b0000000000000101;
-    const uint16 slowFlash = 0b0000000100000001;
-    uint16 flashSequence;
-   static uint8 flashLedCount = 0;
-   static uint8 totPackCount = 0;
-   static uint8 idleTimerCount = 0;
+    static uint16 flashSequence;
+	static uint8 totPackCount = 0;
+	static uint8 idleTimerCount = 0;
     
     //On met à 0 le flag d'interruption du PIT2
     PITTF_PTF2 = 1;  
@@ -548,7 +560,21 @@ __interrupt void iPIT2_100Hz(void)
         gFlags.interlockClosed = 1;
     else if((interlockStateHistory & 0x1F) == 0) 
         gFlags.interlockClosed = 0;
-        
+    
+	
+	
+	//On détermine l'état de l'entrée ERROR_RST_DASH. On attend d'avoir reçu 5 valeurs (50 ms pour changer)
+    //identiques avant de changer le drapeau.
+    curErrorRstDash = !((uint16) ERROR_RST_DASH); // ERROR_RST_DASH est à 0 s'il y a un problème
+    errorRstDashHistory = errorRstDashHistory<<1;
+    errorRstDashHistory = errorRstDashHistory | (curErrorRstDash & 0x1);
+    
+    if((errorRstDashHistory & 0x1F) == 0x1F)    //logique normale, i.e. 1 = interlock fermé
+		gFlags.plausibilityLatch = 0;
+	
+	
+	
+	
     
     //On détermine l'état de l'entrée ERROR RESET. On attend d'avoir reçu 5 valeurs (50 ms pour changer)
     //identiques avant de changer le drapeau.
@@ -558,8 +584,12 @@ __interrupt void iPIT2_100Hz(void)
     
     if((errRstHistory & 0x1F) == 0x1F)    //logique inverse, i.e. 0 = bouton pressé
         gFlags.errorReset = 0;
-    else if((errRstHistory & 0x1F) == 0) 
-        gFlags.errorReset = 1;
+    else if((errRstHistory & 0x1F) == 0)
+	{
+		resetIgnoreTempTable(); // On réinitialise le tableau des températures ignorées
+		resetIDtable(); // On réinitialise la table de correspondance
+		gFlags.errorReset = 1;
+	}
 
 
     //On détermine l'état de l'entrée IMD STATE. On attend d'avoir reçu 5 valeurs (50 ms pour changer)
@@ -572,39 +602,72 @@ __interrupt void iPIT2_100Hz(void)
         gFlags.ImdError = 0;
     else if((imdStateHistory & 0x1F) == 0) 
         gFlags.ImdError = 1;
-
-        
-    //EROR LED ----------------------------------------------------------
-    flashLedCount++;
-    if(flashLedCount >= FLASH_LED_PERIOD)  {
-       if(gFlags.errorState) {
-           flashSequence = alwaysOn;   
-       } else if(gFlags.cellHighTemp) {   //6 x (flash/non_flash) + 4 x non_flash
-           flashSequence = allFlash;
-       } else if(gFlags.highPeakCurrent) {//5 x (flash/non_flash) + 6 x non_flash
-           flashSequence = fiveFlash;
-       } else if(gFlags.cellLowVolt) {    //4 x (flash/non_flash) + 8 x non_flash
-           flashSequence = fourFlash;
-       } else if(gFlags.cellHighVolt) {   //3 x (flash/non_flash) + 10 x non_flash
-           flashSequence = threeFlash;
-       } else if(gFlags.cellLowTemp) {    //2 x (flash/non_flash) + 12 x non_flash
-           flashSequence = twoFlash;
-       } else if(!gFlags.interlockClosed) {
-           flashSequence = slowFlash;
-       } else {
-           flashSequence = 0;
-       }
-       
-       WARNING_DASH_LED = (flashSequence & (1<<index)) >> index;       //Led sur le tableau de bord
-       WARNING_LED = !((flashSequence & (1<<index)) >> index);       //Led sur le circuit imprimé maître
-       index++;
-       if(index > 15)
-           index=0;
-           
-       flashLedCount = 0;
+    
+	 
+	// AFFICHAGE 7 segments
+	if(!gFlags.plausibilityLatch)
+		display('P');
+    else if(gFlags.errorState)
+	{
+		//Affichage du numéro de l'erreur selon l'erreur
+		if(gError.cellMaxTemp)
+			display(5);
+		else if(gError.cellMaxVolt)
+			display(7);
+		else if(gError.cellMinVolt)
+			display(8);
+		else if(gError.cellMinTemp)
+			display(6);
+		else if(gError.slaveTimeout)
+			display(9);
+		else
+			display('E');	
     }
-   
-   
+	else if(gFlags.ImdError)
+		display('F');
+	else if(gFlags.cellHighTemp)
+        display(1);
+    else if(gFlags.cellLowVolt)
+        display(4);
+    else if(gFlags.cellHighVolt)
+        display(3);
+    else if(gFlags.cellLowTemp)
+        display(2);
+	else if(gFlags.relaysClosed)
+		display('C');
+    else
+        display('A');
+	
+	// Point du 7 segment
+	if(gFlags.interlockClosed)
+        display(','); // Le point est éteint
+	else
+		display('.'); // Le point est allumé
+	
+	
+	   // ----------------- LED sur le tableau de bord -----------------
+		if(flashSequence > FLASH_LED_PERIOD)
+		{
+			flashSequence = 0;
+		}
+	   
+		if(!gFlags.interlockClosed)
+		{
+			flashSequence++;
+			//Clignotte si l'interlock est ouvert
+			if(flashSequence < (FLASH_LED_PERIOD / 2))
+				WARNING_DASH_LED = 0; //On éteint
+			else
+				WARNING_DASH_LED = 1; //On allume
+		}
+		else if (gFlags.errorState)
+			WARNING_DASH_LED = 1; //Allumée en cas d'erreur
+		else
+			WARNING_DASH_LED = 0; //Éteinte
+       
+	   
+	
+	// Timer pour mesurer l'activité des esclaves   
    idleTimerCount++;
    if(idleTimerCount >= IDLE_TIMER_COUNT_PERIOD) {
       for(i=0; i<N_MOD; ++i) {
@@ -614,13 +677,13 @@ __interrupt void iPIT2_100Hz(void)
       idleTimerCount = 0;
    }
 
+   // Timer pour ... (je ne sais pas, à vérifier)
    totPackCount++;
    if(totPackCount >= PACK_VOLT_CALC_PERIOD ) {
       gFlags.totalPackTime = 1;
       totPackCount = 0;
    }
    
-        
 }
 /* end of iPIT2_100Hz */
 #pragma CODE_SEG DEFAULT
@@ -639,14 +702,14 @@ __interrupt void iPIT2_100Hz(void)
 */
 __interrupt void iPIT1_safety_check(void)
 {
- uint8 i;
+   uint8 i;
    uint16 anyError = 0;
    uint16 tmp;
    long int highCurrent, maxCurrent;
+   static uint16 delayMinVolt = 0;
     
-
    PITTF_PTF1 = 1;     //remise à zéro du flag, pour redémarrer le compteur.
-   
+
 
    //------------- INSPECTION DES TENSIONS EXTRÊMES ------------- 
    
@@ -656,6 +719,24 @@ __interrupt void iPIT1_safety_check(void)
    gError.cellMaxVolt = *gHighestCellVoltage > gParams.maxCellVoltage;
    
    
+   //----------- PATCH : Délai avant de déclencher une erreur cellMinVolt
+   // L'accélération du véhicule provoque une diminution momentanée de la tension aux bornes des cellues du au courant sortant. Il ne faut pas
+   // que le BMS tombe en erreur lors d'une accélération. On ajoute donc un délai.
+   
+   if(gError.cellMinVolt)
+   {
+		if(delayMinVolt < DELAI_CELLMINVOLT)
+		{
+			gError.cellMinVolt = 0; //on ignore l'erreur
+			delayMinVolt++;
+		}
+   }
+   else
+   {
+		delayMinVolt = 0; //on remet le compteur à 0
+   }
+   
+  
    
    //------------- INSPECTION DES TEMPÉRATURES EXTRÊMES ------------- 
    
@@ -670,7 +751,8 @@ __interrupt void iPIT1_safety_check(void)
       gError.cellMaxTemp = *gHighestCellTemp > gParams.maxChargeCellTemp;
       gFlags.cellHighTemp = *gHighestCellTemp > gParams.highChargeCellTemp;
    }
-
+   
+   
    
    //------------- VÉRIFICATION DES DÉLAIS DE COMMUNICATION ------------- 
     
@@ -720,7 +802,7 @@ __interrupt void iPIT1_safety_check(void)
    
    anyError = *((uint16*) &gError);
 
-   if(anyError || gFlags.ImdError) {   //Erreurs qui requiert le signal errorReset pour être remises à zéro
+   if(anyError || gFlags.ImdError || !gFlags.plausibilityLatch) {   //Erreurs qui requiert le signal errorReset pour être remises à zéro
       gFlags.errorState = 1;
       if(gFlags.relaysClosed && !gParams.ignoreErrors)
          OpenRelays();
@@ -780,12 +862,13 @@ __interrupt void iPIT0_timer_relais(void)
 */
 __interrupt void SCIIsr(void)
 {
+
    if (!(SCI5SR1 & 0x20))              //If reception flag is not set
       return;
 
    if(gGuiBufferFull)
       return;
-      
+	  
    gGuiBuffer[gGuiWriteIndex] = SCI5DRL;  //enregistrement du byte reçu + clear le reception flag
    
    gGuiWriteIndex++;
@@ -947,18 +1030,37 @@ __interrupt void iCANRX_reception(void)
 {
    uint16 rxId; 
    uint8 length, slaveId, msgId;
-   uint8 indexJump, i;
+   uint8 indexJump, i, j;
    uint8 rxData[8];
    uint16 rcvVolt;
-   int rcvTemp;
+   int rcvTemp, tempMoy;
    uint16 balVector, balThres, tmp;
-  
-     
+   uint8 ignoreTemp, nbIgnore; // pour le patch qui ignore les températures  
+   int index;	
+	 
    rxId = ((uint16) CAN0RXIDR0) << 3 | ((uint16) CAN0RXIDR1) >> 5;	//Récupération de l'id du packet
    slaveId = (rxId & 0x3C0)>>6;			//Récupérer le ID de l'esclave source du message
    length = CAN0RXDLR; 					//on récupère la longueur du message (8 octets max)
    msgId = (rxId & 0x3F);           //Récupération de l'identificateur des données du message
 
+   #ifdef DEBUG_CAN
+	if(can_debug)
+	{
+	SCIprintString("[DEBUG] CAN : Reception d'un paquet\n\r");
+	SCIprintInt(" Packet ID :", rxId);
+	SCIprintInt(" Slave ID : ", slaveId);
+	SCIprintInt(" Msg ID : ", msgId);
+	SCIprintString(" (");
+	}
+   #endif
+   
+   // index pour les tableaux
+   index = indexOf(slaveId);
+  
+   if(index == -1) // Si l'index n'existe pas déjà
+   {
+		index = addId(slaveId); // On l'ajoute et on récupère l'index qui lui est attribué
+   }
    
     //le buffer de réception est de type FIFO et est long de 15 octets
    for (i=0; i<length; i++)
@@ -966,13 +1068,17 @@ __interrupt void iCANRX_reception(void)
 	
     
    //Il y a de la vie dans ce module esclave
-   if(idleCount[slaveId-1] > 0)
-      idleCount[slaveId-1]--;
+   if(idleCount[index] > 0)
+      idleCount[index]--;
 
       
    //RÉCEPTION DES MESURES DE TENSIONS
    if(msgId == CAN_VOLTAGES_1TO4_ID  ||  msgId == CAN_VOLTAGES_5TO8_ID  ||  msgId == CAN_VOLTAGES_9TO10_ID) {  
    
+	#ifdef DEBUG_CAN
+	if(can_debug)
+		SCIprintString("Reception de tensions)\n\r");
+	#endif
       //On détermine le décalage de l'index nécessaire selon les données reçues
       if(msgId == CAN_VOLTAGES_1TO4_ID)
          indexJump = 0;
@@ -984,18 +1090,28 @@ __interrupt void iCANRX_reception(void)
       //Pour chaque mesure, on l'écrit dans le tableau des tensions et on vérifie si c'est un nouvel extrême
       for(i=0; i<(length>>1); i++) {
          rcvVolt = (((unsigned int) rxData[2*i]) << 8) | rxData[2*i+1];
-         gCellVolt[slaveId-1][i+indexJump] = rcvVolt;
-
+         gCellVolt[index][i+indexJump] = rcvVolt;
+		 
+		 
          //Mettre à jour les pointeurs vers les tensions extrêmes
          if(rcvVolt < *gLowestCellVoltage) {
-            gLowestCellVoltage = &gCellVolt[slaveId-1][i+indexJump];
+            gLowestCellVoltage = &gCellVolt[index][i+indexJump];
             gLowestVoltageCellSlaveId = slaveId;
             gLowestVoltageCellNum = i+indexJump;
          } else if(rcvVolt > *gHighestCellVoltage) {
-            gHighestCellVoltage = &gCellVolt[slaveId-1][i+indexJump];
+            gHighestCellVoltage = &gCellVolt[index][i+indexJump];
             gHighestVoltageCellSlaveId = slaveId;
             gHighestVoltageCellNum = i+indexJump;
          }
+		 
+		 //*
+		 #ifdef DEBUG_CAN_1
+			// Affichage des données de Tension reçues dans la console
+			SCIprintInt(" Cellule #", i+indexJump);
+			SCIprintInt(" Tension : ", (int)rcvVolt);
+			SCIprintString(" mV\n\r");
+		#endif
+		//*/
       }
    } //end of received voltage measurements msg
    
@@ -1004,6 +1120,11 @@ __interrupt void iCANRX_reception(void)
    //RÉCEPTION DES MESURES DE TEMPÉRATURE   
    else if(  msgId == CAN_TEMP_1TO4_ID  ||  msgId == CAN_TEMP_5TO8_ID  ||  msgId == CAN_TEMP_9TO10_ID) {  
    
+	#ifdef DEBUG_CAN
+	if(can_debug)
+		SCIprintString("Reception de temperatures)\n\r");
+	#endif
+	
       //On détermine le décalage de l'index nécessaire selon les données reçues
       if(msgId == CAN_TEMP_1TO4_ID)
          indexJump = 0;
@@ -1016,20 +1137,97 @@ __interrupt void iCANRX_reception(void)
       for(i=0; i<(length>>1); i++) {
          rcvTemp = (((unsigned int) rxData[2*i]) << 8) | rxData[2*i+1];
 
+		 
+		 
+		//------------ PATCH : Ignorer certaines sondes de températures si les autres adjacentes indiquent une température OK
+		// Certaines sondes de températures sont brisées ou mal positionnées ce qui peur causer des erreurs de basse température. 
+		// Ce patch permet d'ignorer certaines températures si les sondes adjacentes indiquent une température dans les normes.
+		// 
+		// Note : Selon les règlements, on ne doit que vérifier la température de 40% (à vérifier) des cellules de façon uniforme. On peut donc
+		//        se permettre d'en ignorer quelques unes.
+		//
+		// Le tableau de température a 2 dimensions : gCellTemp[N_MOD][N_CELL]
+		// Pour ce patch, on crée un nouveau tableau contenant le numéro du module et le numéro de cellule de la sonde à ignorer : gCellIgnoreTemp
+		ignoreTemp = 0;
+
+		if(rcvTemp < gParams.minDischargeCellTemp || rcvTemp > gParams.maxDischargeCellTemp)
+		{
+		#ifdef DEBUG_CAN_1
+			SCIprintString("[DEBUG] : Température à ignorer");
+			SCIprintInt(":", rcvTemp);
+			SCIprintString("\n\r");
+		#endif
+		
+			// On vérifie qu'on ignore pas déjà la température
+			for(j = 0; j < N_MAX_IGNORE_TEMP; j++)
+			{
+				if(gCellIgnoreTemp[j][0] == slaveId)
+					if(gCellIgnoreTemp[j][1] == (i+indexJump))
+						ignoreTemp = 1; // Si c'est le cas, on ignore sans ajouter une nouvelle entrée
+				else if(gCellIgnoreTemp[j][0] == -1)
+				{
+					nbIgnore = j; //Nombre de sondes ignorées dans le tableau
+					break; //inutile de continuer à chercher
+				}
+			}
+		
+			// Si la sonde n'est pas déjà ignorée
+			if(ignoreTemp == 0)
+			{
+				//moyenne de température des 2 sondes adjacentes
+				if(i+indexJump == 0)
+					tempMoy = (gCellTemp[index][i+indexJump+1] + gCellTemp[index][i+indexJump+2]) / 2;
+				else if(i+indexJump == 9)
+					tempMoy = (gCellTemp[index][i+indexJump-1] + gCellTemp[index][i+indexJump-2]) / 2;
+				else
+					tempMoy = (gCellTemp[index][i+indexJump-1] + gCellTemp[index][i+indexJump+1]) / 2;
+			
+			
+				// Valeur absolue de l'écart, on ignore si l'écart est assez grand
+				if((tempMoy - rcvTemp) > 0)
+					ignoreTemp = (tempMoy - rcvTemp) > ECART_MIN_TEMP; 
+				else
+					ignoreTemp = (rcvTemp - tempMoy) > ECART_MIN_TEMP;
+			
+			
+				//Si on a bel et bien décidé d'ignorer la température
+				if(ignoreTemp == 1)
+				{
+					//On ajoute la sonde à ignorer à la liste
+					gCellIgnoreTemp[nbIgnore][0] = slaveId;
+					gCellIgnoreTemp[nbIgnore][1] = i+indexJump;
+				}
+			}
+		}
+   
+		 
+		 // Ancien patch des sondes de températures
+		 /*
          if(slaveId == 1 && (i+indexJump) == 9)     
             rcvTemp = 210;        //PATCH pour cellule 10 de l'esclave 1 (thermistor brûlé)
          else if(slaveId == 6 && (i+indexJump) == 9)
             rcvTemp = 210;        //PATCH pour cellule 10 de l'esclave 6 (entrée ADC non fonctionnelle)
-   
-        gCellTemp[slaveId-1][i+indexJump] = rcvTemp;
-         
-         //Mettre à jour les pointeurs vers les températures extrêmes
-         if(rcvTemp < *gLowestCellTemp) {
-            gLowestCellTemp = &gCellTemp[slaveId-1][i+indexJump];
+		*/
+		
+//*	
+		#ifdef DEBUG_CAN_1
+			// Affichage des données de Température reçues dans la console
+			SCIprintInt(" Cellule #", i+indexJump);
+			SCIprintInt(" Temp : ", (int)(rcvTemp*10));
+			SCIprintString(" oC\n\r");
+		#endif
+		//*/ 
+        
+		gCellTemp[index][i+indexJump] = rcvTemp;
+        
+		
+         //Mettre à jour les pointeurs vers les températures extrêmes si la température n'est pas ignorée
+         if(rcvTemp < *gLowestCellTemp && ignoreTemp == 0) {
+            gLowestCellTemp = &gCellTemp[index][i+indexJump];
             gLowestTempCellSlaveId = slaveId;
             gLowestTempCellNum = i+indexJump;
-         } else if(rcvTemp > *gHighestCellTemp) {
-            gHighestCellTemp = &gCellTemp[slaveId-1][i+indexJump];
+         } else if(rcvTemp > *gHighestCellTemp && ignoreTemp == 0) {
+            gHighestCellTemp = &gCellTemp[index][i+indexJump];
             gHighestTempCellSlaveId = slaveId;
             gHighestTempCellNum = i+indexJump;
          }
@@ -1040,7 +1238,12 @@ __interrupt void iCANRX_reception(void)
    //RÉCEPTION D'UN RAPPORT D'ÉQUILIBRATION  
    else if(msgId == CAN_EQUI_REPORT_ID) {
 	 
-      balVector = ((unsigned int) rxData[0])<<8 | ((unsigned int) rxData[1]);
+	#ifdef DEBUG_CAN
+	if(can_debug)
+		SCIprintString("Rapport d'equilibration)\n\r");
+	#endif
+	
+	  balVector = ((unsigned int) rxData[0])<<8 | ((unsigned int) rxData[1]);
       balThres = ((unsigned int) rxData[2])<<8 | ((unsigned int) rxData[3]);
       
       if(balVector == 0) {
@@ -1054,19 +1257,59 @@ __interrupt void iCANRX_reception(void)
    
    //RÉCEPTION D'UN RAPPORT D'INITIALISATION
    else if (msgId == CAN_INIT_REPORT_ID) {
-       gSlaveReset[slaveId-1]++;
+	
+	#ifdef DEBUG_CAN
+    if(can_debug)
+		SCIprintString("Rapport d'initialisation)\n\r");
+	#endif
+	
+       gSlaveReset[index]++;
    }
    
    //RÉCEPTION D'UN RAPPORT DE NUMÉRO DE FIRMWARE
    else if(msgId == CAN_FIRMWARE_REVISION_ID) {
-       gSlaveRev[slaveId-1] = rxData[0];
-   }
+   
+	
+	#ifdef DEBUG_CAN
+	if(can_debug)
+		SCIprintString("Numero de Firmware)\n\r");
+	#endif
+	
+	
+       gSlaveRev[index] = rxData[0];
+	}
+	#ifdef DEBUG_CAN
+	else
+	{
+		SCIprintString("Inconnu)\n\r");
+	}
+	#endif
 
    
 	//pour lever l'interruption et relâcher le buffer de réception foreground
     CAN0RFLG_RXF = 1; 
 }
 /* end of iCANRX_reception */
+#pragma CODE_SEG DEFAULT
+
+
+#pragma CODE_SEG __NEAR_SEG NON_BANKED
+/*
+** ===================================================================
+**     Interrupt handler : isrVportj
+**
+**     Description :
+**         User interrupt service routine. 
+**     Parameters  : None
+**     Returns     : Nothing
+** ===================================================================
+*/
+__interrupt void isrVportj(void)
+{
+  /* Write your interrupt code here ... */
+
+}
+/* end of isrVportj */
 #pragma CODE_SEG DEFAULT
 
 
@@ -1276,7 +1519,7 @@ static const tIsrFunc _InterruptVectorTable[] @0xFF10U = { /* Interrupt vector t
   &UNASSIGNED_ISR,                      /* 0x64  0xFFC8   1   no   ivVtimpabovf  unused by PE */
   &UNASSIGNED_ISR,                      /* 0x65  0xFFCA   1   no   ivVtimmdcu    unused by PE */
   &UNASSIGNED_ISR,                      /* 0x66  0xFFCC   1   no   ivVporth      unused by PE */
-  &UNASSIGNED_ISR,                      /* 0x67  0xFFCE   1   no   ivVportj      unused by PE */
+  &isrVportj,                           /* 0x67  0xFFCE   1   no   ivVportj      used by PE */
   &isrVatd1,                            /* 0x68  0xFFD0   1   no   ivVatd1       used by PE */
   &iADC_sequence_complete,              /* 0x69  0xFFD2   2   no   ivVatd0       used by PE */
   &UNASSIGNED_ISR,                      /* 0x6A  0xFFD4   1   no   ivVsci1       unused by PE */
@@ -1314,7 +1557,7 @@ static const tIsrFunc _ResetVectorTable[] @0xFFFAU = { /* Reset vector table */
 #pragma CODE_SEG __NEAR_SEG NON_BANKED
 /*
 ** ===================================================================
-**     Interrupt handler : isrVpit0
+**     Interrupt handler : isrVportp
 **
 **     Description :
 **         User interrupt service routine. 
@@ -1322,12 +1565,12 @@ static const tIsrFunc _ResetVectorTable[] @0xFFFAU = { /* Reset vector table */
 **     Returns     : Nothing
 ** ===================================================================
 */
-__interrupt void isrVpit0(void)
+__interrupt void isrVportp(void)
 {
   /* Write your interrupt code here ... */
 
 }
-/* end of isrVpit0 */
+/* end of isrVportp */
 
 
 #pragma CODE_SEG __NEAR_SEG NON_BANKED
@@ -1347,6 +1590,25 @@ __interrupt void isrVatd0compare(void)
 
 }
 /* end of isrVatd0compare */
+
+
+#pragma CODE_SEG __NEAR_SEG NON_BANKED
+/*
+** ===================================================================
+**     Interrupt handler : isrVpit0
+**
+**     Description :
+**         User interrupt service routine. 
+**     Parameters  : None
+**     Returns     : Nothing
+** ===================================================================
+*/
+__interrupt void isrVpit0(void)
+{
+  /* Write your interrupt code here ... */
+
+}
+/* end of isrVpit0 */
 
 /* END MCUinit */
 

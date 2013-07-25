@@ -18,6 +18,8 @@ extern unsigned char gGuiReadIndex;
 extern unsigned char gGuiWriteIndex;
 extern unsigned char gGuiBufferFull;
 
+extern int can_debug; //Pour le débuggage CAN en console
+
 //************************
 //  Functions prototypes
 //************************ 
@@ -32,6 +34,12 @@ void SCIupAlevel(void);
 void SCIassignation(float user_input);
 void sciGetCellsData(unsigned int volt[][N_CELL], int temp[][N_CELL], int numer_mod);
 void sciByteReception(unsigned char rcvByte);
+void SCIprintStatData(unsigned int volt[][N_CELL], int temp[][N_CELL]);
+void SCIprintInt(char *nom, int donnee);
+void SCIprintIgnoreTemp(int ignoreTemp[][2]);
+void SCIprintIDtable(uint8 table[]);
+
+
 
 
 #endif //TERMINAL_CODE_H

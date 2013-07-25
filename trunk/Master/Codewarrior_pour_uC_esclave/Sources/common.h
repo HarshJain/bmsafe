@@ -15,6 +15,22 @@ int findMinInt(int *table, unsigned char numElements, uchar *index);
 void temperatureCompare(int cellTemp[][N_CELL], int *lowestT, int *maxT);
 void voltageCompare(unsigned int cellVolt[][N_CELL], unsigned int *lowestV, unsigned int *maxV);
 
+// Relié à la table de correspondance
+uint8 idOf(int index);
+int addId(uint8 id);
+int indexOf(uint8 id);
+void resetIDtable();
+
+// Températures ignorées
+void resetIgnoreTempTable();
+
+// Affichage 7 segment
+void display(int no);
+
+
+
+
+
 
 
 #endif

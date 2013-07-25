@@ -28,7 +28,7 @@
                               
 errors_t gError = {1,1,1,1,1,1,1};            //Les drapeaux d'erreurs sont 'activés' au début, et se rétabliront
                                                 //au fur et à mesure que les données requises seront recuillies.
-flags_t gFlags = {0,0,0,0,0,0,0,0,0,0,0,0,0,0};                                    
+flags_t gFlags = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,1}; // 1 pour le plausibility check                                   
                                     
 unsigned int gSlaveEquiStatus = 0;      //Si le i-ème bit est à 1, le (i+1)-ème module est en équilibration
 unsigned int gSlaveComState = 0;        //Si le i-ème bit est à 1, le (i+1)-ème module est en erreur de communication                               
@@ -51,6 +51,7 @@ uint32 gTotalPackVoltage = 0;                       // [mV]
 int gCellTemp[N_MOD][N_CELL];                       // [dixieme oC] Cell temperatures  
 int *gLowestCellTemp = &gCellTemp[0][0];            // [dixieme oC]
 int *gHighestCellTemp = &gCellTemp[0][0];           // [dixieme oC];
+int gCellIgnoreTemp[N_MAX_IGNORE_TEMP][2];			// Liste des sondes de températures ignorées
 
 uint8 gLowestTempCellNum = 0;
 uint8 gLowestTempCellSlaveId = 1;
@@ -62,6 +63,7 @@ uint8 gMode = STAND_BY_MODE;                       // Operating mode
 uint8 idleCount[N_MOD];                             //Un tableau qui compte le nombre de secondes d'inactivité des esclaves
 uint8 gSlaveReset[N_MOD];                           //Le nombre d'initialisations des modules esclaves
 uint8 gSlaveRev[N_MOD];                             //Le numéro de révision du firmware de chacun des modules esclave
+uint8 idTable[N_MOD];								// Table de correspondance des ID des esclaves et index dans les tableaux
 
 
 params_t gParams =   {
@@ -105,9 +107,10 @@ void main(void)
    deviceInit();
    CAN0RequestSlaveFirmware(CAN_BROADCAST_ID);
 
+   
    while(1) {
-
-      if(!gParams.manualMode) {        //Automatic mode
+   
+         if(!gParams.manualMode) {        //Automatic mode
 
          modeSelection();
 
@@ -117,7 +120,7 @@ void main(void)
             case STAND_BY_MODE:  standbyMode(); break;
             case ERROR_MODE:     errorMode(); break;
             default:             errorMode();
-         } 
+         }
       }
 
       //On calcule la tension totale du pack
@@ -126,6 +129,7 @@ void main(void)
          gFlags.totalPackTime = 0;
       }
       
+	  //PITCE_PCE3 = 1;
       //On traite les bytes reçus du lien avec l'usager
       if(gGuiReadIndex != gGuiWriteIndex || gGuiBufferFull) {
          sciByteReception(gGuiBuffer[gGuiReadIndex]);
@@ -133,8 +137,7 @@ void main(void)
          gGuiReadIndex++;
          if(gGuiReadIndex > GUI_RX_BUFFER_SIZE)
             gGuiReadIndex = 0;
-      }
-      
+      }      
    }
 }
 
@@ -175,13 +178,16 @@ void deviceInit()
             gCellVolt[i][j] = 0;
             gCellTemp[i][j] = 0x8000;
         } 
-        idleCount[i] = COM_IDLE_COUNT_MAX;      
+        idleCount[i] = COM_IDLE_COUNT_MAX;    
         gSlaveReset[i] = 0;
         gSlaveRev[i] = 0;
+		idTable[i] = 0; // Table de correspondance
     }
     gMeanCurrent = gParams.maxPeakDischargeCurrent + 1;    //Valeur pas trop grande parce que moyenne
                                                            //mobile sur 10s quand même c'est long à réagir
    
+	resetIgnoreTempTable(); //Initialisation de la table de températures ignorées
+	
    //Sélection du channel AN7 comme channel de départ de l'ADC
    ATD0CTL5 = ATD0CTL5 | 0x07;
     
@@ -191,10 +197,11 @@ void deviceInit()
    SCI5BD = USER_INT_SPEED;           //On assigne la bonne vitesse de transmission
    
    //Timers activation
-   PITCE_PCE1 = 1;                   //Activation of the 100 Hz timer (PIT1)
-   PITCE_PCE2 = 1;                   //Activation of the ADC timer (PIT2)
-   //PITCE_PCE4 = 1;                   //Activation of the warning led flash timer (PIT4)
-   PITCFLMT_PITE = 1;                //Activation of the timer module
+   PITCE_PCE1 = 1;                   //Activation of the 1000 Hz timer (PIT1) : iPIT1_safety_check()
+   PITCE_PCE2 = 1;                   //Activation of the ADC timer (PIT2) : iPIT2_100Hz()
+   // Lest timer 0 et 3 sont activés ailleurs selon le besoin
+   
+   PITCFLMT_PITE = 1;    //Activation of the timer module
 }
 
 
