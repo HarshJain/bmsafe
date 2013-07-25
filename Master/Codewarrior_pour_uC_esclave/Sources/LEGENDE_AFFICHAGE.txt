@@ -1,0 +1,36 @@
+
+# Légende du 7 segments #
+
+NORMAL
+A : Standby (prêt, relais ouverts)
+C : Connecté (courant dans l'auto, relais fermés)
+
+INTERLOCK
+dot allumé : interlock ouvert
+dot éteint : interlock fermé
+
+WARNING
+1 : Hight temperature
+2 : Low Temperature
+3 : Hight Voltage
+4 : Low Voltage
+
+ERREURS
+5 : Max Temperature
+6 : Min Temperature
+7 : Max Voltage
+8 : Min Voltage
+9 : slave timeout
+F : imd error
+E : 2 significations
+	- BMS en erreur, mais l'erreur a été corrigée (il reste appuyer sur le bouton RESET ERROR)
+	- Autre erreur non prise en compte (si en appuyant sur le bouton RESET ERROR, le E reste)
+P : plausibility latch error
+
+
+
+
+
+------------ Liste de possibles symboles distincts pour l'afficheur ----------
+U : L : b : h : [ : - : _ : P : barre en haut
+

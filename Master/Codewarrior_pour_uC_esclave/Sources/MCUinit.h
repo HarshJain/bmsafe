@@ -8,7 +8,7 @@
 **     Processor : MC9S12XDP512BMPV
 **     Version   : Component 02.003, Driver 01.05, CPU db: 2.87.229
 **     Datasheet : MC9S12XDP512RMV2 Rev. 2.18 May 2008
-**     Date/Time : 2012-08-31, 14:08
+**     Date/Time : 15/06/2013, 1:03 PM
 **     Abstract  :
 **         This module contains device initialization code 
 **         for selected on-chip peripherals.
@@ -243,6 +243,22 @@ __interrupt void iCANRX_reception(void);
 /*
 ** ===================================================================
 **     Interrupt handler : iCANRX_reception
+**
+**     Description :
+**         User interrupt service routine. 
+**     Parameters  : None
+**     Returns     : Nothing
+** ===================================================================
+*/
+#pragma CODE_SEG DEFAULT
+
+
+
+#pragma CODE_SEG __NEAR_SEG NON_BANKED
+__interrupt void isrVportj(void);
+/*
+** ===================================================================
+**     Interrupt handler : isrVportj
 **
 **     Description :
 **         User interrupt service routine. 

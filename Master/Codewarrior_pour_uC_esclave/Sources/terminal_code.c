@@ -26,13 +26,21 @@ unsigned int niveau_1 = 0;                  // 1 = configuration, 2 = status, 3 
 unsigned int niveau_2 = 0;
 
 // strings du menu d'affichage des paramètres                                            
-unsigned int gSciDisplayNumModule;                       // numéro du slave à afficher
+unsigned int gSciDisplayNumModule;                       // ID du slave à afficher
 unsigned int gSciInterruptMode = 0;                      //0 = mode menu, 1 = mode assignation
 
 unsigned char gGuiBuffer[GUI_RX_BUFFER_SIZE];            //Un tampon contenant les bytes reçus du lien avec l'usager à traiter.
 unsigned char gGuiReadIndex = 0;
 unsigned char gGuiWriteIndex = 0;
 unsigned char gGuiBufferFull = 0;
+
+
+unsigned int printStatTime = 3600;	// Nombre de temps (en secondes) pendant lequel on envoi les données statistiques
+unsigned int timeFollow = 0; 		// Simple compteur pour pouvoir savoir combien de temps on a fait (ou cycle)
+int sendFreq = 25;					// Fréquence d'envoie des données (100 = 1 envoie par seconde, 25 = 4 par sec, ...)
+
+int can_debug = 0;					// Si = 1, des informations sur le CAN sont affichées dans la console jusqu'à l'appui de Backspace
+
 
 //***************************************************************
 // Menu principal (niveau 0)
@@ -77,6 +85,9 @@ const char *statusMenu =
 3- Mode continu: affichage des tensions et températures\n\r\
 4- Affichage des erreurs\n\r\
 5- Affichage des flags\n\r\
+6- Afficher les sondes de températures ignorées\n\r\
+7- Afficher la table de correspondance ID / index \n\r\
+8- Debuggage CAN \n\r\
 Attente d'une instruction\n\n\n\r";
 
  
@@ -106,7 +117,7 @@ Appuyer sur la touche 'BS' pour retourner au menu précédent ou interrompre l'act
 // Description:   Dispose of a received byte. 
 //
 //*****************************************************************************
-void sciByteReception(unsigned char rcvByte) 
+void sciByteReception(unsigned char rcvByte)
 {
    unsigned char i;
 
@@ -115,11 +126,11 @@ void sciByteReception(unsigned char rcvByte)
    float inputParam = 0;
    static unsigned char point = 0;
 
-
+   //*
    //**************************************************
    // "m" KEY	  
    //**************************************************
-   if (rcvByte == 'm') {		
+   if (rcvByte == 'm') {   
       niveau_1 = 0;                 // 1 = configuration, 2 = status, 3 = commandes
       niveau_2 = 0;
       SCIshowMenu(0);               // input = 0 -> show the menu for the actual levels
@@ -131,19 +142,30 @@ void sciByteReception(unsigned char rcvByte)
    //**************************************************
    // BS KEY
    //
-   // Lorsque l'usager appuie sur BS, la saisie de donné est interrompu.
+   // Lorsque l'usager appuie sur BS, la saisie continue de données est interrompue.
    // Le menu de niveau supérieur est réaffiché
    //**************************************************	
    else if(rcvByte == 0x7F || rcvByte == 0x08) {			   
-      if((niveau_1 == 2) && (niveau_2 == 3))        //Désactivation du mode continu
-         PITCE_PCE3 = 0;
+		if((niveau_1 == 2) && (niveau_2 == 3))        //Désactivation du mode continu
+		{ 
+			PITCE_PCE3 = 0;
+			printStatTime = 0; 
+			timeFollow = 0;
 
-      gSciInterruptMode = 0;   
-      SCIupAlevel();
-      SCIshowMenu(0);
+			gSciInterruptMode = 0;
+			SCIupAlevel();
+			SCIshowMenu(0);
+			
+		}
 
-      for(i=0; i<20; i++)
-         inputBuf[i] = 0;
+		if((niveau_1 == 2) && (niveau_2 == 8))  // Désactivation du debuggage CAN continu
+		{
+			can_debug = 0;
+		}
+		
+		for(i=0; i<20; i++)
+			inputBuf[i] = 0;
+		
    }	
 
    //**************************************************
@@ -204,7 +226,8 @@ void sciByteReception(unsigned char rcvByte)
             SCIPutChar(rcvByte);
          }
       } 
-   }		
+   }
+	//*/   
 }
          
          
@@ -243,7 +266,7 @@ void SCIprintString(char* charBuf)
 *
 * Parameters:  int *volt[]: array 2 dimensions contenant les voltages
 *			   int *temp[]: array 2 dimensions contenant les températures
-*              int numer_mod : numéro du module pour lequel on veut les informations
+*              int numer_mod : numéro (ID) du module pour lequel on veut les informations
 *              int nb_cell : nombre de cellule par module
 * Return : aucun.
 */
@@ -255,7 +278,15 @@ void sciGetCellsData(unsigned int volt[][N_CELL], int temp[][N_CELL], int numer_
    int junk;
    char buf[40];
 
-   unsigned int cell = 0; // cellule pour laquelle on affiche des donnés
+   unsigned int cell = 0; // cellule pour laquelle on affiche des donnés   
+  
+   int index = indexOf(numer_mod); //On récupère l'index du module esclave à afficher
+   
+   if(index == -1)
+   {
+		SCIprintString("Numéro de module invalide\n");
+		return;
+   }
    
    for(cell=0; cell < N_CELL; cell++)
    {
@@ -265,11 +296,11 @@ void sciGetCellsData(unsigned int volt[][N_CELL], int temp[][N_CELL], int numer_
          SCIPutChar(cbuffer[char_pos]);
 
       SCIPutChar(0x20);                       //space
-      junk = sprintf(buf, formatVolt, (float)volt[numer_mod][cell]/1000.0);
+      junk = sprintf(buf, formatVolt, (float)volt[index][cell]/1000.0);
       SCIprintString(buf);
       SCIPutChar(0x20);                       //space   
 
-      junk = sprintf(buf, formatTemp, (float)temp[numer_mod][cell]/10.0);
+      junk = sprintf(buf, formatTemp, (float)temp[index][cell]/10.0);
       SCIprintString(buf);
       SCIprintString("\n\r");
    }
@@ -348,11 +379,16 @@ void SCIprintErrors(void)
    if(gError.slaveTimeout){
       SCIprintString("Expiration de la communication avec les modules: ");
       for(i=0; i<N_MOD; i++) {
-         tmp = 1<<i;
+         tmp = (1<<i);
          if((gSlaveComState & tmp) == tmp){
-            junk = sprintf(buf,"%d ", i+1);
+			
+			if(idOf(i) == 0) // On n'a jamais reçu de paquet de cet esclave
+				SCIprintString("? ");
+			else
+				junk = sprintf(buf,"%d ", idOf(i));
+
             SCIprintString(buf);
-         }  
+         }
       }
       SCIprintString("\n\r");
    } 
@@ -462,7 +498,7 @@ void SCIshowMenu(unsigned char input)
 {
    char buf[40];
    int junk;
-
+   
    //***************************************
    //menu principal (3 choix)		
    //***************************************
@@ -627,10 +663,11 @@ void SCIshowMenu(unsigned char input)
             gSciInterruptMode = 1;  //input mode (gSciInterruptMode =1)				
             break;
 
-         case '3': //Affichage des données en mode continu pour 1 module							
+         case '3': //Affichage des données en mode continu pour tous les modules							
             niveau_2 = 3;				
-            SCIprintString("Entrer le # du module esclave suivi de la touche enter: ");
-            gSciInterruptMode = 1;	//input mode (gSciInterruptMode =1)
+            gSciInterruptMode = 2;
+			printStatTime = 
+			PITCE_PCE3 = 1;
             // NOTE: Dans le mode assignation, une interruption périodique est lancée
             // juste après la saise du module à afficher en loop.
             break;
@@ -644,10 +681,25 @@ void SCIshowMenu(unsigned char input)
             SCIprintFlags();
             SCIprintString(statusMenu);
 			break;
-		 
+			
+		case '6':	//affichage des sondes de températures ignorées
+			SCIprintIgnoreTemp(gCellIgnoreTemp);
+			SCIprintString(statusMenu);
+			break;
+		
+		case '7': 	//affichage de la table de correspondance ID / Index
+			SCIprintIDtable(idTable);
+			SCIprintString(statusMenu);
+			break;
+		
+		case '8':   // affichage continu d'informations sur les paquets CAN reçus
+			niveau_2 = 8;
+			can_debug = 1;
+			break;
+			
 		 default:
 			SCIprintString("Choix erroné.\n\r");
-			SCIprintString(statusMenu);
+			//SCIprintString(statusMenu);
 			break;
 
       }
@@ -889,15 +941,18 @@ void SCIassignation(float user_input)
 			case 2: 
             junk = sprintf(buf,"\n\n\rAffichage des données du module %u\n\r", gSciDisplayNumModule);
             SCIprintString(buf);		
-            sciGetCellsData(gCellVolt, gCellTemp, gSciDisplayNumModule-1);
+            sciGetCellsData(gCellVolt, gCellTemp, gSciDisplayNumModule);
             SCIprintString("\n\n\n\r");            
 			break;
-			
+			/******************
+			/ Modifié pour un affichage différent : pas besoin d'avoir un numéro de module
+			/**************
 			case 3:
             PITCE_PCE3 = 1; //activation de l'interrupt, le mode continu pourra
             gSciInterruptMode = 2;
             SCIprintString("\n\n\r");
             break;          //être interrompu en appuyant sur la touche backspace. 				
+			*/
 		}
 	}
 	//Menu commandes
@@ -932,4 +987,105 @@ void SCIassignation(float user_input)
 	   
 	}
 			
+}
+
+// ****************************************
+//	Imprime dans la console les températures et voltage de chaque cellules
+// 	pendant un certain temps
+//	
+//	Cette fonction est appelée par une interruption de 100 Hz, ce qui permet de connaître la fréquence d'appel de la méthode
+// ****************************************
+
+void SCIprintStatData(unsigned int volt[][N_CELL], int temp[][N_CELL])
+{
+	char buf[70];
+	int i,j;
+
+	if(printStatTime == 0)
+		return;
+		
+	if(timeFollow < (printStatTime*100))
+	{
+		if((timeFollow % sendFreq) == 0)
+		{
+			// On donne un titre au colonnes si c'est le premier appel
+			if(timeFollow == 0)
+			{
+				sprintf(buf, "timestamp(ms),no_module,no_cellule,tension(mV),temperature(0.1degC)\n\r");
+				SCIprintString(buf);
+			}
+			
+			//On envoie les données sous le format : timestamp, no_module, no_cellule, tension, température
+			for(i = 0; i < N_MOD; i++)
+			{
+				for(j = 0; j < N_CELL; j++)
+				{
+					sprintf(buf, "%d,%d,%d,%d,%d\n\r", timeFollow*10, idOf(i), j+1, volt[i][j], temp[i][j]);
+					SCIprintString(buf);
+				}
+			}
+		}
+		
+		timeFollow++;
+	}
+	else
+	{
+		printStatTime = 0; // Envoie des données terminés, on arrête d'envoyer
+		timeFollow = 0;
+		PITCE_PCE3 = 0; //On désactive l'interruption
+	}
+
+}
+
+// Permet d'envoyer la valeur d'une variable sans avoir à créer de buffer dans d'autres fonctions
+void SCIprintInt(char *nom, int donnee)
+{
+	char buf[100];
+
+	sprintf(buf, "%s%d", nom, donnee);
+	SCIprintString(buf);
+}
+
+
+void SCIprintIgnoreTemp(int ignoreTemp[][2])
+{
+	char buf[70];
+	int i;
+	
+	SCIprintString("------- Sondes de températures ignorées --------\n\r");
+	SCIprintString("Module esclave\tCellule\n\r");
+	for(i = 0; i < N_MAX_IGNORE_TEMP; i++)
+	{
+		if(ignoreTemp[i][0] != -1)
+		{
+			sprintf(buf, "\t%d\t\t%d\n\r", ignoreTemp[i][0], ignoreTemp[i][1]);
+			SCIprintString(buf);
+		}
+	}
+	SCIprintString("\n\r");
+	
+}
+
+
+void SCIprintIDtable(uint8 table[])
+{
+	char buf[70];
+	int i;
+	
+	SCIprintString("------- Table de correspondance ID / Index --------\n\r");
+	SCIprintString("\tIndex\tID (# du module esclave)\n\r");
+	for(i = 0; i < N_MOD; i++)
+	{
+		if(table[i] != 0)
+		{
+			sprintf(buf, "\t  %d\t\t%d\n\r", i, table[i]);
+			SCIprintString(buf);
+		}
+		else
+		{
+			sprintf(buf, "\t  %d\t\t%s\n\r", i, "-");
+			SCIprintString(buf);
+		}
+	}
+	SCIprintString("\n\r");
 }
