@@ -1,0 +1,39 @@
+
+
+
+
+-------- Patch de délai pour l'erreur gmincellvolt ---------------
+< ajuster le délai (dans defines.h)
+- ajouter une température critique ?
+
+------------- Affichage continu des données --------------
+- utiliser l'interruption channel 3 (iPIT3_sci_continuous) pour appeler la méthode plutôt que d'utiliser le timer de 100 Hz
+- arranger ça pour que ça aie de l'allure... Peut-être permettre l'ancien mode continuous aussi...
+
+------------- Table de correspondance ID <--> index --------------
+
+À FAIRE
+> Arranger l'état du CAN : modules qui ne communiquent plus (pas indispensable)
+> L'ouverture de l'interlock ne provoque pas une erreur (mais ouvre les relais) : MCUinit.c ligne 770
+
+
+### PIN À VÉRIFIER ###
+NAME (VARIABLE)				PIN NAME V1		PIN NAME V2	PIN NUMBER V2	PIN VAR NAME V2			State					Type
+----------------------------------------------------------------------------------------------------------------------------------------------------
+ERR_RST_DASH				Not present.		PM7			117			PTM_PTM7			Initialisé - non testé		In
+INTERLOCK_STATE				PTS_PTS6			PM6			118			PTM_PTM6			Initialisé - à ajuster		In		High : pas d'erreur
+IGNITION					PTS_PTS5			PS0			119			PTS_PTS0			Testé						In		High : no ignition
+IMD_STATE_TTL (IMD_STATE)	PTS_PTS2			PS1			120			PTS_PTS1			Initialisé - pré-testé		In		
+IMD_STATE_PWM				Not present.		PS2			121			PTS_PTS2			Éventuellement - input		In
+DCDC_MON					Not present.		PS3			122			PTS_PTS3			Éventuellement - input		In		
+ERR_RST_PB (ERROR_RESET)	PTS_PTS3			PS4			123			PTS_PTS4			Testé						In		Low : RESET
+DCDC_RELAY (SUPPLY_24V_RLY)	PTS_PTS0			PS5			124			PTS_PTS5			Manque résistances			Out		
+LED_BMS_DASH (WARNING_DASH_LED)PTS_PTS7			PS6			125			PTS_PTS6			Testé						Out		0 : OFF 1 : ON
+CURRENT_SENSOR_CH1			???					AN00		89								Non utilisé					In		
+CURRENT_SENSOR_CH2			???					AN01		91								Non utilisé					In
+MCR0 (MCR1_HVN)				PORTA_PA2			PA0			73			PORTA_PA0			Testé						Out		1 : fermé
+MCR1 (MCR2_P2P)				PORTA_PA4			PA1			74			PORTA_PA1			Testé						Out		1 : fermé
+MCR2 (DISCH_RLY)			PTM_PTM7			PA2			75			PORTA_PA2			Testé						Out		...
+MCR3 (MCR3_P1N)				PORTA_PA3			PA3			76			PORTA_PA3			Testé						Out
+MCR4 (MCR4_HVP)				PORTA_PA1			PA4			77			PORTA_PA4			Testé						Out
+MCR5 (MCR5_PRE)				PORTA_PA0			PA5			78			PORTA_PA5			Testé 						Out

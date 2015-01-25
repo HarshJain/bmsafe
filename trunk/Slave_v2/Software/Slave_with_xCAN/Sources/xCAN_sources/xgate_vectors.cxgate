@@ -1,0 +1,152 @@
+/******************************************************************************
+Copyright (c) Freescale Semiconductor 2005
+File Name		 :	$RCSfile: xgate_vectors.cxgate,v $
+Engineer		 :	$Author: ttz778 $
+Location		 :	EKB
+Date Created	 :	23/02/2004
+Current Revision :	$Revision: 1.2 $
+Notes            :  
+*******************************************************************************/
+#ifdef __MWERKS__
+#include "hidef.h"
+#endif
+#include "xgate_vectors.h"
+#include "xgCAN_drv.h"
+
+#ifdef __MWERKS__
+void interrupt XGATE_CAN_Receive(void);
+void interrupt XGATE_CAN_Transmit(void);
+
+/* error handler for all others */
+void interrupt ErrorHandler(void) 
+{
+  _asm("BRK");
+}
+#else	 /* Cosmic */
+@interrupt void XGATE_CAN_Receive(void);
+@interrupt void XGATE_CAN_Transmit(void);
+ 
+/* error handler for all others */
+@interrupt void ErrorHandler(void) 
+{
+  _asm("BRK");
+}
+#endif
+
+typedef unsigned int *const xgdataptr;
+
+#define U_XDP (xgdataptr)(0xf000)		/* Valid XGATE address */
+
+/*****************************************************************************
+XGATEVectorTable
+XGATE vector table for S12XDP512
+Each vector comprises two entries:
+Program thread address, followed by thread variable pointer
+This table must be copied to RAM, starting at the address contained in the
+XGATE Vector Base Address Register (XGVBR) + 0x00C0 
+as the first 48 vectors are not used on 9S12XDP512
+*****************************************************************************/
+#pragma CONST_SEG XGATE_VECTORS  /* assign the vector table in separate segment for dedicated placement in linker parameter file */
+
+const xgate_vector XGATEVectorTable[] = {
+                         // Channel # = Vector address / 2
+  {ErrorHandler, U_XDP},  // Channel 30 - XSRAM20K Access Violation
+  {ErrorHandler, U_XDP},  // Channel 31 - XGATE Software Error Interrupt     
+  {ErrorHandler, U_XDP},  // Channel 32 - XGATE Software Trigger 7           
+  {ErrorHandler, U_XDP},  // Channel 33 - XGATE Software Trigger 6           
+  {ErrorHandler, U_XDP},  // Channel 34 - XGATE Software Trigger 5           
+  {ErrorHandler, U_XDP},  // Channel 35 - XGATE Software Trigger 4           
+  {ErrorHandler, U_XDP},  // Channel 36 - XGATE Software Trigger 3           
+  {ErrorHandler, U_XDP},  // Channel 37 - XGATE Software Trigger 2           
+  {ErrorHandler, U_XDP},  // Channel 38 - XGATE Software Trigger 1           
+  {ErrorHandler, U_XDP},  // Channel 39 - XGATE Software Trigger 0           
+  {ErrorHandler, U_XDP},  // Channel 3A - Periodic Interrupt Timer 3          
+  {ErrorHandler, U_XDP},  // Channel 3B - Periodic Interrupt Timer 2          
+  {ErrorHandler, U_XDP},  // Channel 3C - Periodic Interrupt Timer 1          
+  {ErrorHandler, U_XDP},  // Channel 3D - Periodic Interrupt Timer 0          
+  {ErrorHandler, U_XDP},  // Channel 3E - Reserved                           
+  {ErrorHandler, U_XDP},  // Channel 3F - Autonomous Periodical interrupt API
+  {ErrorHandler, U_XDP},  // Channel 40 - Low Voltage interrupt LVI
+  {ErrorHandler, U_XDP},  // Channel 41 - IIC1 Bus                 
+  {ErrorHandler, U_XDP},  // Channel 42 - SCI5                     
+  {ErrorHandler, U_XDP},  // Channel 43 - SCI4                     
+  {ErrorHandler, U_XDP},  // Channel 44 - SCI3                     
+  {ErrorHandler, U_XDP},  // Channel 45 - SCI2                     
+  {ErrorHandler, U_XDP},  // Channel 46 - PWM Emergency Shutdown   
+  {ErrorHandler, U_XDP},  // Channel 47 - Port P Interrupt         
+#ifdef USE_CAN4
+  {XGATE_CAN_Transmit, &XGCAN4},  // Channel 48 - CAN4 transmit            
+  {XGATE_CAN_Receive, &XGCAN4},  // Channel 49 - CAN4 receive             
+#else
+  {ErrorHandler, U_XDP},  // Channel 48 - CAN4 transmit            
+  {ErrorHandler, U_XDP},  // Channel 49 - CAN4 receive             
+#endif
+  {ErrorHandler, U_XDP},  // Channel 4A - CAN4 errors              
+  {ErrorHandler, U_XDP},  // Channel 4B - CAN4 wake-up             
+#ifdef USE_CAN3
+  {XGATE_CAN_Transmit, &XGCAN3},  // Channel 4C - CAN3 transmit            
+  {XGATE_CAN_Receive, &XGCAN3},  // Channel 4D - CAN3 receive             
+#else
+  {ErrorHandler, U_XDP},  // Channel 4C - CAN3 transmit            
+  {ErrorHandler, U_XDP},  // Channel 4D - CAN3 receive             
+#endif
+  {ErrorHandler, U_XDP},  // Channel 4E - CAN3 errors              
+  {ErrorHandler, U_XDP},  // Channel 4F - CAN3 wake-up             
+#ifdef USE_CAN2
+  {XGATE_CAN_Transmit, &XGCAN2},  // Channel 50 - CAN2 transmit
+  {XGATE_CAN_Receive, &XGCAN2},  // Channel 51 - CAN2 receive 
+#else
+  {ErrorHandler, U_XDP},  // Channel 50 - CAN2 transmit            
+  {ErrorHandler, U_XDP},  // Channel 51 - CAN2 receive             
+#endif
+  {ErrorHandler, U_XDP},  // Channel 52 - CAN2 errors  
+  {ErrorHandler, U_XDP},  // Channel 53 - CAN2 wake-up 
+#ifdef USE_CAN1
+  {XGATE_CAN_Transmit, &XGCAN1},  // Channel 54 - CAN1 transmit
+  {XGATE_CAN_Receive, &XGCAN1},  // Channel 55 - CAN1 receive 
+#else
+  {ErrorHandler, U_XDP},  // Channel 54 - CAN1 transmit            
+  {ErrorHandler, U_XDP},  // Channel 55 - CAN1 receive             
+#endif
+  {ErrorHandler, U_XDP},  // Channel 56 - CAN1 errors  
+  {ErrorHandler, U_XDP},  // Channel 57 - CAN1 wake-up 
+#ifdef USE_CAN0
+  {XGATE_CAN_Transmit, &XGCAN0},  // Channel 58 - CAN0 transmit
+  {XGATE_CAN_Receive, &XGCAN0},  // Channel 59 - CAN0 receive 
+#else
+  {ErrorHandler, U_XDP},  // Channel 58 - CAN0 transmit            
+  {ErrorHandler, U_XDP},  // Channel 59 - CAN0 receive             
+#endif
+  {ErrorHandler, U_XDP},  // Channel 5A - CAN0 errors  
+  {ErrorHandler, U_XDP},  // Channel 5B - CAN0 wake-up 
+  {ErrorHandler, U_XDP},  // Channel 5C - FLASH 
+  {ErrorHandler, U_XDP},  // Channel 5D - EEPROM
+  {ErrorHandler, U_XDP},  // Channel 5E - SPI2  
+  {ErrorHandler, U_XDP},  // Channel 5F - SPI1
+  {ErrorHandler, U_XDP},  // Channel 60 - IIC0 Bus                         
+  {ErrorHandler, U_XDP},  // Channel 61 - Reserved                         
+  {ErrorHandler, U_XDP},  // Channel 62 - CRG Self Clock Mode              
+  {ErrorHandler, U_XDP},  // Channel 63 - CRG PLL lock                     
+  {ErrorHandler, U_XDP},  // Channel 64 - Pulse Accumulator B Overflow     
+  {ErrorHandler, U_XDP},  // Channel 65 - Modulus Down Counter underflow   
+  {ErrorHandler, U_XDP},  // Channel 66 - Port H                           
+  {ErrorHandler, U_XDP},  // Channel 67 - Port J                           
+  {ErrorHandler, U_XDP},  // Channel 68 - ATD1                             
+  {ErrorHandler, U_XDP},  // Channel 69 - ATD0                             
+  {ErrorHandler, U_XDP},  // Channel 6A - SCI1                             
+  {ErrorHandler, U_XDP},  // Channel 6B - SCI0                             
+  {ErrorHandler, U_XDP},  // Channel 6C - SPI0                             
+  {ErrorHandler, U_XDP},  // Channel 6D - Pulse accumulator input edge     
+  {ErrorHandler, U_XDP},  // Channel 6E - Pulse accumulator A overflow     
+  {ErrorHandler, U_XDP},  // Channel 6F - Enhanced Capture Timer overflow  
+  {ErrorHandler, U_XDP},  // Channel 70 - Enhanced Capture Timer channel 7                                 
+  {ErrorHandler, U_XDP},  // Channel 71 - Enhanced Capture Timer channel 6 
+  {ErrorHandler, U_XDP},  // Channel 72 - Enhanced Capture Timer channel 5 
+  {ErrorHandler, U_XDP},  // Channel 73 - Enhanced Capture Timer channel 4 
+  {ErrorHandler, U_XDP},  // Channel 74 - Enhanced Capture Timer channel 3 
+  {ErrorHandler, U_XDP},  // Channel 75 - Enhanced Capture Timer channel 2 
+  {ErrorHandler, U_XDP},  // Channel 76 - Enhanced Capture Timer channel 1 
+  {ErrorHandler, U_XDP},  // Channel 77 - Enhanced Capture Timer channel 0 
+  {ErrorHandler, U_XDP}   // Channel 78 - Real Time Interrupt 
+};
+
