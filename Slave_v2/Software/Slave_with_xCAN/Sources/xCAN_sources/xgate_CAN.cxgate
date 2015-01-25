@@ -1,0 +1,182 @@
+/******************************************************************************
+Copyright (c) Freescale Semiconductor 2005
+File Name		 :	$RCSfile: xgate_CAN.cxgate,v $
+Engineer		 :	$Author: ttz778 $
+Location		 :	EKB
+Date Created	 :	23/02/2004
+Current Revision :	$Revision: 1.3 $
+Notes            :  This file for use with CodeWarrior only
+*******************************************************************************/
+#ifdef __MWERKS__
+
+#include "intrinsics_xgate.h"
+#include "xgCAN_drv.h"
+#include "Defines.h"
+ 
+/******************************************************************************/
+
+/* A shared variable has a different address for the CPU and the XGATE
+   and so pointers cannot be shared. Thus we have two different structures
+   of pointers (to the same shared variables) for the CPU and XGATE
+*/
+
+#pragma DATA_SEG XGATE_DATA
+
+#ifdef USE_CAN0
+XGCANstruct XGCAN0 = {CAN0
+                     ,ID_Table_CAN0		
+                     ,MsgData_CAN0
+                     ,MsgLen_CAN0
+                     ,&RxStatus_CAN0	
+                     ,&TxStatus_CAN0
+                     ,RXBOXSIZE_CAN0};
+
+#endif
+#ifdef USE_CAN1
+XGCANstruct XGCAN1 = {CAN1
+                     ,ID_Table_CAN1		
+                     ,MsgData_CAN1
+                     ,MsgLen_CAN1
+                     ,&RxStatus_CAN1	
+                     ,&TxStatus_CAN1
+                     ,RXBOXSIZE_CAN1};
+
+#endif
+#ifdef USE_CAN2
+XGCANstruct XGCAN2 = {CAN2
+                     ,ID_Table_CAN2		
+                     ,MsgData_CAN2
+                     ,MsgLen_CAN2
+                     ,&RxStatus_CAN2	
+                     ,&TxStatus_CAN2
+                     ,RXBOXSIZE_CAN2};
+
+#endif
+#ifdef USE_CAN3
+XGCANstruct XGCAN3 = {CAN3
+                     ,ID_Table_CAN3		
+                     ,MsgData_CAN3
+                     ,MsgLen_CAN3
+                     ,&RxStatus_CAN3	
+                     ,&TxStatus_CAN3
+                     ,RXBOXSIZE_CAN3};
+
+#endif
+#ifdef USE_CAN4
+XGCANstruct XGCAN4 = {CAN4
+                     ,ID_Table_CAN4		
+                     ,MsgData_CAN4
+                     ,MsgLen_CAN4
+                     ,&RxStatus_CAN4	
+                     ,&TxStatus_CAN4
+                     ,RXBOXSIZE_CAN4};
+#endif
+
+#pragma DATA_SEG DEFAULT
+
+/******************************************************************************
+Function Name	:	XGATE_CAN_Receive
+Engineer		:	r27624
+Date			:	11/03/2004						
+Arguments		:	channel: structure containing interrupt specific data
+Return			:	none	 
+Notes			: 	Copies received message into matching mailbox.
+                    Access to mailbox is blocked while semaphore #0 is set by 
+                    CPU.
+                    The mailbox 0 is a catchall for messages that
+                    have no matching id.
+******************************************************************************/
+void __interrupt 
+XGATE_CAN_Receive(XGCANstruct * restrict channel) 
+{
+	tU08 box;
+	tU16 rxid;
+
+	if(_ssem(CANSEMXG))
+	{									/* semaphore locked */
+										/* get received id */
+		rxid = channel->pCAN->rxbuf.id.w[0] & CAN_SID_MSK;
+										/* linear search */
+		for(box = (channel->RxBoxSize - 1); box != 0; box--)
+		{								/* compare received id with box table */
+			if(rxid == channel->pID[box])
+			{							/* match found */							
+				break;
+			}
+		}
+
+		if(box == 0)
+		{								/* no match, so copy id */
+			channel->pID[0] = channel->pCAN->rxbuf.id.w[0] & CAN_SID_MSK;
+		}
+										/* copy 8 bytes of data */
+		*(tU16*)(channel->pBuffer[box]    ) = *(tU16*)(channel->pCAN->rxbuf.dsr    );
+		*(tU16*)(channel->pBuffer[box] + 2) = *(tU16*)(channel->pCAN->rxbuf.dsr + 2);
+		*(tU16*)(channel->pBuffer[box] + 4) = *(tU16*)(channel->pCAN->rxbuf.dsr + 4);
+		*(tU16*)(channel->pBuffer[box] + 6) = *(tU16*)(channel->pCAN->rxbuf.dsr + 6);
+										/* copy length */
+		*(channel->pLength + box) = channel->pCAN->rxbuf.dlr.bit.dlc;
+										/* set Rx status bit */
+		*(channel->pRxStatus) |= RXSTATUSMASK<<box;
+										/* release msCAN buffer */
+		channel->pCAN->canrflg.byte = RXF;	
+										/* unlock semaphore */
+		_csem(CANSEMXG);
+#ifdef CAN_RECEIVE_NOTIFICATION
+                    /* set CANx Receive channel interrupt */
+    _sif();
+#endif		
+	}
+}
+
+/******************************************************************************
+Function Name	:	XGATE_CAN_Transmit
+Engineer		:	r27624
+Date			:	18/03/2004						
+Arguments		:	channel: structure containing interrupt specific data
+Return			:	none	 
+Notes			: 	
+******************************************************************************/
+void __interrupt 
+XGATE_CAN_Transmit(XGCANstruct * restrict channel) 
+{
+	tU08 box;
+													
+										
+	if(_ssem(CANSEMXG))
+	{									/* semaphore locked */
+										/* disable interrupts for empty buffers */
+		channel->pCAN->cantier.byte = ~(channel->pCAN->cantflg.byte) & (TXE0|TXE1|TXE2);
+										/* search for queued message */
+		box = _bffo(*channel->pTxStatus);
+
+		if(!_carry())
+		{								
+		                /* queued message found */
+										/* clear Tx status bit */
+			*(channel->pTxStatus) &= ~(TXSTATUSMASK<<box);
+										/* add offset for Tx boxes */
+			box += channel->RxBoxSize;
+										/* select TX buffer */
+			channel->pCAN->cantbsel.byte = channel->pCAN->cantflg.byte;
+										/* copy id */
+			channel->pCAN->txbuf.id.w[0] = channel->pID[box];
+			              /* copy 8 byte of data */
+			*(tU16*)(channel->pCAN->txbuf.dsr    ) = *(tU16*)(channel->pBuffer[box]    );
+			*(tU16*)(channel->pCAN->txbuf.dsr + 2) = *(tU16*)(channel->pBuffer[box] + 2);
+			*(tU16*)(channel->pCAN->txbuf.dsr + 4) = *(tU16*)(channel->pBuffer[box] + 4);
+			*(tU16*)(channel->pCAN->txbuf.dsr + 6) = *(tU16*)(channel->pBuffer[box] + 6);
+											/* copy length */
+			channel->pCAN->txbuf.dlr.byte = *(channel->pLength + box);
+										/* queue CAN transmit buffer */	
+			channel->pCAN->cantflg.byte = channel->pCAN->cantbsel.byte;
+										/* enable interrupt for this buffer */	
+			channel->pCAN->cantier.byte |= channel->pCAN->cantbsel.byte;
+		}
+										/* unlock semaphore */
+		_csem(CANSEMXG);
+	}
+
+}
+
+#endif /* __MWERKS__ */

@@ -1,0 +1,2 @@
+1. Copier bom-ex.ulp dans eagle\ulp
+2. Assigner une touche (ex.: ctrl-B) à 'RUN bom-ex.ulp'

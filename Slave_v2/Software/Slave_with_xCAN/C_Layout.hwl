@@ -1,0 +1,16 @@
+OPEN source 0 0 50 75
+Source < attributes SHOW_CORE 0,TOOLTIP on,TOOLTIP_FORMAT signed,TOOLTIP_MODE details,FREEZE off,MARKS on
+OPEN procedure 0 75 25 24
+Procedure:1 < attributes SHOW_CORE 0,VALUES on,TYPES off
+OPEN procedure 25 75 25 24
+Procedure:2 < attributes SHOW_CORE 1,VALUES on,TYPES off
+OPEN data 50 0 50 49
+Data:1 < attributes SHOW_CORE 0,SCOPE global,COMPLEMENT None,FORMAT Symb,MODE automatic,SORT NotSort,UPDATERATE 10,NAMEWIDTH 16
+OPEN data 50 49 50 51
+Data:2 < attributes SHOW_CORE 1,SCOPE global,COMPLEMENT None,FORMAT Symb,MODE automatic,SORT NotSort,UPDATERATE 10,NAMEWIDTH 16
+OPEN memory 0 75 50 25 ;i
+Memory < attributes FORMAT hex,COMPLEMENT None,WORD 1,ASC on,ADR on,MODE automatic,UPDATERATE 10,SHOW_ADDRESSSPACE 0,ADDRESS 0x80
+bckcolor 50331647
+font 'Courier New' 9 BLACK
+AUTOSIZE on
+ACTIVATE "Memory" "Procedure:1" "Procedure:2" "Data:1" "Source" "Data:2"

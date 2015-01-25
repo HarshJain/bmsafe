@@ -1,0 +1,26 @@
+Version utilisee pour la competition a Lincoln en juin 2013
+
+Adaptation du code au PCB version 2 du BMS master (avec MCU correspondant)
+- Changement du nom des pins dans defines.h et relays.h et la configuration de ces pins
+
+Ajout d'une fonctionnalite pour ignorer certaines sondes de temperatures qui donnent une lecture erronee
+- main.c : nouveau tableu (gCellIgnoreTemp) contenant le numero des cellules dont la sonde est ignoree
+
+Ajout d'un delais avant l'activation de l'erreur cellMinVoltage (declenchee inutilement lors de l'acceleration)
+- MCUinit.c : changements dans l'interruption iPIT1_safety_check()
+
+Ajout du support pour l'affichage 7 segments
+- common.c : fonction display() ajoutee pour simplifier le code
+- MCUinit.c : l'affichage est gere dans l'interruption iPIT2_100Hz()
+- LEGENDE_AFFICHAGE.txt : contient la legende de l'affichage 7 segment
+
+Tableau de conversion entre l'ID des slave et l'index des tableaux
+- L'ID des slaves etait utilise pour parcourir certains tableaux dans le code.
+  Ce changement permet l'utilisation de n'importe quel slave sur l'auto sans
+  avoir a utiliser un ordre precis.
+- common.c : fonction IDtoIndex() et IndexToID()
+- changements a travers tous le code ou les ID etaient usilises pour parcourir les tableaux
+
+
+Changements dans la communicaion SCI : fichiers terminal_code.h et terminal_code.c principalement
+- Ajout de certaines options dans le menu status

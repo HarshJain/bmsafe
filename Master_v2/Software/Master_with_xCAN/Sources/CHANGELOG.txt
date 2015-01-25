@@ -1,0 +1,16 @@
+- Patch pour ignorer les températures trop élevées ou trop basses
+
+- Implémentation de l'affichage 7 segments
+
+- Ajout d'un système dynamique d'indexations pour pouvoir utilisé différents numéros de slaves (table de correspondance ID <--> index)
+
+- Modification de l'initialisation des pins selon le nouveau schéma (V2) du BMS master
+
+- Ajout d'options dans le menu status
+	- affichage de la table ID <--> Index
+	- affichage des sondes de températures ignorées
+	- affichage d'informations en continu sur les paquets CAN reçus (pour débugger)
+
+- Nouvelle forme d'affichage en mode continu : affiche toutes les informations de toutes les cellules qu'on peut facilement logger et travailler
+
+- Ajout d'un délais de temps avant le déclenchement d'une erreur cellMinVolt (pour contourner le problème lors de l'accélération)

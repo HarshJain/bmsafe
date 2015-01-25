@@ -1,0 +1,1 @@
+Les fichiers *.graphml ont été créés et peuvent être édités avec yEd (logiciel de diagrammes gratuit).
